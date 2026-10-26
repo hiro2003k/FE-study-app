@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FE対策 文系民のための基礎理論特化 一問一答道場</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    button {
+      touch-action: manipulation;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased min-h-screen p-3 md:p-6 font-sans select-none">
+  <div class="max-w-4xl mx-auto space-y-4 md:space-y-5">
+
+    <!-- Top Navigation & Stats Bar -->
+    <header class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 md:p-5 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mb-1">
+            <span>基本情報技術者試験 (FE)</span>
+            <span>•</span>
+            <span>文系特化 暗記道場</span>
+          </div>
+          <h1 class="text-xl md:text-2xl font-bold tracking-tight text-[var(--foreground)]">FE 基礎特化 一問一答</h1>
+        </div>
+
+        <!-- Progress Summary -->
+        <div class="flex items-center justify-around sm:justify-end gap-3 bg-[var(--background)] p-2 px-4 rounded-xl border border-[var(--border)]">
+          <div class="text-center">
+            <div id="stat-mastered" class="text-lg md:text-xl font-bold text-emerald-500">0</div>
+            <div class="text-[10px] text-[var(--muted-foreground)]">習得済</div>
+          </div>
+          <div class="h-6 w-[1px] bg-[var(--border)]"></div>
+          <div class="text-center">
+            <div id="stat-learning" class="text-lg md:text-xl font-bold text-amber-500">0</div>
+            <div class="text-[10px] text-[var(--muted-foreground)]">要復習</div>
+          </div>
+          <div class="h-6 w-[1px] bg-[var(--border)]"></div>
+          <div class="text-center">
+            <div id="stat-total" class="text-lg md:text-xl font-bold text-[var(--foreground)]">0</div>
+            <div class="text-[10px] text-[var(--muted-foreground)]">総問題数</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Bar: Category Filters & Mode Controls -->
+      <div class="mt-3 pt-3 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-2">
+        <div class="flex gap-1.5 overflow-x-auto custom-scrollbar pb-1 max-w-full" id="category-filters">
+          <!-- Dynamically populated buttons -->
+        </div>
+
+        <div class="flex items-center gap-1.5 ml-auto">
+          <button onclick="toggleMode()" id="mode-toggle-btn" class="px-2.5 py-1 rounded-lg text-xs font-medium border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--border)]">
+            <span id="current-mode-label" class="text-blue-500 font-bold">4択モード</span>
+          </button>
+          <button onclick="openModal('add-modal')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition">
+            ➕ 追加
+          </button>
+          <button onclick="openModal('data-modal')" class="px-2.5 py-1 rounded-lg text-xs border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--border)] text-[var(--muted-foreground)]" title="データ移行・バックアップ">
+            ⚙️ データ
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Question Card -->
+    <main>
+      <div id="quiz-card" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 md:p-6 shadow-sm min-h-[380px] flex flex-col justify-between relative">
+        
+        <!-- Top Info & Quick Hint Toggle -->
+        <div>
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span id="q-category-badge" class="px-2 py-0.5 rounded text-xs font-semibold bg-blue-500/10 text-blue-500">分野</span>
+              <span id="q-importance-badge" class="px-2 py-0.5 rounded text-xs font-semibold bg-amber-500/10 text-amber-500">★★★</span>
+              <span id="q-status-badge" class="text-xs text-[var(--muted-foreground)] font-medium">未学習</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="toggleQuickHint()" class="text-xs px-2 py-0.5 rounded border border-blue-500/30 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 font-medium transition" title="解く前に要点だけ確認">
+                💡 1行要点
+              </button>
+              <span class="text-xs text-[var(--muted-foreground)] font-mono">
+                <span id="current-q-index">1</span> / <span id="total-filtered-count">0</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Quick Hint Bar (Hidden by default, can be toggled before answering) -->
+          <div id="quick-hint-box" class="hidden mb-3 p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-600 dark:text-blue-400">
+            <span class="font-bold">🎯 核心サマリー：</span>
+            <span id="quick-hint-text"></span>
+          </div>
+
+          <!-- Question Text -->
+          <h2 id="q-question-text" class="text-base md:text-lg font-bold leading-relaxed text-[var(--foreground)] mt-1 select-text">
+            問題を読み込み中...
+          </h2>
+        </div>
+
+        <!-- Options / Flashcard Area -->
+        <div id="quiz-interactive-area" class="my-4 md:my-5">
+          <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+            <!-- Injected via JS -->
+          </div>
+
+          <div id="flashcard-reveal-area" class="hidden text-center py-6">
+            <button onclick="revealAnswer()" class="w-full md:w-auto px-8 py-3 rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] font-bold shadow-md hover:opacity-90 active:scale-95 transition">
+              💡 答えと解説を見る
+            </button>
+          </div>
+        </div>
+
+        <!-- Detailed Explanation Drawer -->
+        <div id="explanation-box" class="hidden border-t border-[var(--border)] pt-4 mt-2 space-y-3 bg-[var(--background)] -mx-4 -mb-4 md:-mx-6 md:-mb-6 p-4 md:p-6 rounded-b-2xl">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div class="flex items-center gap-2">
+              <span id="result-icon" class="text-xl">✅</span>
+              <span id="result-title" class="font-bold text-base">正解！</span>
+              <span id="correct-answer-text" class="text-xs md:text-sm font-semibold text-[var(--foreground)]"></span>
+            </div>
+          </div>
+
+          <!-- 1-line Summary Callout -->
+          <div class="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-2">
+            <span>⚡ 簡潔まとめ:</span>
+            <span id="summary-line" class="font-normal text-[var(--foreground)]"></span>
+          </div>
+
+          <!-- Why it makes sense -->
+          <div class="p-3.5 rounded-xl bg-blue-500/5 border border-blue-500/20 text-xs md:text-sm space-y-1">
+            <div class="font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+              <span>💡 文系目線の「なぜ？」「どう覚える？」</span>
+            </div>
+            <div id="q-reasoning" class="text-[var(--foreground)] leading-relaxed select-text"></div>
+          </div>
+
+          <!-- Tip -->
+          <div class="p-2.5 rounded-xl bg-[var(--card)] border border-[var(--border)] text-xs text-[var(--muted-foreground)] leading-relaxed select-text">
+            <span class="font-semibold text-[var(--foreground)]">🎯 試験直結テクニック：</span>
+            <span id="q-exam-tip"></span>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-2">
+            <div class="flex gap-2">
+              <button onclick="markQuestion(false)" class="flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 active:bg-amber-500/20 transition">
+                ⚠️ まだあやふや (要復習)
+              </button>
+              <button onclick="markQuestion(true)" class="flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 active:bg-emerald-500/20 transition">
+                🎉 理解した！ (習得済)
+              </button>
+            </div>
+            <button onclick="nextQuestion()" class="px-5 py-2.5 rounded-lg text-xs font-bold bg-[var(--primary)] text-[var(--primary-foreground)] shadow hover:opacity-90 active:scale-95 transition text-center">
+              次の問題へ →
+            </button>
+          </div>
+        </div>
+
+        <!-- Bottom Controls -->
+        <div id="footer-nav" class="flex items-center justify-between pt-3 border-t border-[var(--border)] text-xs">
+          <button onclick="prevQuestion()" class="px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--border)] active:scale-95 transition">
+            ← 前の問題
+          </button>
+          <span class="text-[var(--muted-foreground)] hidden sm:inline">[1~4] キーで選択 / [Enter] で次へ</span>
+          <button onclick="nextQuestion()" class="px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--border)] active:scale-95 transition">
+            次の問題 →
+          </button>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Quick Reference Accordion (Cheat Sheet) -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 md:p-5 shadow-sm space-y-3">
+      <div class="flex items-center justify-between cursor-pointer" onclick="toggleCheatsheet()">
+        <div class="flex items-center gap-2">
+          <span class="text-sm md:text-base font-bold text-[var(--foreground)]">📖 直前確認用：文系のための超直感まとめ表</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-purple-500/10 text-purple-500 font-semibold">公式集</span>
+        </div>
+        <span id="cheatsheet-toggle-icon" class="text-xs text-[var(--muted-foreground)]">▼ 開く</span>
+      </div>
+
+      <div id="cheatsheet-body" class="hidden pt-3 border-t border-[var(--border)] grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+        <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
+          <h4 class="font-bold text-emerald-500">1. 半加算器 & 全加算器</h4>
+          <p>• <b>半加算器</b> = <b>XOR</b> (和S) ＋ <b>AND</b> (桁上がりC)</p>
+          <p>• <b>全加算器</b> = <b>半加算器2個</b> ＋ <b>OR回路1個</b>（下の桁の繰り上がりも足せる）</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
+          <h4 class="font-bold text-blue-500">2. 状態遷移表（文字列検査）</h4>
+          <p>• 表の「0, 1, 2」は<b>部屋番号（状態ID）</b>！計算値でも2進数でもない！</p>
+          <p>• 1文字ごとに「次の部屋」へ移動するスゴロク。最後に「受理状態（ゴール）」に着けば合格。</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
+          <h4 class="font-bold text-amber-500">3. 逆ポーランド記法</h4>
+          <p>• 人間用：カッコでくくって、記号を後ろへポイッと投げる！<br>
+            例: <code>(A + B) × C</code> → <code>((A B)+ C)×</code> → <code>A B + C ×</code></p>
+          <p>• コンピュータ用：<b>スタック（皿）</b>を使い、左から一直線に読む。</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
+          <h4 class="font-bold text-purple-500">4. ハッシュ法と探索時間</h4>
+          <p>• <b>O(1)</b>：データが何億件あっても「1発で直行できる」（計算時間一定）。</p>
+          <p>• 同じ場所に入ってしまう事故 = <b>衝突（シノニム）</b>。</p>
+          <p>• 対比：線形探索=O(n)、2分探索=O(log n)（※事前ソート必須）。</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
+          <h4 class="font-bold text-pink-500">5. データ構造</h4>
+          <p>• <b>スタック</b>：積まれた本、後入れ先出し（<b>LIFO</b>）</p>
+          <p>• <b>キュー</b>：レジの行列、先入れ先出し（<b>FIFO</b>）</p>
+          <p>• <b>配列</b>：下駄箱。番号で即アクセス可、途中の割り込みは全員ずらす大工事。</p>
+          <p>• <b>連結リスト</b>：電車。鎖（ポインタ）を繋ぎ変えるだけで挿入・削除が一瞬。</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
+          <h4 class="font-bold text-cyan-500">6. MIL記号 & 万能素子</h4>
+          <p>• <b>Dの形</b> = AND / <b>三日月形</b> = OR / <b>丸○</b> = NOT</p>
+          <p>• <b>NAND / NOR</b> は「万能素子」と呼ばれ、これ1種類だけで全回路が作れる。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modal 1: Add Question -->
+    <div id="add-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl w-full max-w-lg p-5 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+          <h3 class="font-bold text-base text-[var(--foreground)]">➕ 新しい問題を追加</h3>
+          <button onclick="closeModal('add-modal')" class="text-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)]">✕</button>
+        </div>
+
+        <form id="add-question-form" onsubmit="saveCustomQuestion(event)" class="space-y-3 mt-4 text-xs md:text-sm">
+          <div>
+            <label class="block font-medium mb-1">分野カテゴリ</label>
+            <input type="text" id="new-cat-name" placeholder="例: セキュリティ / ネットワーク / データベース" required class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]">
+          </div>
+
+          <div>
+            <label class="block font-medium mb-1">重要度</label>
+            <select id="new-importance" class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]">
+              <option value="★★★">★★★ (超頻出・必須)</option>
+              <option value="★★☆">★★☆ (科目A頻出)</option>
+              <option value="★☆☆">★☆☆ (知ってれば即答)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-medium mb-1">問題文</label>
+            <textarea id="new-question" rows="2" placeholder="問題文を入力..." required class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]"></textarea>
+          </div>
+
+          <div>
+            <label class="block font-medium mb-1">選択肢（1番目が正解になります）</label>
+            <input type="text" id="new-opt-1" placeholder="選択肢1（正解）" required class="w-full p-2 rounded-lg border border-emerald-500/40 bg-[var(--background)] mb-1.5">
+            <input type="text" id="new-opt-2" placeholder="選択肢2（誤答）" required class="w-full p-2 rounded-lg border border-[var(--border)] bg-[var(--background)] mb-1.5">
+            <input type="text" id="new-opt-3" placeholder="選択肢3（誤答）" required class="w-full p-2 rounded-lg border border-[var(--border)] bg-[var(--background)] mb-1.5">
+            <input type="text" id="new-opt-4" placeholder="選択肢4（誤答）" required class="w-full p-2 rounded-lg border border-[var(--border)] bg-[var(--background)]">
+          </div>
+
+          <div>
+            <label class="block font-medium mb-1">1行サマリー（秒速確認用）</label>
+            <input type="text" id="new-summary" placeholder="例: 半加算器＝XOR＋AND。和＝XOR、桁上がり＝AND" class="w-full p-2 rounded-lg border border-[var(--border)] bg-[var(--background)]">
+          </div>
+
+          <div>
+            <label class="block font-medium mb-1">文系向け納得解説（なぜそうなるか）</label>
+            <textarea id="new-reasoning" rows="2" placeholder="日常の例えや、初心者が納得できる理屈..." class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]"></textarea>
+          </div>
+
+          <div>
+            <label class="block font-medium mb-1">試験直結テクニック / 覚え方</label>
+            <input type="text" id="new-tip" placeholder="例: ○○ときたら××を選ぶ！" class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]">
+          </div>
+
+          <div class="flex gap-2 pt-2">
+            <button type="button" onclick="closeModal('add-modal')" class="flex-1 py-2 rounded-lg border border-[var(--border)] text-[var(--muted-foreground)]">キャンセル</button>
+            <button type="submit" class="flex-1 py-2 rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700">保存して追加</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 2: Data Import / Export -->
+    <div id="data-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl w-full max-w-lg p-5 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+          <h3 class="font-bold text-base text-[var(--foreground)]">⚙️ データ移行・一括登録</h3>
+          <button onclick="closeModal('data-modal')" class="text-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)]">✕</button>
+        </div>
+
+        <p class="text-xs text-[var(--muted-foreground)]">
+          AIに作ってもらった問題JSONを貼り付けて一括追加したり、現在の進捗を別端末に引き継げます。
+        </p>
+
+        <div>
+          <label class="block text-xs font-semibold mb-1">問題データ (JSON形式)</label>
+          <textarea id="json-io-area" rows="6" placeholder="ここにJSONデータを貼り付けて「インポート」を押すと問題が一括追加されます" class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] font-mono text-xs custom-scrollbar"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="exportData()" class="p-2.5 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--border)] font-semibold">
+            📤 現在の全データをコピー
+          </button>
+          <button onclick="importData()" class="p-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold">
+            📥 JSONから一括読み込み
+          </button>
+        </div>
+
+        <div class="pt-2 border-t border-[var(--border)] flex justify-between items-center text-xs">
+          <button onclick="restoreDefaults()" class="text-red-500 hover:underline">初期状態に戻す</button>
+          <button onclick="closeModal('data-modal')" class="px-4 py-1.5 rounded-lg border border-[var(--border)]">閉じる</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Initial questions with concise summaries
+    const defaultQuestions = [
+      {
+        id: 1,
+        category: "adder",
+        categoryName: "加算回路",
+        importance: "★★★",
+        summary: "半加算器 ＝ XOR (和) ＋ AND (桁上がり)",
+        question: "半加算器（Half Adder）を構成する2つの論理回路の正しい組み合わせはどれか？",
+        options: [
+          "和（S）にXOR回路、桁上がり（C）にAND回路",
+          "和（S）にOR回路、桁上がり（C）にAND回路",
+          "和（S）にAND回路、桁上がり（C）にXOR回路",
+          "和（S）にXOR回路、桁上がり（C）にOR回路"
+        ],
+        answer: 0,
+        reasoning: "2進数の1桁足し算（0+0=0, 0+1=1, 1+0=1, 1+1=10）を観察してください。答えの1の位（S）は『片方だけ1のときに1』になるので排他的論理和（XOR）。桁上がり（C）は『両方1のときにだけ1』になるので論理積（AND）そのものです。電気スイッチをこの形に繋ぐだけで、勝手に足し算ができます。",
+        tip: "『半加算器＝XOR＋AND』の呪文だけで1点取れます。和＝XOR、桁上がり（Carry）＝AND。"
+      },
+      {
+        id: 2,
+        category: "adder",
+        categoryName: "加算回路",
+        importance: "★★☆",
+        summary: "全加算器 ＝ 半加算器 × 2 ＋ OR回路 × 1",
+        question: "全加算器（Full Adder）の説明として、最も適切なものはどれか？",
+        options: [
+          "半加算器2つと、OR回路1つで構成され、下位桁からの繰り上がりも含めて3つの入力を加算できる",
+          "半加算器4つで構成され、4ビットの2進数を一括で加算できる",
+          "乗算（掛け算）を可能にするために、半加算器と全加算器を直列に繋いだもの",
+          "NOT回路とAND回路だけで構成され、引き算を自動的に加算に変換するもの"
+        ],
+        answer: 0,
+        reasoning: "『半』加算器は2つの数字しか足せないので、繰り上がってきた数を足せません。そこで半加算器を2つ並べて（A+Bを足した後、繰り上がりを足す）、どちらかで繰り上がりが発生したら次の桁へ送るためにOR回路を1個つけたものが『全加算器』です。",
+        tip: "『全加算器 ＝ 半加算器 × 2 ＋ OR × 1』。この部品構成の数字がそのまま試験に出ます。"
+      },
+      {
+        id: 3,
+        category: "state",
+        categoryName: "状態遷移表",
+        importance: "★★★",
+        summary: "表の「0, 1, 2」は計算値ではなく「部屋番号（状態ID）」",
+        question: "文字列検査の状態遷移表で、表の中に書かれている「0, 1, 2」などの数字の正体は何ですか？",
+        options: [
+          "計算結果の数値ではなく、現在いるフェーズを表す『状態番号（部屋番号）』",
+          "2進数に変換された文字列のビット値",
+          "合致した文字列の文字数カウント",
+          "エラーの発生確率（0%=正常、1=注意、2=異常）"
+        ],
+        answer: 0,
+        reasoning: "文系民が最も混乱するポイント！この数字は足し算引き算する『数』ではありません。スゴロクの『1マス目』『2マス目』というただの『場所（状態）のラベル』です。例えばメールアドレス検査なら『状態0＝まだ@の前』『状態1＝@が1個出た』『状態2＝ドメイン部分に入った』という名札にすぎません。",
+        tip: "状態遷移表を見たら『計算』しようとせず、『今、状態0の部屋にいて、文字 \"a\" が来たら次は状態1の部屋へワープする』というスゴロクのコマ進めとして読んでください。"
+      },
+      {
+        id: 4,
+        category: "state",
+        categoryName: "状態遷移表",
+        importance: "★★☆",
+        summary: "文字列検査で最後に到達すべきゴール ＝ 受理状態",
+        question: "有限オートマトン（状態遷移機械）において、文字列の入力が終わったときに最終的にたどり着くべき状態を何と呼ぶか？",
+        options: [
+          "受理状態（最終状態）",
+          "初期状態",
+          "飽和状態",
+          "リセット状態"
+        ],
+        answer: 0,
+        reasoning: "文字列が正しいルールに従っていれば、最後に『合格の部屋（二重丸で書かれることが多い）』に到着します。この部屋のことを『受理状態』と呼びます。ここに辿り着けば『OK（適合）』、途中で行き止まりになったり別の部屋で終わったら『エラー』判定です。",
+        tip: "選択肢の文字列を1文字ずつ表に当てはめて指を動かし、指定されたゴール状態に着くものを探すだけです。"
+      },
+      {
+        id: 5,
+        category: "rpn",
+        categoryName: "逆ポーランド記法",
+        importance: "★★★",
+        summary: "カッコでくくって、演算記号を右後ろへポイッと投げるだけ",
+        question: "通常の計算式 `(A + B) × C` を逆ポーランド記法で表したものはどれか？",
+        options: [
+          "A B + C ×",
+          "+ A B × C",
+          "A B C + ×",
+          "A B × C +"
+        ],
+        answer: 0,
+        reasoning: "文系の必勝法：計算順にカッコでくくって、演算記号をカッコの『後ろ（右側）』に追い出します！\n1. `(A + B)` → `(A B)+`\n2. `((A B)+ × C)` → `((A B)+ C)×`\n3. カッコを外すと → `A B + C ×`。これだけで誰でも10秒で解けます！",
+        tip: "『記号を後ろへポイッと投げる』と覚えましょう。逆ポーランド記法は演算子が後ろに来ます。"
+      },
+      {
+        id: 6,
+        category: "rpn",
+        categoryName: "逆ポーランド記法",
+        importance: "★★★",
+        summary: "逆ポーランド記法の計算には「スタック（LIFO）」を使う",
+        question: "コンピュータが逆ポーランド記法を計算する際に利用するデータ構造はどれか？",
+        options: [
+          "スタック（後入れ先出し：LIFO）",
+          "キュー（先入れ先出し：FIFO）",
+          "2分探索木",
+          "ハッシュテーブル"
+        ],
+        answer: 0,
+        reasoning: "なぜ人間には読みづらい逆ポーランド記法を使うのか？それは『スタック（机に積み重ねたお皿）』を使うと、左から右へ読むだけで超簡単に計算できるからです。数字が来たらスタックにポンポン積み、記号（+や×）が来たら上の2枚を取り出して計算し、結果をまた積む。カッコや優先順位を一切気にせず一直線に計算できます。",
+        tip: "『逆ポーランド ＝ スタック』。これはFEで親の顔より見かける超ド定番の組み合わせです。"
+      },
+      {
+        id: 7,
+        category: "radix",
+        categoryName: "基数変換",
+        importance: "★★★",
+        summary: "2進数の位は右から倍々（1, 2, 4, 8, 16...）",
+        question: "2進数の `1101` を10進数に変換するといくつか？",
+        options: [
+          "13",
+          "11",
+          "15",
+          "14"
+        ],
+        answer: 0,
+        reasoning: "2進数の各桁の重みは右から『1の位、2の位、4の位、8の位』と倍々ゲームです。`1101` は『8が1個、4が1個、2が0個、1が1個』なので、8 + 4 + 0 + 1 = 13 です。",
+        tip: "指折り数えて該当する数字を足すだけ！"
+      },
+      {
+        id: 8,
+        category: "radix",
+        categoryName: "基数変換",
+        importance: "★★★",
+        summary: "2進数 ⇔ 16進数は「4桁ずつ」区切って直変換",
+        question: "2進数の `11110010` を16進数に変換するといくつか？",
+        options: [
+          "F2",
+          "E2",
+          "F4",
+          "72"
+        ],
+        answer: 0,
+        reasoning: "10進数を経由すると計算ミスします！16は2の4乗なので、2進数を『4桁ずつ』区切るのが鉄則です。\n`1111` ＝ 15（16進数では `F`）\n`0010` ＝ 2（16進数では `2`）\n並べると `F2`。一瞬で変換できます！",
+        tip: "2進数 ⇔ 16進数は『4桁セット』。A=10, B=11, C=12, D=13, E=14, F=15 だけメモ帳に書き出しておきましょう。"
+      },
+      {
+        id: 9,
+        category: "logic",
+        categoryName: "論理演算・MIL記号",
+        importance: "★★★",
+        summary: "Dの形＝AND、三日月＝OR、先端の丸○＝NOT",
+        question: "MIL記号において、先端が尖った三日月（弓）のような形をした記号は何を表すか？",
+        options: [
+          "OR（論理和）",
+          "AND（論理積）",
+          "NOT（否定）",
+          "XOR（排他的論理和）"
+        ],
+        answer: 0,
+        reasoning: "覚え方：まっすぐ直線（アルファベットのDの形）は『AND』のD！曲がった三日月・弓矢の形は『OR』です。先端に○（丸）がついたら反転（NOT）を意味するのでNORになります。",
+        tip: "Dの形＝AND、三日月＝OR、三日月の後ろに二重線＝XOR、小さな丸○＝NOT。"
+      },
+      {
+        id: 10,
+        category: "logic",
+        categoryName: "論理演算・MIL記号",
+        importance: "★★☆",
+        summary: "NAND / NOR ＝ 万能素子（これ1種類だけで全回路が作れる）",
+        question: "半導体回路の設計において、NAND回路やNOR回路が特別に重宝される最大の理由はどれか？",
+        options: [
+          "NAND回路（またはNOR回路）1種類だけを組み合わせることで、ANDやORを含むすべての論理回路を構築できるから",
+          "消費電力が常にゼロで発熱しないから",
+          "2進数だけでなく10進数も直接計算できるから",
+          "プログラムを書き換えるだけで光通信に変換できるから"
+        ],
+        answer: 0,
+        reasoning: "文系民の疑問『なんでわざわざNOTしたNANDやNORなんて面倒なものを習うの？』の答えがこれです。工場で集積回路（ICチップ）を作るとき、何種類もの回路を作るより『NAND素子だけを大量生産して全部それで済ませる』方が圧倒的に安く作れるからです（万能素子と呼びます）。",
+        tip: "『NAND（またはNOR）だけで全回路が作れる』という知識問題は過去問でそのまま出ます。"
+      },
+      {
+        id: 11,
+        category: "data_struct",
+        categoryName: "データ構造",
+        importance: "★★★",
+        summary: "キュー ＝ レジの行列、先入れ先出し（FIFO）",
+        question: "「先に入れたデータが最初に取り出される（FIFO：First-In First-Out）」データ構造はどれか？",
+        options: [
+          "キュー（Queue / 待ち行列）",
+          "スタック（Stack）",
+          "木構造（Tree）",
+          "ヒープ（Heap）"
+        ],
+        answer: 0,
+        reasoning: "ラーメン屋やテーマパークの『行列（Queue）』を思い出してください。先に来て並んだ人から順番に店内に入れます。プリンターの印刷待ちや、OSのタスク処理など、順番待ちの処理はすべてキューです。",
+        tip: "キュー＝行列（FIFO）、スタック＝積まれた本（LIFO）。"
+      },
+      {
+        id: 12,
+        category: "data_struct",
+        categoryName: "データ構造",
+        importance: "★★★",
+        summary: "連結リスト ＝ ポインタ繋ぎ変えで途中の挿入・削除が高速",
+        question: "「配列（Array）」と比較したときの「連結リスト（Linked List）」の最大の長所はどれか？",
+        options: [
+          "データの途中の挿入や削除が、ポインタの繋ぎ変えだけで高速に行える",
+          "指定したインデックス（何番目か）のデータへ瞬時にアクセスできる",
+          "メモリ使用量が配列よりも常に少なくて済む",
+          "データが自動的に昇順にソートされる"
+        ],
+        answer: 0,
+        reasoning: "配列は『下駄箱』です。10番目の下駄箱は一瞬で開けられますが、3番目に靴をねじ込むには4番目以降の靴を全員1個ずつ横にずらす大工事が必要です。一方、連結リストは『電車の連結』です。途中に新しい車両を挟むときは、鎖（ポインタ）をカチャッと繋ぎ直すだけで一瞬で終わります。",
+        tip: "【配列】参照が速い（O(1)）、挿入削除が遅い。\n【連結リスト】挿入削除が速い（O(1)）、参照が遅い。"
+      },
+      {
+        id: 13,
+        category: "search",
+        categoryName: "探索法",
+        importance: "★★★",
+        summary: "ハッシュ法 ＝ 計算式でロッカー直行、探索時間は O(1)（一定時間）",
+        question: "ハッシュ法（ハッシュ探索）において、理想的な状態でのデータ探索時間（計算量）を表すものはどれか？",
+        options: [
+          "O(1) （データ数に関わらず一定時間）",
+          "O(n) （データ数に比例）",
+          "O(log n) （データ数の対数に比例）",
+          "O(n^2) （データ数の2乗に比例）"
+        ],
+        answer: 0,
+        reasoning: "普通は100万件のデータから人を探すとき、端から順に見たり（O(n)）、半分ずつ絞り込んだり（O(log n)）します。しかしハッシュ法は『名前を計算式に入れると、いきなりロッカー番号がズバッと出る』仕組みです。だからデータが10件だろうが10億件だろうが【1発でロッカーに直行して取り出せる（計算量O(1)＝一定時間）】のです！",
+        tip: "『ハッシュ探索の探索時間 ＝ O(1)』は試験の絶対得点源です。"
+      },
+      {
+        id: 14,
+        category: "search",
+        categoryName: "探索法",
+        importance: "★★★",
+        summary: "ハッシュ値が被る事故 ＝ 衝突（シノニム）",
+        question: "ハッシュ法において、異なる2つのデータから偶然同じハッシュ値（格納アドレス）が算出されてしまう現象を何と呼ぶか？",
+        options: [
+          "衝突（コリジョン / シノニムの発生）",
+          "オーバーフロー",
+          "デッドロック",
+          "ページフォルト"
+        ],
+        answer: 0,
+        reasoning: "計算した結果、田中さんと佐藤さんが同じ『ロッカー番号42番』になってしまう事故です。この現象を『衝突（Collision）』、同じ値になってしまったデータのことを『シノニム（Synonym）』と呼びます。対策として隣の空きロッカーを探す（オープンアドレス法）や、ロッカー内で数珠繋ぎにする（チェイン法）があります。",
+        tip: "『同一ハッシュ値＝衝突（シノニム）』と結びつけて記憶しましょう。"
+      },
+      {
+        id: 15,
+        category: "search",
+        categoryName: "探索法",
+        importance: "★★☆",
+        summary: "2分探索法 ＝ 事前ソート必須、探索時間は O(log n)",
+        question: "2分探索法（バイナリサーチ）を行うための必須条件はどれか？",
+        options: [
+          "対象のデータがあらかじめ昇順または降順に整列（ソート）されていること",
+          "データ数が2の階乗（2, 4, 8, 16...）であること",
+          "データが連結リスト形式で保持されていること",
+          "ハッシュ関数が定義されていること"
+        ],
+        answer: 0,
+        reasoning: "国語辞書で単語を探すとき、真ん中をパカッと開いて『探したい言葉より前か後ろか』で半分ずつ絞り込みますよね。もし辞書の言葉がバラバラの順序で並んでいたら、真ん中を開いても意味がありません。だから『整列済みであること』が絶対条件です。探索時間は O(log n)。",
+        tip: "『2分探索 ＝ 事前にソート必須 ＝ O(log n)』。"
+      },
+      {
+        id: 16,
+        category: "prog_type",
+        categoryName: "言語・プログラム種類",
+        importance: "★★☆",
+        summary: "クライアント(ブラウザ)＝アプレット、サーバー＝サーブレット",
+        question: "Webブラウザ（クライアント側）にダウンロードされ、ブラウザ上で動作するJavaプログラムをかつて何と呼んでいたか？",
+        options: [
+          "Javaアプレット (Java Applet)",
+          "Javaサーブレット (Java Servlet)",
+          "JavaBeans",
+          "Java仮想マシン (JVM)"
+        ],
+        answer: 0,
+        reasoning: "名前の対比で一発です！\n• アプレット（Applet = 小さなアプリ）：クライアント（ブラウザ）側で動くJava\n• サーブレット（Servlet = サーバーの小間使い）：サーバー側で動くJava\n現在アプレットはセキュリティ上の理由で廃止されていますが、試験では『クライアント＝アプレット、サーバー＝サーブレット』の知識が問われます。",
+        tip: "『クライアント側 ＝ アプレット』『サーバー側 ＝ サーブレット』で対比暗記！"
+      },
+      {
+        id: 17,
+        category: "prog_type",
+        categoryName: "言語・プログラム種類",
+        importance: "★★★",
+        summary: "コンパイラ＝事前一括翻訳(実行が速い)、インタプリタ＝1行ずつ翻訳",
+        question: "ソースコードを実行時に1行ずつ機械語に翻訳しながら動かす「インタプリタ方式」と比較したときの、「コンパイラ方式」の特徴はどれか？",
+        options: [
+          "事前にプログラム全体を一括で機械語に翻訳するため、実行速度が非常に高速である",
+          "翻訳の手間が不要なため、プログラムの修正・テストが手軽である",
+          "OSやCPUの種類に依存せず、どこでも同じ機械語ファイルがそのまま動く",
+          "メモリ消費量が常にインタプリタよりも少ない"
+        ],
+        answer: 0,
+        reasoning: "文系向けの例え：\n• コンパイラ方式（C言語など）：本を一冊丸ごと事前に『全ページ日本語に完全翻訳出版』してから読む。読むスピードは爆速！\n• インタプリタ方式（Pythonなど）：外国人が隣にいて『1文ずつ同時通訳』してくれる。すぐ試せるが、実行スピードは遅い。",
+        tip: "コンパイラ＝事前一括翻訳（実行が速い）、インタプリタ＝1行ずつ逐次翻訳（実行が遅い、開発手軽）。"
+      },
+      {
+        id: 18,
+        category: "prog_type",
+        categoryName: "言語・プログラム種類",
+        importance: "★★☆",
+        summary: "JavaはJVM(仮想マシン)があるからどこでも動く",
+        question: "Javaプログラムが「Write Once, Run Anywhere（一度書けばどこでも動く）」を実現できる理由となっているソフトウェアはどれか？",
+        options: [
+          "JVM（Java仮想マシン）",
+          "Webブラウザ",
+          "GCCコンパイラ",
+          "テキストエディタ"
+        ],
+        answer: 0,
+        reasoning: "WindowsとMacでは話す言葉（機械語）が違います。Javaは直接WindowsやMac用の機械語にするのではなく、共通の『中間コード（バイトコード）』に変換します。そして各OSの上に置かれた『JVM（通訳マシン）』がその場で自分のOSの言葉に通訳して実行します。",
+        tip: "『Java ＝ 中間コードをJVM（Java仮想マシン）上で動かす』。"
+      },
+      {
+        id: 19,
+        category: "logic",
+        categoryName: "論理演算・MIL記号",
+        importance: "★★★",
+        summary: "XOR ＝ 2つの値が違うときだけ1（不一致検出）",
+        question: "2つの入力A, Bにおいて、「AとBの値が異なるときだけ1になり、同じときは0になる」論理演算はどれか？",
+        options: [
+          "XOR（排他的論理和）",
+          "AND（論理積）",
+          "OR（論理和）",
+          "NOR（否定論理和）"
+        ],
+        answer: 0,
+        reasoning: "XORは『Exclusive OR（排他的OR）』。日常会話の『A定食かB定食のどちらか一方だけ選んでね（両方はダメ）』がこれです。1と0、0と1のときだけ1になります。加算回路の足し算の1桁目（0+1=1, 1+0=1, 1+1=0で繰り上がり）として使われます。",
+        tip: "『不一致検出＝XOR』『半加算器の和＝XOR』と連動させて覚えましょう。"
+      },
+      {
+        id: 20,
+        category: "radix",
+        categoryName: "基数変換",
+        importance: "★★☆",
+        summary: "小数の2進数は右へ半分ずつ（0.5, 0.25, 0.125...）のパズル",
+        question: "10進数の「0.625」を2進数に変換したものはどれか？",
+        options: [
+          "0.101",
+          "0.110",
+          "0.011",
+          "0.111"
+        ],
+        answer: 0,
+        reasoning: "小数点の2進数は、位が右に行くにつれて半分になっていきます。\n• 0.1の位 ＝ 1/2 ＝ 0.5\n• 0.01の位 ＝ 1/4 ＝ 0.25\n• 0.001の位 ＝ 1/8 ＝ 0.125\n0.625 は 0.5 (1/2) ＋ 0.125 (1/8) なので、0.101 となります！",
+        tip: "小数は『0.5, 0.25, 0.125, 0.0625』の組み合わせパズルです。"
+      }
+    ];
+
+    // State Variables
+    let allQuestions = [];
+    let currentFilter = 'all';
+    let currentIndex = 0;
+    let isFlashcardMode = false;
+    let filteredQuestions = [];
+    let userStats = {
+      mastered: new Set(),
+      learning: new Set()
+    };
+
+    function initData() {
+      try {
+        const stored = localStorage.getItem('fe_custom_questions_v2');
+        if (stored) {
+          allQuestions = JSON.parse(stored);
+        } else {
+          allQuestions = [...defaultQuestions];
+        }
+
+        const savedM = localStorage.getItem('fe_mastered');
+        const savedL = localStorage.getItem('fe_learning');
+        if (savedM) userStats.mastered = new Set(JSON.parse(savedM));
+        if (savedL) userStats.learning = new Set(JSON.parse(savedL));
+      } catch (e) {
+        allQuestions = [...defaultQuestions];
+      }
+      buildCategoryFilters();
+      applyFilter('all');
+    }
+
+    function saveAllQuestions() {
+      try {
+        localStorage.setItem('fe_custom_questions_v2', JSON.stringify(allQuestions));
+      } catch (e) {}
+    }
+
+    function saveStats() {
+      try {
+        localStorage.setItem('fe_mastered', JSON.stringify([...userStats.mastered]));
+        localStorage.setItem('fe_learning', JSON.stringify([...userStats.learning]));
+      } catch (e) {}
+      updateStatsUI();
+    }
+
+    function updateStatsUI() {
+      document.getElementById('stat-mastered').textContent = userStats.mastered.size;
+      document.getElementById('stat-learning').textContent = userStats.learning.size;
+      document.getElementById('stat-total').textContent = allQuestions.length;
+    }
+
+    function buildCategoryFilters() {
+      const container = document.getElementById('category-filters');
+      const cats = new Map();
+      cats.set('all', 'すべて');
+
+      allQuestions.forEach(q => {
+        if (!cats.has(q.category)) {
+          cats.set(q.category, q.categoryName || q.category);
+        }
+      });
+
+      container.innerHTML = '';
+      cats.forEach((label, key) => {
+        const btn = document.createElement('button');
+        btn.dataset.cat = key;
+        btn.textContent = label;
+        btn.className = (key === currentFilter)
+          ? "filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] whitespace-nowrap"
+          : "filter-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--background)] hover:bg-[var(--border)] text-[var(--foreground)] border border-[var(--border)] whitespace-nowrap";
+        btn.onclick = () => applyFilter(key);
+        container.appendChild(btn);
+      });
+    }
+
+    function applyFilter(cat) {
+      currentFilter = cat;
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        if (b.dataset.cat === cat) {
+          b.className = "filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] whitespace-nowrap";
+        } else {
+          b.className = "filter-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--background)] hover:bg-[var(--border)] text-[var(--foreground)] border border-[var(--border)] whitespace-nowrap";
+        }
+      });
+
+      if (cat === 'all') {
+        filteredQuestions = [...allQuestions];
+      } else {
+        filteredQuestions = allQuestions.filter(q => q.category === cat);
+      }
+      currentIndex = 0;
+      updateStatsUI();
+      renderQuestion();
+    }
+
+    function toggleMode() {
+      isFlashcardMode = !isFlashcardMode;
+      document.getElementById('current-mode-label').textContent = isFlashcardMode ? '暗記カード' : '4択モード';
+      renderQuestion();
+    }
+
+    function toggleQuickHint() {
+      const box = document.getElementById('quick-hint-box');
+      box.classList.toggle('hidden');
+    }
+
+    function renderQuestion() {
+      document.getElementById('quick-hint-box').classList.add('hidden');
+
+      if (filteredQuestions.length === 0) {
+        document.getElementById('q-question-text').textContent = "問題がありません。「➕ 追加」ボタンから追加してください。";
+        document.getElementById('options-container').innerHTML = '';
+        document.getElementById('total-filtered-count').textContent = '0';
+        document.getElementById('current-q-index').textContent = '0';
+        return;
+      }
+
+      const q = filteredQuestions[currentIndex];
+
+      document.getElementById('q-category-badge').textContent = q.categoryName || q.category;
+      document.getElementById('q-importance-badge').textContent = q.importance || '★★★';
+      document.getElementById('quick-hint-text').textContent = q.summary || q.tip || "重要キーワードを連想しましょう。";
+      
+      const statusBadge = document.getElementById('q-status-badge');
+      if (userStats.mastered.has(q.id)) {
+        statusBadge.textContent = '🎉 習得済';
+        statusBadge.className = 'text-xs text-emerald-500 font-semibold';
+      } else if (userStats.learning.has(q.id)) {
+        statusBadge.textContent = '⚠️ 要復習';
+        statusBadge.className = 'text-xs text-amber-500 font-semibold';
+      } else {
+        statusBadge.textContent = '未学習';
+        statusBadge.className = 'text-xs text-[var(--muted-foreground)]';
+      }
+
+      document.getElementById('current-q-index').textContent = currentIndex + 1;
+      document.getElementById('total-filtered-count').textContent = filteredQuestions.length;
+      document.getElementById('q-question-text').textContent = q.question;
+
+      document.getElementById('explanation-box').classList.add('hidden');
+      document.getElementById('footer-nav').classList.remove('hidden');
+
+      const optionsContainer = document.getElementById('options-container');
+      const flashcardRevealArea = document.getElementById('flashcard-reveal-area');
+
+      if (isFlashcardMode) {
+        optionsContainer.classList.add('hidden');
+        flashcardRevealArea.classList.remove('hidden');
+      } else {
+        flashcardRevealArea.classList.add('hidden');
+        optionsContainer.classList.remove('hidden');
+        optionsContainer.innerHTML = '';
+
+        q.options.forEach((opt, idx) => {
+          const btn = document.createElement('button');
+          btn.className = "text-left p-3.5 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:border-[var(--primary)] text-xs md:text-sm font-medium flex items-start gap-2.5 active:scale-[0.98] transition";
+          btn.innerHTML = `
+            <span class="w-5 h-5 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center text-xs font-bold text-[var(--muted-foreground)] shrink-0">
+              ${idx + 1}
+            </span>
+            <span class="text-[var(--foreground)] leading-relaxed">${opt}</span>
+          `;
+          btn.onclick = () => handleAnswer(idx);
+          optionsContainer.appendChild(btn);
+        });
+      }
+    }
+
+    function handleAnswer(selectedIdx) {
+      const q = filteredQuestions[currentIndex];
+      const isCorrect = (selectedIdx === q.answer);
+
+      const resultIcon = document.getElementById('result-icon');
+      const resultTitle = document.getElementById('result-title');
+      const correctText = document.getElementById('correct-answer-text');
+
+      if (isCorrect) {
+        resultIcon.textContent = '⭕';
+        resultTitle.textContent = '正解！';
+        resultTitle.className = 'font-bold text-emerald-500 text-sm md:text-base';
+      } else {
+        resultIcon.textContent = '❌';
+        resultTitle.textContent = '不正解';
+        resultTitle.className = 'font-bold text-red-500 text-sm md:text-base';
+      }
+
+      correctText.textContent = `正解: 「${q.options[q.answer]}」`;
+      showExplanation(q);
+    }
+
+    function revealAnswer() {
+      const q = filteredQuestions[currentIndex];
+      const resultIcon = document.getElementById('result-icon');
+      const resultTitle = document.getElementById('result-title');
+      const correctText = document.getElementById('correct-answer-text');
+
+      resultIcon.textContent = '💡';
+      resultTitle.textContent = '正解・解答ポイント';
+      resultTitle.className = 'font-bold text-blue-500 text-sm md:text-base';
+      correctText.textContent = `正解: 「${q.options[q.answer]}」`;
+
+      showExplanation(q);
+    }
+
+    function showExplanation(q) {
+      document.getElementById('summary-line').textContent = q.summary || q.tip || "選択肢の特徴を掴んで即答しましょう。";
+      document.getElementById('q-reasoning').innerHTML = (q.reasoning || "解説準備中").replace(/\n/g, '<br>');
+      document.getElementById('q-exam-tip').textContent = q.tip || "キーワードと紐づけて記憶しましょう。";
+
+      document.getElementById('explanation-box').classList.remove('hidden');
+      document.getElementById('footer-nav').classList.add('hidden');
+    }
+
+    function markQuestion(mastered) {
+      const q = filteredQuestions[currentIndex];
+      if (mastered) {
+        userStats.mastered.add(q.id);
+        userStats.learning.delete(q.id);
+      } else {
+        userStats.learning.add(q.id);
+        userStats.mastered.delete(q.id);
+      }
+      saveStats();
+      nextQuestion();
+    }
+
+    function nextQuestion() {
+      if (currentIndex < filteredQuestions.length - 1) {
+        currentIndex++;
+      } else {
+        currentIndex = 0;
+      }
+      renderQuestion();
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+      } else {
+        currentIndex = filteredQuestions.length - 1;
+      }
+      renderQuestion();
+    }
+
+    function toggleCheatsheet() {
+      const body = document.getElementById('cheatsheet-body');
+      const icon = document.getElementById('cheatsheet-toggle-icon');
+      if (body.classList.contains('hidden')) {
+        body.classList.remove('hidden');
+        icon.textContent = '▲ 閉じる';
+      } else {
+        body.classList.add('hidden');
+        icon.textContent = '▼ 開く';
+      }
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function saveCustomQuestion(e) {
+      e.preventDefault();
+      const catName = document.getElementById('new-cat-name').value.trim();
+      const importance = document.getElementById('new-importance').value;
+      const question = document.getElementById('new-question').value.trim();
+      const opt1 = document.getElementById('new-opt-1').value.trim();
+      const opt2 = document.getElementById('new-opt-2').value.trim();
+      const opt3 = document.getElementById('new-opt-3').value.trim();
+      const opt4 = document.getElementById('new-opt-4').value.trim();
+      const summary = document.getElementById('new-summary').value.trim();
+      const reasoning = document.getElementById('new-reasoning').value.trim();
+      const tip = document.getElementById('new-tip').value.trim();
+
+      const newQ = {
+        id: Date.now(),
+        category: catName.toLowerCase().replace(/\s+/g, '_'),
+        categoryName: catName,
+        importance: importance,
+        summary: summary || tip || "重要問題",
+        question: question,
+        options: [opt1, opt2, opt3, opt4],
+        answer: 0,
+        reasoning: reasoning,
+        tip: tip
+      };
+
+      allQuestions.push(newQ);
+      saveAllQuestions();
+      buildCategoryFilters();
+      applyFilter(newQ.category);
+      closeModal('add-modal');
+      e.target.reset();
+      alert('問題を正常に追加しました！');
+    }
+
+    function exportData() {
+      const exportObj = {
+        questions: allQuestions,
+        mastered: [...userStats.mastered],
+        learning: [...userStats.learning]
+      };
+      const jsonStr = JSON.stringify(exportObj, null, 2);
+      document.getElementById('json-io-area').value = jsonStr;
+      navigator.clipboard.writeText(jsonStr).then(() => {
+        alert('クリップボードに全データをコピーしました！');
+      }).catch(() => {
+        alert('テキストエリアに出力しました。手動でコピーしてください。');
+      });
+    }
+
+    function importData() {
+      const raw = document.getElementById('json-io-area').value.trim();
+      if (!raw) return alert('JSONデータを入力してください');
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          allQuestions = parsed;
+        } else if (parsed.questions && Array.isArray(parsed.questions)) {
+          allQuestions = parsed.questions;
+          if (parsed.mastered) userStats.mastered = new Set(parsed.mastered);
+          if (parsed.learning) userStats.learning = new Set(parsed.learning);
+          saveStats();
+        } else {
+          throw new Error('不正な形式');
+        }
+        saveAllQuestions();
+        buildCategoryFilters();
+        applyFilter('all');
+        closeModal('data-modal');
+        alert('データをインポートしました！');
+      } catch (err) {
+        alert('JSONの解析に失敗しました。形式をご確認ください。');
+      }
+    }
+
+    function restoreDefaults() {
+      if (confirm('初期問題に戻しますか？')) {
+        allQuestions = [...defaultQuestions];
+        userStats.mastered.clear();
+        userStats.learning.clear();
+        saveAllQuestions();
+        saveStats();
+        buildCategoryFilters();
+        applyFilter('all');
+        closeModal('data-modal');
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (document.getElementById('add-modal').classList.contains('hidden') && 
+          document.getElementById('data-modal').classList.contains('hidden')) {
+        if (e.key >= '1' && e.key <= '4' && !isFlashcardMode && document.getElementById('explanation-box').classList.contains('hidden')) {
+          handleAnswer(parseInt(e.key) - 1);
+        } else if (e.key === 'Enter') {
+          const expBox = document.getElementById('explanation-box');
+          if (!expBox.classList.contains('hidden')) {
+            nextQuestion();
+          } else if (isFlashcardMode) {
+            revealAnswer();
+          }
+        } else if (e.key === 'ArrowRight') {
+          nextQuestion();
+        } else if (e.key === 'ArrowLeft') {
+          prevQuestion();
+        }
+      }
+    });
+
+    initData();
+  </script>
+</body>
+</html>
