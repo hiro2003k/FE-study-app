@@ -427,35 +427,86 @@
     </div>
 
     <!-- Modal 2: Data Import / Export -->
-    <div id="data-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl w-full max-w-lg p-5 shadow-2xl space-y-4">
-        <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
-          <h3 class="font-bold text-base text-[var(--foreground)]">⚙️ データ移行・一括登録</h3>
-          <button onclick="closeModal('data-modal')" class="text-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)]">✕</button>
+    <div id="data-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-4 sm:p-5 border-b border-[var(--border)] bg-[var(--background)]">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">⚙️</span>
+            <div>
+              <h3 class="font-bold text-base text-[var(--foreground)]">データ管理・端末引き継ぎ</h3>
+              <p class="text-[11px] text-[var(--muted-foreground)]">進捗や追加問題のバックアップ・別端末への共有</p>
+            </div>
+          </div>
+          <button onclick="closeModal('data-modal')" class="w-8 h-8 rounded-full border border-[var(--border)] hover:bg-[var(--border)] flex items-center justify-center text-sm text-[var(--muted-foreground)] transition">✕</button>
         </div>
 
-        <p class="text-xs text-[var(--muted-foreground)]">
-          問題JSONを貼り付けて一括追加したり、現在の進捗を別端末に引き継げます。
-        </p>
+        <!-- Modal Body (Scrollable) -->
+        <div class="p-4 sm:p-5 space-y-4 overflow-y-auto custom-scrollbar text-xs">
+          
+          <!-- Section 1: PC ⇄ スマホの引き継ぎ -->
+          <div class="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--background)] space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                <span>📱⇄💻</span>
+                <span>端末間でのデータ移行・バックアップ</span>
+              </span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold">簡単2ステップ</span>
+            </div>
+            
+            <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
+              現在解いた「習得状況」や「追加した自作問題」をまるごと別端末に引き継ぐことができます。
+            </p>
 
-        <div>
-          <label class="block text-xs font-semibold mb-1">問題データ (JSON形式)</label>
-          <textarea id="json-io-area" rows="6" placeholder="ここにJSONデータを貼り付けて「インポート」を押すと問題が一括追加されます" class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] font-mono text-xs custom-scrollbar"></textarea>
+            <!-- Step 1: Export -->
+            <div class="pt-1">
+              <button onclick="exportData()" id="export-btn" class="w-full py-2.5 px-3 rounded-lg bg-[var(--card)] border border-[var(--border)] hover:border-[var(--primary)] text-left flex items-center justify-between font-semibold text-[var(--foreground)] transition active:scale-[0.99] group">
+                <span class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-xs">📤</span>
+                  <span>1. 現在の全データをコピーする</span>
+                </span>
+                <span id="export-status-badge" class="text-[10px] px-2 py-0.5 rounded bg-[var(--border)] text-[var(--muted-foreground)] group-hover:bg-[var(--primary)] group-hover:text-white transition">タップでコピー</span>
+              </button>
+            </div>
+
+            <!-- Step 2: Import -->
+            <div class="space-y-1.5 pt-1">
+              <label class="block text-[11px] font-semibold text-[var(--foreground)] flex items-center gap-1">
+                <span>2. 引き継ぎ先でここに貼り付けて取り込む：</span>
+              </label>
+              <textarea id="json-io-area" rows="3" placeholder="コピーしたデータをここに貼り付けて「データを取り込む」を押してください" class="w-full p-2.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] font-mono text-[11px] leading-relaxed focus:outline-none focus:border-[var(--primary)] transition custom-scrollbar"></textarea>
+              
+              <button onclick="importData()" class="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold transition flex items-center justify-center gap-1.5 active:scale-[0.99]">
+                <span>📥</span>
+                <span>データを取り込む（インポート実行）</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Section 2: アプリのリセット・最新問題化 -->
+          <div class="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--background)] space-y-2">
+            <span class="font-bold text-[var(--foreground)] flex items-center gap-1.5">
+              <span>🔄</span>
+              <span>初期問題セットの最新化・リフレッシュ</span>
+            </span>
+            <p class="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
+              もし「問題数が古いまま」「最初からやり直したい」という場合は、公式の最新問題（全125問）にリフレッシュできます。
+            </p>
+            <button onclick="restoreDefaults()" class="w-full py-2 rounded-lg border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 text-red-600 dark:text-red-400 font-semibold transition active:scale-[0.99]">
+              ⚠️ 最新初期問題（全125問）にリセット・同期する
+            </button>
+          </div>
+
         </div>
 
-        <div class="grid grid-cols-2 gap-2 text-xs">
-          <button onclick="exportData()" class="p-2.5 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--border)] font-semibold">
-            📤 現在の全データをコピー
+        <!-- Modal Footer -->
+        <div class="p-3 sm:p-4 border-t border-[var(--border)] bg-[var(--background)] flex justify-end">
+          <button onclick="closeModal('data-modal')" class="px-5 py-2 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--border)] text-xs font-semibold text-[var(--foreground)] transition">
+            閉じる
           </button>
-          <button onclick="importData()" class="p-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold">
-            📥 JSONから一括読み込み
-          </button>
         </div>
 
-        <div class="pt-2 border-t border-[var(--border)] flex justify-between items-center text-xs">
-          <button onclick="restoreDefaults()" class="text-red-500 hover:underline">初期問題セット（最新全125問）に更新</button>
-          <button onclick="closeModal('data-modal')" class="px-4 py-1.5 rounded-lg border border-[var(--border)]">閉じる</button>
-        </div>
       </div>
     </div>
 
@@ -3012,11 +3063,28 @@
       };
       const jsonStr = JSON.stringify(exportObj, null, 2);
       document.getElementById('json-io-area').value = jsonStr;
-      navigator.clipboard.writeText(jsonStr).then(() => {
-        alert('クリップボードに全データをコピーしました！');
-      }).catch(() => {
-        alert('テキストエリアに出力しました。手動でコピーしてください。');
-      });
+      
+      const badge = document.getElementById('export-status-badge');
+      const setSuccessBadge = () => {
+        if (badge) {
+          badge.textContent = '✅ コピー完了！';
+          badge.className = 'text-[10px] px-2 py-0.5 rounded bg-emerald-500 text-white font-bold';
+          setTimeout(() => {
+            badge.textContent = 'タップで再コピー';
+            badge.className = 'text-[10px] px-2 py-0.5 rounded bg-[var(--border)] text-[var(--muted-foreground)]';
+          }, 3000);
+        }
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(jsonStr).then(() => {
+          setSuccessBadge();
+        }).catch(() => {
+          setSuccessBadge();
+        });
+      } else {
+        setSuccessBadge();
+      }
     }
 
     function importData() {
