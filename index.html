@@ -427,72 +427,79 @@
     </div>
 
     <!-- Modal 2: Data Import / Export -->
-    <div id="data-modal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-      <div class="bg-white text-slate-900 border-2 border-slate-300 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div id="data-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4" style="background-color: rgba(0, 0, 0, 0.75) !important; backdrop-filter: blur(4px);">
+      <div class="w-full max-w-lg overflow-hidden flex flex-col shadow-2xl" style="background-color: #ffffff !important; color: #0f172a !important; border: 3px solid #94a3b8 !important; border-radius: 16px; max-height: 92vh;">
         
-        <!-- Modal Header (High Contrast) -->
-        <div class="flex items-center justify-between p-4 sm:p-5 border-b-2 border-slate-200 bg-slate-100 text-slate-900">
-          <div class="flex items-center gap-2.5">
-            <span class="text-2xl">⚙️</span>
+        <!-- Modal Header (Crisp Light Slate with Deep Navy Text) -->
+        <div class="flex items-center justify-between p-4 sm:p-5" style="background-color: #f8fafc !important; border-bottom: 2px solid #e2e8f0 !important;">
+          <div class="flex items-center gap-3">
+            <span style="font-size: 26px;">⚙️</span>
             <div>
-              <h3 class="font-extrabold text-base sm:text-lg text-slate-900">データ管理・端末引き継ぎ</h3>
-              <p class="text-xs text-slate-600 font-medium">スマホとPCの間で学習進捗を簡単に共有できます</p>
+              <div class="flex items-center gap-2">
+                <h3 style="font-size: 18px; font-weight: 900; color: #0f172a !important; margin: 0;">データ管理・端末引き継ぎ</h3>
+                <span style="font-size: 10px; font-weight: 800; background-color: #0f172a; color: #ffffff; padding: 2px 7px; border-radius: 4px;">v5.1最新</span>
+              </div>
+              <p style="font-size: 12px; color: #475569 !important; margin: 2px 0 0 0; font-weight: 600;">スマホとPCの間で学習進捗を簡単に共有・復元できます</p>
             </div>
           </div>
-          <button onclick="closeModal('data-modal')" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold flex items-center justify-center text-sm transition shadow-sm">✕</button>
+          <button onclick="closeModal('data-modal')" style="width: 34px; height: 34px; border-radius: 50%; background-color: #e2e8f0; color: #0f172a; font-weight: 900; border: 2px solid #94a3b8; display: flex; align-items: center; justify-content: center; cursor: pointer;">✕</button>
         </div>
 
-        <!-- Modal Body (Pure White Background, Dark Crisp Text) -->
-        <div class="p-4 sm:p-5 space-y-4 overflow-y-auto custom-scrollbar bg-white text-slate-900 text-xs">
+        <!-- Modal Body (Pure White Background, Jet Black Text, Strong High Contrast Frames) -->
+        <div class="p-4 sm:p-5 space-y-4 overflow-y-auto custom-scrollbar" style="background-color: #ffffff !important; color: #0f172a !important;">
           
-          <!-- Block 1: PC ⇄ スマホの引き継ぎ (Bright Blue Frame) -->
-          <div class="p-4 rounded-xl border-2 border-blue-300 bg-blue-50/70 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-sm text-blue-950 flex items-center gap-1.5">
+          <!-- Section 1: PC ⇄ スマホの引き継ぎ (Bright Blue Solid Frame) -->
+          <div style="background-color: #eff6ff !important; border: 2px solid #3b82f6 !important; border-radius: 12px; padding: 14px;">
+            <div class="flex items-center justify-between" style="margin-bottom: 8px;">
+              <span style="font-size: 14px; font-weight: 900; color: #1e3a8a !important; display: flex; align-items: center; gap: 6px;">
                 <span>📱⇄💻</span>
                 <span>端末間でのデータ移行・バックアップ</span>
               </span>
-              <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-blue-600 text-white font-bold shadow-sm">簡単2ステップ</span>
+              <span style="font-size: 11px; font-weight: 800; background-color: #2563eb; color: #ffffff; padding: 3px 8px; border-radius: 9999px;">簡単2ステップ</span>
             </div>
             
-            <p class="text-xs text-slate-700 leading-relaxed font-medium">
+            <p style="font-size: 12px; color: #1e293b !important; line-height: 1.5; margin: 0 0 12px 0; font-weight: 600;">
               現在解いた「習得状況」や「追加した自作問題」をまるごと別端末に引き継ぐことができます。
             </p>
 
             <!-- Step 1: Copy Button -->
-            <div class="space-y-1">
-              <span class="block text-xs font-bold text-slate-800">ステップ 1：現在のデータをコピー</span>
-              <button onclick="exportData()" id="export-btn" class="w-full py-3 px-3.5 rounded-xl bg-white border-2 border-emerald-500 hover:bg-emerald-50 text-slate-900 text-left flex items-center justify-between font-bold transition shadow-sm active:scale-[0.99] group">
-                <span class="flex items-center gap-2 text-emerald-800 text-xs sm:text-sm">
-                  <span class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-sm shadow-sm">📤</span>
+            <div style="margin-bottom: 12px;">
+              <span style="display: block; font-size: 12px; font-weight: 800; color: #0f172a !important; margin-bottom: 4px;">
+                ステップ 1：現在のデータをコピー
+              </span>
+              <button onclick="exportData()" id="export-btn" style="width: 100%; padding: 11px 14px; border-radius: 10px; background-color: #ffffff !important; border: 2px solid #10b981 !important; color: #065f46 !important; font-weight: 800; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                <span style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                  <span style="background-color: #10b981; color: #ffffff; border-radius: 6px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 13px;">📤</span>
                   <span>現在の全データをコピーする</span>
                 </span>
-                <span id="export-status-badge" class="text-xs px-3 py-1 rounded-md bg-emerald-600 text-white font-bold shadow-sm transition">タップでコピー</span>
+                <span id="export-status-badge" style="font-size: 11px; padding: 4px 10px; border-radius: 6px; background-color: #059669; color: #ffffff; font-weight: 800;">タップでコピー</span>
               </button>
             </div>
 
             <!-- Step 2: Paste Area & Import Button -->
-            <div class="space-y-2 pt-1">
-              <span class="block text-xs font-bold text-slate-800">ステップ 2：引き継ぎ先の端末でここに貼り付け</span>
-              <textarea id="json-io-area" rows="3" placeholder="コピーしたデータをここに貼り付けて「データを取り込む」を押してください" class="w-full p-3 rounded-xl border-2 border-slate-300 bg-white text-slate-900 font-mono text-xs leading-relaxed focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition shadow-inner placeholder:text-slate-400 custom-scrollbar"></textarea>
+            <div>
+              <span style="display: block; font-size: 12px; font-weight: 800; color: #0f172a !important; margin-bottom: 4px;">
+                ステップ 2：引き継ぎ先の端末でここに貼り付け
+              </span>
+              <textarea id="json-io-area" rows="3" placeholder="コピーしたデータをここに貼り付けて「データを取り込む」を押してください" style="width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #94a3b8 !important; background-color: #ffffff !important; color: #0f172a !important; font-family: monospace; font-size: 12px; line-height: 1.4; box-sizing: border-box; margin-bottom: 8px; outline: none;"></textarea>
               
-              <button onclick="importData()" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-md active:scale-[0.99]">
-                <span class="text-base">📥</span>
+              <button onclick="importData()" style="width: 100%; padding: 10px; border-radius: 10px; background-color: #2563eb !important; color: #ffffff !important; font-weight: 900; font-size: 13px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 5px rgba(37,99,235,0.3);">
+                <span style="font-size: 15px;">📥</span>
                 <span>データを取り込む（インポート実行）</span>
               </button>
             </div>
           </div>
 
-          <!-- Block 2: アプリのリセット・最新問題化 (Soft Red Frame) -->
-          <div class="p-4 rounded-xl border-2 border-red-300 bg-red-50/70 space-y-2.5">
-            <span class="font-bold text-sm text-red-950 flex items-center gap-1.5">
+          <!-- Section 2: アプリのリセット・最新問題化 (Soft Red Frame) -->
+          <div style="background-color: #fef2f2 !important; border: 2px solid #f87171 !important; border-radius: 12px; padding: 14px;">
+            <span style="font-size: 14px; font-weight: 900; color: #991b1b !important; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
               <span>🔄</span>
               <span>初期問題セットの最新化・リフレッシュ</span>
             </span>
-            <p class="text-xs text-slate-700 leading-relaxed font-medium">
+            <p style="font-size: 12px; color: #475569 !important; line-height: 1.5; margin: 0 0 10px 0; font-weight: 600;">
               もし「問題数が古いまま」「最初からやり直したい」という場合は、公式の最新問題（全125問）にリフレッシュできます。
             </p>
-            <button onclick="restoreDefaults()" class="w-full py-2.5 rounded-xl border-2 border-red-400 bg-white hover:bg-red-100/50 text-red-700 font-bold text-xs transition shadow-sm active:scale-[0.99]">
+            <button onclick="restoreDefaults()" style="width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #ef4444 !important; background-color: #ffffff !important; color: #b91c1c !important; font-weight: 800; font-size: 12px; cursor: pointer;">
               ⚠️ 最新初期問題（全125問）にリセット・同期する
             </button>
           </div>
@@ -500,8 +507,8 @@
         </div>
 
         <!-- Modal Footer -->
-        <div class="p-4 border-t-2 border-slate-200 bg-slate-100 flex justify-end">
-          <button onclick="closeModal('data-modal')" class="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold transition shadow-md">
+        <div class="p-4" style="background-color: #f8fafc !important; border-top: 2px solid #e2e8f0 !important; display: flex; justify-content: flex-end;">
+          <button onclick="closeModal('data-modal')" style="padding: 9px 26px; border-radius: 10px; background-color: #0f172a !important; color: #ffffff !important; font-size: 13px; font-weight: 800; border: none; cursor: pointer;">
             閉じる
           </button>
         </div>
