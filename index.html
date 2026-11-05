@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-    <!-- Content Security Policy (XSS & Unauthorized Script Execution Prevention) -->
+  <!-- Content Security Policy (XSS & Unauthorized Script Execution Prevention) -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://www.gstatic.com; img-src 'self' data:; connect-src 'self'; font-src 'self' data:;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>FE対策 文系民のための基礎理論特化 一問一答道場</title>
@@ -25,19 +25,19 @@
   <div class="max-w-4xl mx-auto space-y-4 md:space-y-5">
 
     <!-- Top Navigation & Stats Bar -->
-    <header class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 md:p-5 shadow-sm">
+    <header class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 md:p-5 shadow-sm space-y-3">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mb-1">
             <span>基本情報技術者試験 (FE)</span>
             <span>•</span>
-            <span>文系特化 暗記＆理解道場</span>
+            <span>IPAシラバス完全網羅道場</span>
           </div>
           <h1 class="text-xl md:text-2xl font-bold tracking-tight text-[var(--foreground)]">FE 基礎特化 一問一答</h1>
         </div>
 
-        <!-- Progress Summary -->
-        <div class="flex items-center justify-around sm:justify-end gap-3 bg-[var(--background)] p-2 px-4 rounded-xl border border-[var(--border)]">
+        <!-- Progress Summary Cards -->
+        <div class="flex items-center justify-around sm:justify-end gap-3 bg-[var(--background)] p-2.5 px-4 rounded-xl border border-[var(--border)]">
           <div class="text-center">
             <div id="stat-mastered" class="text-lg md:text-xl font-bold text-emerald-500">0</div>
             <div class="text-[10px] text-[var(--muted-foreground)]">習得済</div>
@@ -55,23 +55,45 @@
         </div>
       </div>
 
-      <!-- Action Bar: Category Filters & Mode Controls -->
-      <div class="mt-3 pt-3 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-2">
-        <div class="flex gap-1.5 overflow-x-auto custom-scrollbar pb-1 max-w-full" id="category-filters">
-          <!-- Dynamically populated buttons -->
+      <!-- Feature ③: Progress Percentage Bar -->
+      <div>
+        <div class="flex justify-between items-center text-xs text-[var(--muted-foreground)] mb-1 font-medium">
+          <span>全体の進捗達成率</span>
+          <span id="progress-percentage-label" class="font-bold text-emerald-600 dark:text-emerald-400 font-mono">0% (0問習得)</span>
+        </div>
+        <div class="w-full bg-[var(--background)] h-2 rounded-full overflow-hidden border border-[var(--border)] flex">
+          <div id="progress-bar-fill" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%;"></div>
+          <div id="progress-bar-learning" class="bg-amber-400 h-full transition-all duration-300" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Feature ④: Quick Search Bar & Action Controls -->
+      <div class="pt-2 border-t border-[var(--border)] flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
+        <div class="relative flex-1">
+          <input type="text" id="quick-search-input" oninput="handleSearch(this.value)" placeholder="🔍 用語・問題・解説をクイック検索（例: ハッシュ、P/L、正規化）" class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-xs text-[var(--foreground)] focus:outline-none focus:border-[var(--primary)] transition">
+          <span class="absolute left-2.5 top-2 text-xs text-[var(--muted-foreground)] pointer-events-none"></span>
         </div>
 
-        <div class="flex items-center gap-1.5 ml-auto">
-          <button onclick="toggleMode()" id="mode-toggle-btn" class="px-2.5 py-1 rounded-lg text-xs font-medium border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--border)]">
+        <!-- Management Buttons & Feature ②: Shuffle Toggle -->
+        <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-0.5">
+          <button onclick="toggleMode()" id="mode-toggle-btn" class="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--border)] whitespace-nowrap">
             <span id="current-mode-label" class="text-blue-500 font-bold">4択モード</span>
           </button>
-          <button onclick="openModal('add-modal')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition">
+          <button onclick="toggleOrderShuffle()" id="shuffle-toggle-btn" class="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--border)] whitespace-nowrap" title="出題順序をランダムシャッフル">
+            <span id="shuffle-mode-label">順序: <b>通常</b></span>
+          </button>
+          <button onclick="openModal('add-modal')" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition whitespace-nowrap">
             ➕ 追加
           </button>
-          <button onclick="openModal('data-modal')" class="px-2.5 py-1 rounded-lg text-xs border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--border)] text-[var(--muted-foreground)]" title="データ移行・バックアップ">
+          <button onclick="openModal('data-modal')" class="px-2.5 py-1.5 rounded-lg text-xs border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--border)] text-[var(--muted-foreground)] whitespace-nowrap" title="データ移行・バックアップ">
             ⚙️ データ
           </button>
         </div>
+      </div>
+
+      <!-- Feature ①: Category Filters & "⚠️ 要復習のみ" Focus Mode -->
+      <div class="pt-2 border-t border-[var(--border)] flex gap-1.5 overflow-x-auto custom-scrollbar pb-1 max-w-full" id="category-filters">
+        <!-- Dynamically populated buttons -->
       </div>
     </header>
 
@@ -186,7 +208,7 @@
     <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 md:p-5 shadow-sm space-y-3">
       <div class="flex items-center justify-between cursor-pointer" onclick="toggleCheatsheet()">
         <div class="flex items-center gap-2">
-          <span class="text-sm md:text-base font-bold text-[var(--foreground)]">📖 直前確認用：文系のための超直感まとめ表（全26分野完全網羅）</span>
+          <span class="text-sm md:text-base font-bold text-[var(--foreground)]">📖 直前確認用：文系のための超直感まとめ表（IPAシラバス完全網羅）</span>
           <span class="text-[10px] px-2 py-0.5 rounded bg-purple-500/10 text-purple-500 font-semibold">公式集</span>
         </div>
         <span id="cheatsheet-toggle-icon" class="text-xs text-[var(--muted-foreground)]">▼ 開く</span>
@@ -227,10 +249,11 @@
         </div>
 
         <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
-          <h4 class="font-bold text-cyan-500">6. MIL記号 & 万能素子</h4>
-          <p>• <b>Dの形</b> = AND / <b>三日月形</b> = OR / <b>丸○</b> = NOT</p>
-          <p>• <b>NAND / NOR</b> は「万能素子」。これ1種類だけで全回路が作れる。</p>
-          <p>• <b>ド・モルガンの法則</b>：否定をちぎると記号がひっくり返る（AND⇔OR）。</p>
+          <h4 class="font-bold text-cyan-500">6. システム信頼性・稼働率</h4>
+          <p>• <b>直列稼働率</b> = <code>R1 × R2</code>（掛け算で下がる）。</p>
+          <p>• <b>並列稼働率</b> = <code>1 - (1-R1)(1-R2)</code>（片方動けばOK）。</p>
+          <p>• <b>稼働率公式</b> = <code>MTBF / (MTBF + MTTR)</code>。</p>
+          <p>• <b>フェールセーフ</b>＝安全第一で停止、<b>フールプルーフ</b>＝誤操作防止。</p>
         </div>
 
         <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
@@ -285,67 +308,61 @@
         </div>
 
         <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
-          <h4 class="font-bold text-red-500">14. 暗号技術</h4>
+          <h4 class="font-bold text-red-500">14. 暗号技術 & セキュリティ</h4>
           <p>• <b>共通鍵暗号</b>：同じ鍵で高速。鍵配送問題あり（AESなど）。</p>
-          <p>• <b>公開鍵暗号</b>：鍵ペアで低速。秘密データを送る時は「相手の公開鍵」で暗号化（RSAなど）。</p>
-          <p>• <b>ディジタル署名</b>：自分の「秘密鍵」で署名し、相手は「公開鍵」で検証（改ざん検知＋本人証明）。</p>
+          <p>• <b>公開鍵暗号</b>：秘密データは「相手の公開鍵」で暗号化（RSAなど）。</p>
+          <p>• <b>ディジタル署名</b>：自分の「秘密鍵」で署名し、相手は「公開鍵」で検証。</p>
+          <p>• <b>WAF</b>：Webアプリ（SQLi, XSS等）を防御。<b>IDS/IPS</b>：侵入検知vs侵入遮断。</p>
         </div>
 
         <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
-          <h4 class="font-bold text-yellow-500">15. 情報セキュリティ</h4>
-          <p>• <b>WAF</b>：Webアプリ（SQLi, XSS等）を防御。</p>
-          <p>• <b>IDS / IPS</b>：侵入検知(IDS) vs 侵入遮断(IPS)。</p>
-          <p>• <b>DMZ</b>：ネットと社内LANの間の公開用隔離エリア。</p>
-          <p>• <b>ゼロトラスト</b>：社内も信用せず、毎回アクセスを検証する思想。</p>
+          <h4 class="font-bold text-fuchsia-500">15. 開発手法・アジャイル</h4>
+          <p>• <b>カプセル化</b>：データとメソッドの隠蔽。<b>ポリモーフィズム</b>：多様性。</p>
+          <p>• <b>アジャイル開発</b>：短いスプリントで小刻み反復開発。</p>
+          <p>• <b>スクラム</b>：PO(要求優先順位決定) ＋ SM(障害排除支援)。</p>
+          <p>• <b>リファクタリング</b>：振る舞いを変えずに内部コードを整理。</p>
         </div>
 
         <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
-          <h4 class="font-bold text-fuchsia-500">16. システム開発・オブジェクト指向</h4>
-          <p>• <b>カプセル化</b>：データとメソッドを隠蔽。</p>
-          <p>• <b>継承 (インヘリタンス)</b>：親の性質を引き継いで差分だけ作成。</p>
-          <p>• <b>多相性 (ポリモーフィズム)</b>：同じ指示でも相手ごとに異なる振る舞い。</p>
-        </div>
-
-        <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
-          <h4 class="font-bold text-green-500">17. テスト手法</h4>
+          <h4 class="font-bold text-green-500">16. テスト手法</h4>
           <p>• <b>ホワイトボックス</b>：命令網羅 ＜ 分岐網羅 ＜ 条件網羅 ＜ 複数条件網羅(最強)。</p>
           <p>• <b>限界値分析 (境界値)</b>：バグが出やすい境界線の前後をテスト。</p>
           <p>• <b>リグレッションテスト</b>：修正で他が壊れていないか確認。</p>
         </div>
 
         <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
-          <h4 class="font-bold text-cyan-600">18. プロジェクトマネジメント</h4>
+          <h4 class="font-bold text-cyan-600">17. プロジェクトマネジメント</h4>
           <p>• <b>クリティカルパス</b>：最長所要日数ルート（余裕ゼロ）。</p>
           <p>• <b>EVM</b>：進捗・コストをお金(EV)で管理。CPI=EV/AC, SPI=EV/PV（1以上なら合格・優秀）。</p>
           <p>• <b>WBS</b>：作業をツリー状に階層分解した図。</p>
         </div>
 
         <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
-          <h4 class="font-bold text-blue-600">19. サービスマネジメント</h4>
-          <p>• <b>ITIL</b>：ITSMの成功事例ベストプラクティス集。</p>
-          <p>• <b>SLA</b>：品質基準の合意書。</p>
+          <h4 class="font-bold text-blue-600">18. サービスマネジメント & 監査</h4>
+          <p>• <b>ITIL</b>：ITSMベストプラクティス集。<b>SLA</b>：品質合意書。</p>
           <p>• <b>インシデント管理</b>(暫定復旧) vs <b>問題管理</b>(根本原因究明・再発防止)。</p>
+          <p>• <b>システム監査人</b>：被監査部門から独立した立場で助言・勧告（命令権なし）。</p>
         </div>
 
         <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
-          <h4 class="font-bold text-purple-600">20. システム戦略・EA</h4>
-          <p>• <b>EAの4層</b>：BA(業務) → DA(データ) → AA(アプリ) → TA(技術)。</p>
-          <p>• <b>SoR</b>(正確な記録) vs <b>SoE</b>(顧客とのつながり)。</p>
+          <h4 class="font-bold text-purple-600">19. 財務会計 & 損益分岐点</h4>
+          <p>• <b>P/L</b>：一定期間の儲け成績表。<b>B/S</b>：一時点の財政状態。</p>
+          <p>• <b>損益分岐点売上高</b> = <code>固定費 ÷ (1 - 変動費率)</code>。</p>
+          <p>• <b>ROE</b> = <code>当期純利益 ÷ 自己資本 × 100</code>（株主への還元効率）。</p>
         </div>
 
         <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
-          <h4 class="font-bold text-pink-600">21. 事業戦略・BSC</h4>
+          <h4 class="font-bold text-pink-600">20. 法務・コンプライアンス</h4>
+          <p>• <b>著作権法</b>：言語・規約・アルゴリズムは保護対象外！ソースコード表現が対象。</p>
+          <p>• <b>労働形態</b>：派遣＝発注先が指揮命令、請負＝受託側が指揮命令。</p>
+          <p>• <b>GPL</b>：派生ソフトもソース公開義務（コピーレフト）。</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
+          <h4 class="font-bold text-amber-600">21. マーケティング & 戦略</h4>
+          <p>• <b>マーケティングの4P</b>：製品 Product、価格 Price、流通 Place、販促 Promotion。</p>
           <p>• <b>BSCの4視点</b>：財務、顧客、内部プロセス、学習と成長。</p>
-          <p>• <b>KGI</b>(最終目標) vs <b>KPI</b>(中間行動指標)。</p>
-          <p>• <b>PPM</b>：花形、金のなる木(低成長高シェア)、問題児、負け犬。</p>
-        </div>
-
-        <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
-          <h4 class="font-bold text-amber-600">22. OR・IE分析手法</h4>
-          <p>• <b>パレート図</b>：棒グラフ＋累積比率（ABC分析）。</p>
-          <p>• <b>特性要因図</b>：魚の骨（原因と結果の関係）。</p>
-          <p>• <b>管理図</b>：中心線と上下管理限界線で異常検知。</p>
-          <p>• <b>線形計画法</b>：制約式の中で利益を最大化。</p>
+          <p>• <b>MOTの関門</b>：魔の川(研究→開発)、死の谷(開発→事業化)、ダーウィンの海(事業化→市場競争)。</p>
         </div>
       </div>
     </section>
@@ -436,7 +453,7 @@
         </div>
 
         <div class="pt-2 border-t border-[var(--border)] flex justify-between items-center text-xs">
-          <button onclick="restoreDefaults()" class="text-red-500 hover:underline">初期問題セット（最新全104問）に更新</button>
+          <button onclick="restoreDefaults()" class="text-red-500 hover:underline">初期問題セット（最新全125問）に更新</button>
           <button onclick="closeModal('data-modal')" class="px-4 py-1.5 rounded-lg border border-[var(--border)]">閉じる</button>
         </div>
       </div>
@@ -446,1176 +463,2134 @@
 
   <script>
     // System Data Version for Auto-Update
-    const CURRENT_DATA_VERSION = 4;
+    const CURRENT_DATA_VERSION = 5;
 
-    // Comprehensive FE Syllabus-aligned Question Database (104 Questions)
+    // Comprehensive FE Syllabus-aligned Question Database (125 Questions)
     const defaultQuestions = [
-  // 1. 基数変換
   {
-    id: 101, category: "radix", categoryName: "基数変換", importance: "★★★",
-    summary: "2進数の位は右から倍々（1, 2, 4, 8, 16...）",
-    question: "2進数の `1101` を10進数に変換するといくつか？",
-    options: ["13", "11", "15", "14"],
-    answer: 0,
-    reasoning: "2進数の各桁の重みは右から『1の位、2の位、4の位、8の位』と倍々ゲームです。`1101` は『8が1個、4が1個、2が0個、1が1個』なので、8 + 4 + 0 + 1 = 13 です。",
-    tip: "右から順に『1, 2, 4, 8, 16, 32, 64, 128』とメモして、1が立っている場所を足すだけ！"
+    "id": 101,
+    "category": "radix",
+    "categoryName": "基数変換",
+    "importance": "★★★",
+    "summary": "2進数の位は右から倍々（1, 2, 4, 8, 16...）",
+    "question": "2進数の `1101` を10進数に変換するといくつか？",
+    "options": [
+      "13",
+      "11",
+      "15",
+      "14"
+    ],
+    "answer": 0,
+    "reasoning": "2進数の各桁の重みは右から『1の位、2の位、4の位、8の位』と倍々ゲームです。`1101` は『8が1個、4が1個、2が0個、1が1個』なので、8 + 4 + 0 + 1 = 13 です。",
+    "tip": "右から順に『1, 2, 4, 8, 16, 32, 64, 128』とメモして、1が立っている場所を足すだけ！"
   },
   {
-    id: 102, category: "radix", categoryName: "基数変換", importance: "★★★",
-    summary: "2進数 ⇔ 16進数は「4桁セット」で機械的に直変換",
-    question: "2進数の `11110010` を16進数に変換するといくつか？",
-    options: ["F2", "E2", "F4", "72"],
-    answer: 0,
-    reasoning: "10進数を経由すると計算ミスします！16は2の4乗なので、2進数を『4桁ずつ』区切るのが鉄則です。\n前半 `1111` ＝ 15（16進数では `F`）\n後半 `0010` ＝ 2（16進数では `2`）\n並べると `F2`。一瞬で変換できます！",
-    tip: "A=10, B=11, C=12, D=13, E=14, F=15。4桁ずつ区切るだけで計算不要です。"
+    "id": 102,
+    "category": "radix",
+    "categoryName": "基数変換",
+    "importance": "★★★",
+    "summary": "2進数 ⇔ 16進数は「4桁セット」で機械的に直変換",
+    "question": "2進数の `11110010` を16進数に変換するといくつか？",
+    "options": [
+      "F2",
+      "E2",
+      "F4",
+      "72"
+    ],
+    "answer": 0,
+    "reasoning": "10進数を経由すると計算ミスします！16は2の4乗なので、2進数を『4桁ずつ』区切るのが鉄則です。\n前半 `1111` ＝ 15（16進数では `F`）\n後半 `0010` ＝ 2（16進数では `2`）\n並べると `F2`。一瞬で変換できます！",
+    "tip": "A=10, B=11, C=12, D=13, E=14, F=15。4桁ずつ区切るだけで計算不要です。"
   },
   {
-    id: 103, category: "radix", categoryName: "基数変換", importance: "★★☆",
-    summary: "小数の2進数は右へ半分ずつ（0.5, 0.25, 0.125...）のパズル",
-    question: "10進数の「0.625」を2進数に変換したものはどれか？",
-    options: ["0.101", "0.110", "0.011", "0.111"],
-    answer: 0,
-    reasoning: "小数の位は右に行くにつれて半分になります。\n• 0.1の位 ＝ 1/2 ＝ 0.5\n• 0.01の位 ＝ 1/4 ＝ 0.25\n• 0.001の位 ＝ 1/8 ＝ 0.125\n0.625 は 0.5 (1/2) ＋ 0.125 (1/8) なので、0.101 となります！",
-    tip: "小数は『0.5, 0.25, 0.125, 0.0625』のパーツを足して作るパズルです。"
+    "id": 103,
+    "category": "radix",
+    "categoryName": "基数変換",
+    "importance": "★★☆",
+    "summary": "小数の2進数は右へ半分ずつ（0.5, 0.25, 0.125...）のパズル",
+    "question": "10進数の「0.625」を2進数に変換したものはどれか？",
+    "options": [
+      "0.101",
+      "0.110",
+      "0.011",
+      "0.111"
+    ],
+    "answer": 0,
+    "reasoning": "小数の位は右に行くにつれて半分になります。\n• 0.1の位 ＝ 1/2 ＝ 0.5\n• 0.01の位 ＝ 1/4 ＝ 0.25\n• 0.001の位 ＝ 1/8 ＝ 0.125\n0.625 は 0.5 (1/2) ＋ 0.125 (1/8) なので、0.101 となります！",
+    "tip": "小数は『0.5, 0.25, 0.125, 0.0625』のパーツを足して作るパズルです。"
   },
   {
-    id: 104, category: "radix", categoryName: "基数変換", importance: "★★★",
-    summary: "2の補数（マイナスの数） ＝ 全ビット反転して ＋ 1",
-    question: "8ビットの2の補数表現において、10進数の「-5」を2進数で表したものはどれか？（※+5は 00000101）",
-    options: ["11111011", "11111010", "10000101", "11110101"],
-    answer: 0,
-    reasoning: "コンピュータは足し算回路で引き算をするために『足すとゼロ（桁あふれ）になる数＝2の補数』を使います。\n作り方は簡単2ステップ：\n① ビットを全部ひっくり返す（反転）：`00000101` → `11111010`\n② 1を足す：`11111010` + 1 = `11111011`",
-    tip: "『反転して1を足す』。最上位ビットが1ならマイナスの数です。"
+    "id": 104,
+    "category": "radix",
+    "categoryName": "基数変換",
+    "importance": "★★★",
+    "summary": "2の補数（マイナスの数） ＝ 全ビット反転して ＋ 1",
+    "question": "8ビットの2の補数表現において、10進数の「-5」を2進数で表したものはどれか？（※+5は 00000101）",
+    "options": [
+      "11111011",
+      "11111010",
+      "10000101",
+      "11110101"
+    ],
+    "answer": 0,
+    "reasoning": "コンピュータは足し算回路で引き算をするために『足すとゼロ（桁あふれ）になる数＝2の補数』を使います。\n作り方は簡単2ステップ：\n① ビットを全部ひっくり返す（反転）：`00000101` → `11111010`\n② 1を足す：`11111010` + 1 = `11111011`",
+    "tip": "『反転して1を足す』。最上位ビットが1ならマイナスの数です。"
   },
   {
-    id: 105, category: "radix", categoryName: "基数変換", importance: "★★☆",
-    summary: "nビットの2の補数の表現範囲 ＝ -2^(n-1) 〜 +2^(n-1)-1",
-    question: "8ビットの2の補数表現で表すことができる整数の範囲はどれか？",
-    options: [
+    "id": 105,
+    "category": "radix",
+    "categoryName": "基数変換",
+    "importance": "★★☆",
+    "summary": "nビットの2の補数の表現範囲 ＝ -2^(n-1) 〜 +2^(n-1)-1",
+    "question": "8ビットの2の補数表現で表すことができる整数の範囲はどれか？",
+    "options": [
       "-128 〜 +127",
       "-127 〜 +128",
       "-256 〜 +255",
       "-255 〜 +256"
     ],
-    answer: 0,
-    reasoning: "8ビット（256通り）のうち、最上位ビットが0なら正（0〜127の128個）、最上位ビットが1なら負（-1〜-128の128個）に均等に割り振られます。正の数には「0」が含まれるため、プラス側の限界は127までになります。",
-    tip: "『負の側が1個多い（-128 〜 +127）』と覚えましょう！"
+    "answer": 0,
+    "reasoning": "8ビット（256通り）のうち、最上位ビットが0なら正（0〜127の128個）、最上位ビットが1なら負（-1〜-128の128個）に均等に割り振られます。正の数には「0」が含まれるため、プラス側の限界は127までになります。",
+    "tip": "『負の側が1個多い（-128 〜 +127）』と覚えましょう！"
   },
   {
-    id: 106, category: "radix", categoryName: "基数変換", importance: "★★☆",
-    summary: "10進の「0.1」は2進数にすると無限小数（循環小数）になり誤差が出る",
-    question: "コンピュータ内部で10進数の「0.1」を2進数で表現しようとしたときに起こる現象として、正しいものはどれか？",
-    options: [
+    "id": 106,
+    "category": "radix",
+    "categoryName": "基数変換",
+    "importance": "★★☆",
+    "summary": "10進の「0.1」は2進数にすると無限小数（循環小数）になり誤差が出る",
+    "question": "コンピュータ内部で10進数の「0.1」を2進数で表現しようとしたときに起こる現象として、正しいものはどれか？",
+    "options": [
       "循環小数（無限小数）となり、有限の桁数では正確に表現できず丸め誤差が生じる",
       "2進数ではちょうど0.0001と表現でき、誤差は一切発生しない",
       "最上位ビットがオーバーフローして正負が逆転してしまう",
       "アンダーフローが発生して数値がゼロとして扱われてしまう"
     ],
-    answer: 0,
-    reasoning: "10進数で『1÷3 = 0.3333...』と割り切れないのと全く同じで、2進数で表せる小数は『0.5, 0.25, 0.125...』など分母が2の累乗のものだけです。0.1（1/10）は2の累乗で割れないため、`0.0001100110011...` と永遠にループする循環小数になります。",
-    tip: "『10進数の0.1は2進数で循環小数になり誤差を生む』は頻出理論です。"
-  },
-
-  // 2. 論理演算・MIL記号
-  {
-    id: 201, category: "logic", categoryName: "論理演算・MIL記号", importance: "★★★",
-    summary: "Dの形＝AND、三日月＝OR、先端の丸○＝NOT",
-    question: "MIL記号において、先端が尖った三日月（弓）のような形をした記号は何を表すか？",
-    options: ["OR（論理和）", "AND（論理積）", "NOT（否定）", "XOR（排他的論理和）"],
-    answer: 0,
-    reasoning: "まっすぐ直線（Dの形）は『AND』のD！曲がった三日月・弓矢の形は『OR』です。先端に○（丸）がついたら反転（NOT）を意味するのでNORになります。",
-    tip: "Dの形＝AND、三日月＝OR、三日月の後ろに二重線＝XOR、小さな丸○＝NOT。"
+    "answer": 0,
+    "reasoning": "10進数で『1÷3 = 0.3333...』と割り切れないのと全く同じで、2進数で表せる小数は『0.5, 0.25, 0.125...』など分母が2の累乗のものだけです。0.1（1/10）は2の累乗で割れないため、`0.0001100110011...` と永遠にループする循環小数になります。",
+    "tip": "『10進数の0.1は2進数で循環小数になり誤差を生む』は頻出理論です。"
   },
   {
-    id: 202, category: "logic", categoryName: "論理演算・MIL記号", importance: "★★☆",
-    summary: "NAND / NOR ＝ 万能素子（これ1種類だけで全回路が作れる）",
-    question: "半導体回路の設計において、NAND回路やNOR回路が特別に重宝される最大の理由はどれか？",
-    options: [
+    "id": 201,
+    "category": "logic",
+    "categoryName": "論理演算・MIL記号",
+    "importance": "★★★",
+    "summary": "Dの形＝AND、三日月＝OR、先端の丸○＝NOT",
+    "question": "MIL記号において、先端が尖った三日月（弓）のような形をした記号は何を表すか？",
+    "options": [
+      "OR（論理和）",
+      "AND（論理積）",
+      "NOT（否定）",
+      "XOR（排他的論理和）"
+    ],
+    "answer": 0,
+    "reasoning": "まっすぐ直線（Dの形）は『AND』のD！曲がった三日月・弓矢の形は『OR』です。先端に○（丸）がついたら反転（NOT）を意味するのでNORになります。",
+    "tip": "Dの形＝AND、三日月＝OR、三日月の後ろに二重線＝XOR、小さな丸○＝NOT。"
+  },
+  {
+    "id": 202,
+    "category": "logic",
+    "categoryName": "論理演算・MIL記号",
+    "importance": "★★☆",
+    "summary": "NAND / NOR ＝ 万能素子（これ1種類だけで全回路が作れる）",
+    "question": "半導体回路の設計において、NAND回路やNOR回路が特別に重宝される最大の理由はどれか？",
+    "options": [
       "NAND回路（またはNOR回路）1種類だけを組み合わせることで、ANDやORを含むすべての論理回路を構築できるから",
       "消費電力が常にゼロで発熱しないから",
       "2進数だけでなく10進数も直接計算できるから",
       "プログラムを書き換えるだけで光通信に変換できるから"
     ],
-    answer: 0,
-    reasoning: "文系民の疑問『なんでわざわざNOTしたNANDやNORなんて面倒なものを習うの？』の答えがこれです。工場で集積回路（ICチップ）を作るとき、何種類もの回路を作るより『NAND素子だけを大量生産して全部それで済ませる』方が圧倒的に安く作れるからです（万能素子と呼びます）。",
-    tip: "『NAND（またはNOR）だけで全論理回路が作れる』という知識問題は過去問でそのまま出ます。"
+    "answer": 0,
+    "reasoning": "文系民の疑問『なんでわざわざNOTしたNANDやNORなんて面倒なものを習うの？』の答えがこれです。工場で集積回路（ICチップ）を作るとき、何種類もの回路を作るより『NAND素子だけを大量生産して全部それで済ませる』方が圧倒的に安く作れるからです（万能素子と呼びます）。",
+    "tip": "『NAND（またはNOR）だけで全論理回路が作れる』という知識問題は過去問でそのまま出ます。"
   },
   {
-    id: 203, category: "logic", categoryName: "論理演算・MIL記号", importance: "★★★",
-    summary: "XOR ＝ 2つの値が違うときだけ1（不一致検出）",
-    question: "2つの入力A, Bにおいて、「AとBの値が異なるときだけ1になり、同じときは0になる」論理演算はどれか？",
-    options: ["XOR（排他的論理和）", "AND（論理積）", "OR（論理和）", "NOR（否定論理和）"],
-    answer: 0,
-    reasoning: "XORは『Exclusive OR（排他的OR）』。日常会話の『A定食かB定食のどちらか一方だけ選んでね（両方はダメ）』がこれです。1と0、0と1のときだけ1になります。加算回路の足し算の1桁目（0+1=1, 1+0=1, 1+1=0で繰り上がり）として使われます。",
-    tip: "『不一致検出＝XOR』『半加算器の和＝XOR』と連動させて覚えましょう。"
+    "id": 203,
+    "category": "logic",
+    "categoryName": "論理演算・MIL記号",
+    "importance": "★★★",
+    "summary": "XOR ＝ 2つの値が違うときだけ1（不一致検出）",
+    "question": "2つの入力A, Bにおいて、「AとBの値が異なるときだけ1になり、同じときは0になる」論理演算はどれか？",
+    "options": [
+      "XOR（排他的論理和）",
+      "AND（論理積）",
+      "OR（論理和）",
+      "NOR（否定論理和）"
+    ],
+    "answer": 0,
+    "reasoning": "XORは『Exclusive OR（排他的OR）』。日常会話の『A定食かB定食のどちらか一方だけ選んでね（両方はダメ）』がこれです。1と0、0と1のときだけ1になります。加算回路の足し算の1桁目（0+1=1, 1+0=1, 1+1=0で繰り上がり）として使われます。",
+    "tip": "『不一致検出＝XOR』『半加算器の和＝XOR』と連動させて覚えましょう。"
   },
   {
-    id: 204, category: "logic", categoryName: "論理演算・MIL記号", importance: "★★☆",
-    summary: "ド・モルガンの法則 ＝ 否定のバーをちぎると記号がひっくり返る（AND⇔OR）",
-    question: "論理式 NOT(A AND B) と常に同じ結果になる論理式はどれか？（ド・モルガンの法則）",
-    options: ["(NOT A) OR (NOT B)", "(NOT A) AND (NOT B)", "A OR B", "A AND (NOT B)"],
-    answer: 0,
-    reasoning: "「彼がイケメンでかつお金持ち（AND）」の否定は、「イケメンじゃないか、または、お金持ちじゃない（どちらか欠けていればNG）」ですよね！\n数式上のルールは超シンプル：上の否定バーを真ん中でちぎると、真ん中の記号が『ANDからORへ（またはORからANDへ）』クルッとひっくり返ります！",
-    tip: "『否定をちぎると、ANDとORが入れ替わる』。これだけで解けます。"
+    "id": 204,
+    "category": "logic",
+    "categoryName": "論理演算・MIL記号",
+    "importance": "★★☆",
+    "summary": "ド・モルガンの法則 ＝ 否定のバーをちぎると記号がひっくり返る（AND⇔OR）",
+    "question": "論理式 NOT(A AND B) と常に同じ結果になる論理式はどれか？（ド・モルガンの法則）",
+    "options": [
+      "(NOT A) OR (NOT B)",
+      "(NOT A) AND (NOT B)",
+      "A OR B",
+      "A AND (NOT B)"
+    ],
+    "answer": 0,
+    "reasoning": "「彼がイケメンでかつお金持ち（AND）」の否定は、「イケメンじゃないか、または、お金持ちじゃない（どちらか欠けていればNG）」ですよね！\n数式上のルールは超シンプル：上の否定バーを真ん中でちぎると、真ん中の記号が『ANDからORへ（またはORからANDへ）』クルッとひっくり返ります！",
+    "tip": "『否定をちぎると、ANDとORが入れ替わる』。これだけで解けます。"
   },
   {
-    id: 205, category: "logic", categoryName: "論理演算・MIL記号", importance: "★★☆",
-    summary: "吸収律 ＝ A AND (A OR B) は 単に「A」になる",
-    question: "論理式 A AND (A OR B) を簡略化したものとして正しいものはどれか？",
-    options: ["A", "B", "A AND B", "1"],
-    answer: 0,
-    reasoning: "ベン図をイメージしてください。『A』と『AまたはB』の両方に共通して重なるエリアは、結局まるまる『A』そのものですよね。このような無駄をそぎ落とす式変形を『吸収律』と呼びます。",
-    tip: "Aでくくられた外側と内側に同じAがあれば、答えは単にAになります。"
+    "id": 205,
+    "category": "logic",
+    "categoryName": "論理演算・MIL記号",
+    "importance": "★★☆",
+    "summary": "吸収律 ＝ A AND (A OR B) は 単に「A」になる",
+    "question": "論理式 A AND (A OR B) を簡略化したものとして正しいものはどれか？",
+    "options": [
+      "A",
+      "B",
+      "A AND B",
+      "1"
+    ],
+    "answer": 0,
+    "reasoning": "ベン図をイメージしてください。『A』と『AまたはB』の両方に共通して重なるエリアは、結局まるまる『A』そのものですよね。このような無駄をそぎ落とす式変形を『吸収律』と呼びます。",
+    "tip": "Aでくくられた外側と内側に同じAがあれば、答えは単にAになります。"
   },
-
-  // 3. 加算回路
   {
-    id: 301, category: "adder", categoryName: "加算回路", importance: "★★★",
-    summary: "半加算器 ＝ XOR (和S) ＋ AND (桁上がりC)",
-    question: "半加算器（Half Adder）を構成する2つの論理回路の正しい組み合わせはどれか？",
-    options: [
+    "id": 301,
+    "category": "adder",
+    "categoryName": "加算回路",
+    "importance": "★★★",
+    "summary": "半加算器 ＝ XOR (和S) ＋ AND (桁上がりC)",
+    "question": "半加算器（Half Adder）を構成する2つの論理回路の正しい組み合わせはどれか？",
+    "options": [
       "和（S）にXOR回路、桁上がり（C）にAND回路",
       "和（S）にOR回路、桁上がり（C）にAND回路",
       "和（S）にAND回路、桁上がり（C）にXOR回路",
       "和（S）にXOR回路、桁上がり（C）にOR回路"
     ],
-    answer: 0,
-    reasoning: "2進数の1桁足し算（0+0=0, 0+1=1, 1+0=1, 1+1=10）を観察してください。答えの1の位（S）は『片方だけ1のときに1』になるので排他的論理和（XOR）。桁上がり（C）は『両方1のときにだけ1』になるので論理積（AND）そのものです。電気スイッチをこの形に繋ぐだけで、勝手に足し算ができます。",
-    tip: "試験では『半加算器＝XOR＋AND』の呪文だけで1点取れます。和＝XOR、桁上がり（Carry）＝AND。"
+    "answer": 0,
+    "reasoning": "2進数の1桁足し算（0+0=0, 0+1=1, 1+0=1, 1+1=10）を観察してください。答えの1の位（S）は『片方だけ1のときに1』になるので排他的論理和（XOR）。桁上がり（C）は『両方1のときにだけ1』になるので論理積（AND）そのものです。電気スイッチをこの形に繋ぐだけで、勝手に足し算ができます。",
+    "tip": "試験では『半加算器＝XOR＋AND』の呪文だけで1点取れます。和＝XOR、桁上がり（Carry）＝AND。"
   },
   {
-    id: 302, category: "adder", categoryName: "加算回路", importance: "★★☆",
-    summary: "全加算器 ＝ 半加算器 × 2 ＋ OR回路 × 1",
-    question: "全加算器（Full Adder）の説明として、最も適切なものはどれか？",
-    options: [
+    "id": 302,
+    "category": "adder",
+    "categoryName": "加算回路",
+    "importance": "★★☆",
+    "summary": "全加算器 ＝ 半加算器 × 2 ＋ OR回路 × 1",
+    "question": "全加算器（Full Adder）の説明として、最も適切なものはどれか？",
+    "options": [
       "半加算器2つと、OR回路1つで構成され、下位桁からの繰り上がりも含めて3つの入力を加算できる",
       "半加算器4つで構成され、4ビットの2進数を一括で加算できる",
       "乗算（掛け算）を可能にするために、半加算器と全加算器を直列に繋いだもの",
       "NOT回路とAND回路だけで構成され、引き算を自動的に加算に変換するもの"
     ],
-    answer: 0,
-    reasoning: "『半』加算器は2つの数字しか足せないので、下の桁から繰り上がってきた数を足せません。そこで半加算器を2つ並べて（A+Bを足した後、繰り上がりを足す）、どちらかで繰り上がりが発生したら次の桁へ送るためにOR回路を1個つけたものが『全加算器』です。",
-    tip: "『全加算器 ＝ 半加算器 × 2 ＋ OR × 1』。この部品構成の数字がそのまま出ます。"
+    "answer": 0,
+    "reasoning": "『半』加算器は2つの数字しか足せないので、下の桁から繰り上がってきた数を足せません。そこで半加算器を2つ並べて（A+Bを足した後、繰り上がりを足す）、どちらかで繰り上がりが発生したら次の桁へ送るためにOR回路を1個つけたものが『全加算器』です。",
+    "tip": "『全加算器 ＝ 半加算器 × 2 ＋ OR × 1』。この部品構成の数字がそのまま出ます。"
   },
   {
-    id: 303, category: "adder", categoryName: "加算回路", importance: "★★☆",
-    summary: "4ビット加算器 ＝ 半加算器1個 ＋ 全加算器3個",
-    question: "4ビットの2進数どうしを加算する並列加算器を構成するとき、必要な加算器の組み合わせはどれか？",
-    options: [
+    "id": 303,
+    "category": "adder",
+    "categoryName": "加算回路",
+    "importance": "★★☆",
+    "summary": "4ビット加算器 ＝ 半加算器1個 ＋ 全加算器3個",
+    "question": "4ビットの2進数どうしを加算する並列加算器を構成するとき、必要な加算器の組み合わせはどれか？",
+    "options": [
       "最下位桁に半加算器1個、上位3桁に全加算器3個",
       "4桁すべてに半加算器を4個",
       "最下位桁に全加算器1個、上位3桁に半加算器3個",
       "半加算器2個と全加算器2個"
     ],
-    answer: 0,
-    reasoning: "筆算を思い出してください！一番右端の『1の位（最下位桁）』だけは下からの繰り上がりがないので、2つの数を足すだけの『半加算器』で済みます。しかし2桁目・3桁目・4桁目は下の桁から繰り上がってくる可能性があるため、3つの数を足せる『全加算器』が3個必要になります。",
-    tip: "一番下の桁だけ半加算器でOK。残りの上位桁はすべて全加算器！"
-  },
-
-  // 4. 逆ポーランド記法
-  {
-    id: 401, category: "rpn", categoryName: "逆ポーランド記法", importance: "★★★",
-    summary: "カッコでくくって、演算記号を右後ろへポイッと投げるだけ",
-    question: "通常の計算式 `(A + B) × C` を逆ポーランド記法で表したものはどれか？",
-    options: ["A B + C ×", "+ A B × C", "A B C + ×", "A B × C +"],
-    answer: 0,
-    reasoning: "文系の必勝法：計算順にカッコでくくって、演算記号をカッコの『後ろ（右側）』に追い出します！\n1. `(A + B)` → `(A B)+`\n2. `((A B)+ × C)` → `((A B)+ C)×`\n3. カッコを外すと → `A B + C ×`。これだけで誰でも10秒で解けます！",
-    tip: "『記号を後ろへポイッと投げる』と覚えましょう。逆ポーランド記法は演算子が後ろに来ます。"
+    "answer": 0,
+    "reasoning": "筆算を思い出してください！一番右端の『1の位（最下位桁）』だけは下からの繰り上がりがないので、2つの数を足すだけの『半加算器』で済みます。しかし2桁目・3桁目・4桁目は下の桁から繰り上がってくる可能性があるため、3つの数を足せる『全加算器』が3個必要になります。",
+    "tip": "一番下の桁だけ半加算器でOK。残りの上位桁はすべて全加算器！"
   },
   {
-    id: 402, category: "rpn", categoryName: "逆ポーランド記法", importance: "★★★",
-    summary: "逆ポーランド記法の計算には「スタック（LIFO）」を使う",
-    question: "コンピュータが逆ポーランド記法を計算する際に利用するデータ構造はどれか？",
-    options: [
+    "id": 401,
+    "category": "rpn",
+    "categoryName": "逆ポーランド記法",
+    "importance": "★★★",
+    "summary": "カッコでくくって、演算記号を右後ろへポイッと投げるだけ",
+    "question": "通常の計算式 `(A + B) × C` を逆ポーランド記法で表したものはどれか？",
+    "options": [
+      "A B + C ×",
+      "+ A B × C",
+      "A B C + ×",
+      "A B × C +"
+    ],
+    "answer": 0,
+    "reasoning": "文系の必勝法：計算順にカッコでくくって、演算記号をカッコの『後ろ（右側）』に追い出します！\n1. `(A + B)` → `(A B)+`\n2. `((A B)+ × C)` → `((A B)+ C)×`\n3. カッコを外すと → `A B + C ×`。これだけで誰でも10秒で解けます！",
+    "tip": "『記号を後ろへポイッと投げる』と覚えましょう。逆ポーランド記法は演算子が後ろに来ます。"
+  },
+  {
+    "id": 402,
+    "category": "rpn",
+    "categoryName": "逆ポーランド記法",
+    "importance": "★★★",
+    "summary": "逆ポーランド記法の計算には「スタック（LIFO）」を使う",
+    "question": "コンピュータが逆ポーランド記法を計算する際に利用するデータ構造はどれか？",
+    "options": [
       "スタック（後入れ先出し：LIFO）",
       "キュー（先入れ先出し：FIFO）",
       "2分探索木",
       "ハッシュテーブル"
     ],
-    answer: 0,
-    reasoning: "なぜ人間には読みづらい逆ポーランド記法を使うのか？それは『スタック（机に積み重ねたお皿）』を使うと、左から右へ読むだけで超簡単に計算できるからです。数字が来たらスタックにポンポン積み、記号（+や×）が来たら上の2枚を取り出して計算し、結果をまた積む。カッコや優先順位を一切気にせず一直線に計算できます。",
-    tip: "『逆ポーランド ＝ スタック』。これはFEで親の顔より見かける超ド定番の組み合わせです。"
+    "answer": 0,
+    "reasoning": "なぜ人間には読みづらい逆ポーランド記法を使うのか？それは『スタック（机に積み重ねたお皿）』を使うと、左から右へ読むだけで超簡単に計算できるからです。数字が来たらスタックにポンポン積み、記号（+や×）が来たら上の2枚を取り出して計算し、結果をまた積む。カッコや優先順位を一切気にせず一直線に計算できます。",
+    "tip": "『逆ポーランド ＝ スタック』。これはFEで親の顔より見かける超ド定番の組み合わせです。"
   },
   {
-    id: 403, category: "rpn", categoryName: "逆ポーランド記法", importance: "★★★",
-    summary: "逆ポーランドの計算：数字はスタックに積み、記号で2枚取って計算",
-    question: "逆ポーランド記法で記述された式 `5 3 2 × +` をスタックを用いて計算した結果はどれか？",
-    options: ["11", "16", "30", "13"],
-    answer: 0,
-    reasoning: "スタックの動きを左から順に追います：\n1. `5` を積む（スタック: [5]）\n2. `3` を積む（スタック: [5, 3]）\n3. `2` を積む（スタック: [5, 3, 2]）\n4. `×` が来た！上から2つ（3と2）を取り出して掛け算（3×2=6）、結果を積む（スタック: [5, 6]）\n5. `+` が来た！上から2つ（5と6）を取り出して足し算（5+6=11）、結果を積む（スタック: [11]）\nよって答えは 11 です！",
-    tip: "左から順に数字を皿に積み、演算子が出たら上の2つを計算して戻すだけ！"
+    "id": 403,
+    "category": "rpn",
+    "categoryName": "逆ポーランド記法",
+    "importance": "★★★",
+    "summary": "逆ポーランドの計算：数字はスタックに積み、記号で2枚取って計算",
+    "question": "逆ポーランド記法で記述された式 `5 3 2 × +` をスタックを用いて計算した結果はどれか？",
+    "options": [
+      "11",
+      "16",
+      "30",
+      "13"
+    ],
+    "answer": 0,
+    "reasoning": "スタックの動きを左から順に追います：\n1. `5` を積む（スタック: [5]）\n2. `3` を積む（スタック: [5, 3]）\n3. `2` を積む（スタック: [5, 3, 2]）\n4. `×` が来た！上から2つ（3と2）を取り出して掛け算（3×2=6）、結果を積む（スタック: [5, 6]）\n5. `+` が来た！上から2つ（5と6）を取り出して足し算（5+6=11）、結果を積む（スタック: [11]）\nよって答えは 11 です！",
+    "tip": "左から順に数字を皿に積み、演算子が出たら上の2つを計算して戻すだけ！"
   },
-
-  // 5. 状態遷移表・オートマトン
   {
-    id: 501, category: "state", categoryName: "状態遷移表", importance: "★★★",
-    summary: "表の「0, 1, 2」は計算値ではなく「部屋番号（状態ID）」",
-    question: "文字列検査の状態遷移表で、表の中に書かれている「0, 1, 2」などの数字の正体は何ですか？",
-    options: [
+    "id": 501,
+    "category": "state",
+    "categoryName": "状態遷移表",
+    "importance": "★★★",
+    "summary": "表の「0, 1, 2」は計算値ではなく「部屋番号（状態ID）」",
+    "question": "文字列検査の状態遷移表で、表の中に書かれている「0, 1, 2」などの数字の正体は何ですか？",
+    "options": [
       "計算結果の数値ではなく、現在いるフェーズを表す『状態番号（部屋番号）』",
       "2進数に変換された文字列のビット値",
       "合致した文字列の文字数カウント",
       "エラーの発生確率（0%=正常、1=注意、2=異常）"
     ],
-    answer: 0,
-    reasoning: "文系民が最も混乱するポイント！この数字は足し算引き算する『数』ではありません。スゴロクの『1マス目』『2マス目』というただの『場所（状態）のラベル』です。例えばメールアドレス検査なら『状態0＝まだ@の前』『状態1＝@が1個出た』『状態2＝ドメイン部分に入った』という名札にすぎません。",
-    tip: "状態遷移表を見たら『計算』しようとせず、『今、状態0の部屋にいて、文字 \"a\" が来たら次は状態1の部屋へワープする』というスゴロクのコマ進めとして読んでください。"
+    "answer": 0,
+    "reasoning": "文系民が最も混乱するポイント！この数字は足し算引き算する『数』ではありません。スゴロクの『1マス目』『2マス目』というただの『場所（状態）のラベル』です。例えばメールアドレス検査なら『状態0＝まだ@の前』『状態1＝@が1個出た』『状態2＝ドメイン部分に入った』という名札にすぎません。",
+    "tip": "状態遷移表を見たら『計算』しようとせず、『今、状態0の部屋にいて、文字 \"a\" が来たら次は状態1の部屋へワープする』というスゴロクのコマ進めとして読んでください。"
   },
   {
-    id: 502, category: "state", categoryName: "状態遷移表", importance: "★★☆",
-    summary: "文字列検査で最後に到達すべきゴール ＝ 受理状態",
-    question: "有限オートマトン（状態遷移機械）において、文字列の入力が終わったときに最終的にたどり着くべき状態を何と呼ぶか？",
-    options: ["受理状態（最終状態）", "初期状態", "飽和状態", "リセット状態"],
-    answer: 0,
-    reasoning: "文字列が正しいルールに従っていれば、最後に『合格の部屋（二重丸で書かれることが多い）』に到着します。この部屋のことを『受理状態』と呼びます。ここに辿り着けば『OK（適合）』、途中で行き止まりになったり別の部屋で終わったら『エラー』判定です。",
-    tip: "選択肢の文字列を1文字ずつ表に当てはめて指を動かし、指定されたゴール状態に着くものを探すだけです。"
+    "id": 502,
+    "category": "state",
+    "categoryName": "状態遷移表",
+    "importance": "★★☆",
+    "summary": "文字列検査で最後に到達すべきゴール ＝ 受理状態",
+    "question": "有限オートマトン（状態遷移機械）において、文字列の入力が終わったときに最終的にたどり着くべき状態を何と呼ぶか？",
+    "options": [
+      "受理状態（最終状態）",
+      "初期状態",
+      "飽和状態",
+      "リセット状態"
+    ],
+    "answer": 0,
+    "reasoning": "文字列が正しいルールに従っていれば、最後に『合格の部屋（二重丸で書かれることが多い）』に到着します。この部屋のことを『受理状態』と呼びます。ここに辿り着けば『OK（適合）』、途中で行き止まりになったり別の部屋で終わったら『エラー』判定です。",
+    "tip": "選択肢の文字列を1文字ずつ表に当てはめて指を動かし、指定されたゴール状態に着くものを探すだけです。"
   },
   {
-    id: 503, category: "state", categoryName: "状態遷移表", importance: "★★★",
-    summary: "オートマトンの追跡：初期状態から文字を1文字ずつ読んで部屋を移動する",
-    question: "初期状態S0において、入力「1」でS0とS1を行き来し、入力「0」では状態が変わらないオートマトンがある。S0が受理状態のとき、受理される文字列はどれか？",
-    options: [
+    "id": 503,
+    "category": "state",
+    "categoryName": "状態遷移表",
+    "importance": "★★★",
+    "summary": "オートマトンの追跡：初期状態から文字を1文字ずつ読んで部屋を移動する",
+    "question": "初期状態S0において、入力「1」でS0とS1を行き来し、入力「0」では状態が変わらないオートマトンがある。S0が受理状態のとき、受理される文字列はどれか？",
+    "options": [
       "101101（1が4個：偶数個）",
       "10101（1が3個：奇数個）",
       "111（1が3個：奇数個）",
       "010（1が1個：奇数個）"
     ],
-    answer: 0,
-    reasoning: "S0からスタートして、『1』が来るとS1へ、『1』がもう一度来るとS0に戻る仕組みです。つまり『1が偶数回来たときだけS0（ゴール）にいる』ことになります！\n選択肢の中で『1』が偶数個（4個）あるのは `101101` だけです。",
-    tip: "『1が出るたびに部屋が交互に入れ替わる』＝ 偶数・奇数のパリティ判定マシンです。"
-  },
-
-  // 6. データ構造
-  {
-    id: 601, category: "data_struct", categoryName: "データ構造", importance: "★★★",
-    summary: "キュー ＝ レジの行列、先入れ先出し（FIFO）",
-    question: "「先に入れたデータが最初に取り出される（FIFO：First-In First-Out）」データ構造はどれか？",
-    options: ["キュー（Queue / 待ち行列）", "スタック（Stack）", "木構造（Tree）", "ヒープ（Heap）"],
-    answer: 0,
-    reasoning: "ラーメン屋やテーマパークの『行列（Queue）』を思い出してください。先に来て並んだ人から順番に店内に入れます。プリンターの印刷待ちや、OSのタスク処理など、順番待ちの処理はすべてキューです。",
-    tip: "キュー＝行列（FIFO）、スタック＝積まれた本（LIFO）。"
+    "answer": 0,
+    "reasoning": "S0からスタートして、『1』が来るとS1へ、『1』がもう一度来るとS0に戻る仕組みです。つまり『1が偶数回来たときだけS0（ゴール）にいる』ことになります！\n選択肢の中で『1』が偶数個（4個）あるのは `101101` だけです。",
+    "tip": "『1が出るたびに部屋が交互に入れ替わる』＝ 偶数・奇数のパリティ判定マシンです。"
   },
   {
-    id: 602, category: "data_struct", categoryName: "データ構造", importance: "★★★",
-    summary: "連結リスト ＝ ポインタ繋ぎ変えで途中の挿入・削除が高速",
-    question: "「配列（Array）」と比較したときの「連結リスト（Linked List）」の最大の長所はどれか？",
-    options: [
+    "id": 601,
+    "category": "data_struct",
+    "categoryName": "データ構造",
+    "importance": "★★★",
+    "summary": "キュー ＝ レジの行列、先入れ先出し（FIFO）",
+    "question": "「先に入れたデータが最初に取り出される（FIFO：First-In First-Out）」データ構造はどれか？",
+    "options": [
+      "キュー（Queue / 待ち行列）",
+      "スタック（Stack）",
+      "木構造（Tree）",
+      "ヒープ（Heap）"
+    ],
+    "answer": 0,
+    "reasoning": "ラーメン屋やテーマパークの『行列（Queue）』を思い出してください。先に来て並んだ人から順番に店内に入れます。プリンターの印刷待ちや、OSのタスク処理など、順番待ちの処理はすべてキューです。",
+    "tip": "キュー＝行列（FIFO）、スタック＝積まれた本（LIFO）。"
+  },
+  {
+    "id": 602,
+    "category": "data_struct",
+    "categoryName": "データ構造",
+    "importance": "★★★",
+    "summary": "連結リスト ＝ ポインタ繋ぎ変えで途中の挿入・削除が高速",
+    "question": "「配列（Array）」と比較したときの「連結リスト（Linked List）」の最大の長所はどれか？",
+    "options": [
       "データの途中の挿入や削除が、ポインタの繋ぎ変えだけで高速に行える",
       "指定したインデックス（何番目か）のデータへ瞬時にアクセスできる",
       "メモリ使用量が配列よりも常に少なくて済む",
       "データが自動的に昇順にソートされる"
     ],
-    answer: 0,
-    reasoning: "配列は『下駄箱』です。10番目の下駄箱は一瞬で開けられますが、3番目に靴をねじ込むには4番目以降の靴を全員1個ずつ横にずらす大工事が必要です。一方、連結リストは『電車の連結』です。途中に新しい車両を挟むときは、鎖（ポインタ）をカチャッと繋ぎ直すだけで一瞬で終わります。",
-    tip: "【配列】参照が速い（O(1)）、挿入削除が遅い。\n【連結リスト】挿入削除が速い（O(1)）、参照が遅い。"
+    "answer": 0,
+    "reasoning": "配列は『下駄箱』です。10番目の下駄箱は一瞬で開けられますが、3番目に靴をねじ込むには4番目以降の靴を全員1個ずつ横にずらす大工事が必要です。一方、連結リストは『電車の連結』です。途中に新しい車両を挟むときは、鎖（ポインタ）をカチャッと繋ぎ直すだけで一瞬で終わります。",
+    "tip": "【配列】参照が速い（O(1)）、挿入削除が遅い。\n【連結リスト】挿入削除が速い（O(1)）、参照が遅い。"
   },
   {
-    id: 603, category: "data_struct", categoryName: "データ構造", importance: "★★☆",
-    summary: "2分探索木 ＝ 「左の子 ＜ 親 ＜ 右の子」の大小ルール",
-    question: "2分探索木（Binary Search Tree）のノード配置ルールとして正しいものはどれか？",
-    options: [
+    "id": 603,
+    "category": "data_struct",
+    "categoryName": "データ構造",
+    "importance": "★★☆",
+    "summary": "2分探索木 ＝ 「左の子 ＜ 親 ＜ 右の子」の大小ルール",
+    "question": "2分探索木（Binary Search Tree）のノード配置ルールとして正しいものはどれか？",
+    "options": [
       "左の子の値は親より小さく、右の子の値は親より大きい",
       "左の子の値は親より大きく、右の子の値は親より小さい",
       "左右の子の値の合計が必ず親の値と等しい",
       "すべての葉ノードの深さが完全に一致している"
     ],
-    answer: 0,
-    reasoning: "国語辞書のように『真ん中の親より小さければ左へ、大きければ右へ』と整理されている木構造です。このルールのおかげで、1回下りるごとに候補を半分に絞り込めます。",
-    tip: "『左＜親＜右』。この順でなぞる（通りがけ順巡回）と、データが小さい順（昇順）に並びます。"
+    "answer": 0,
+    "reasoning": "国語辞書のように『真ん中の親より小さければ左へ、大きければ右へ』と整理されている木構造です。このルールのおかげで、1回下りるごとに候補を半分に絞り込めます。",
+    "tip": "『左＜親＜右』。この順でなぞる（通りがけ順巡回）と、データが小さい順（昇順）に並びます。"
   },
   {
-    id: 604, category: "data_struct", categoryName: "データ構造", importance: "★★☆",
-    summary: "リングバッファのポインタ更新 ＝ 剰余演算 (p + 1) % 容量",
-    question: "配列を用いてキューを実現する「リングバッファ」において、末尾ポインタ tail を1つ進めて配列の端で先頭へ循環させる計算式はどれか？（※配列の長さを N とする）",
-    options: [
+    "id": 604,
+    "category": "data_struct",
+    "categoryName": "データ構造",
+    "importance": "★★☆",
+    "summary": "リングバッファのポインタ更新 ＝ 剰余演算 (p + 1) % 容量",
+    "question": "配列を用いてキューを実現する「リングバッファ」において、末尾ポインタ tail を1つ進めて配列の端で先頭へ循環させる計算式はどれか？（※配列の長さを N とする）",
+    "options": [
       "(tail + 1) % N",
       "(tail + 1) / N",
       "tail + 1 - N",
       "(tail * 2) % N"
     ],
-    answer: 0,
-    reasoning: "時計の文字盤を想像してください！12時の次は1時に戻りますよね。例えば長さN=5の配列なら、添字は 0, 1, 2, 3, 4 です。4の次に1足すと5になりますが、『5 % 5 = 0』とあまりを計算することで自動的に0（先頭）にクルッと戻って循環できます。",
-    tip: "『円環・ループ・循環』と来たらあまり（%）を使う式を選びましょう！"
+    "answer": 0,
+    "reasoning": "時計の文字盤を想像してください！12時の次は1時に戻りますよね。例えば長さN=5の配列なら、添字は 0, 1, 2, 3, 4 です。4の次に1足すと5になりますが、『5 % 5 = 0』とあまりを計算することで自動的に0（先頭）にクルッと戻って循環できます。",
+    "tip": "『円環・ループ・循環』と来たらあまり（%）を使う式を選びましょう！"
   },
   {
-    id: 605, category: "data_struct", categoryName: "データ構造", importance: "★★☆",
-    summary: "ヒープ木 ＝ 「親 ≦ 子」または「親 ≧ 子」で最小値・最大値が根に来る",
-    question: "「ヒープ（Heap）」と呼ばれるデータ構造の特徴として、正しいものはどれか？",
-    options: [
+    "id": 605,
+    "category": "data_struct",
+    "categoryName": "データ構造",
+    "importance": "★★☆",
+    "summary": "ヒープ木 ＝ 「親 ≦ 子」または「親 ≧ 子」で最小値・最大値が根に来る",
+    "question": "「ヒープ（Heap）」と呼ばれるデータ構造の特徴として、正しいものはどれか？",
+    "options": [
       "親ノードの値が常に子ノードの値以上（または以下）であり、根（先頭）に常に最大値（または最小値）が位置する",
       "すべてのデータが昇順に一直線の数珠つなぎで並んでいる",
       "データの探索時間がデータ数に関わらず常に O(1) である",
       "最後に入れたデータから先に取り出す後入れ先出し構造である"
     ],
-    answer: 0,
-    reasoning: "会社の組織図をイメージしてください！社長（根）が一番偉く、どの部署でも『上司 ≧ 部下』というルールだけが守られています（左の部下と右の部下のどちらが偉いかは気にしない）。このため、全社員の中で『一番偉い人（最大値）』を1秒で呼び出せます。優先度付きキューなどに使われます。",
-    tip: "『根に最大値または最小値がある』＝ ヒープ。"
-  },
-
-  // 7. 探索法
-  {
-    id: 701, category: "search", categoryName: "探索法", importance: "★★★",
-    summary: "ハッシュ法 ＝ 計算式でロッカー直行、探索時間は O(1)（一定時間）",
-    question: "ハッシュ法（ハッシュ探索）において、理想的な状態でのデータ探索時間（計算量）を表すものはどれか？",
-    options: ["O(1) （データ数に関わらず一定時間）", "O(n) （データ数に比例）", "O(log n) （データ数の対数に比例）", "O(n^2) （データ数の2乗に比例）"],
-    answer: 0,
-    reasoning: "普通は100万件のデータから人を探すとき、端から順に見たり（O(n)）、半分ずつ絞り込んだり（O(log n)）します。しかしハッシュ法は『名前を計算式に入れると、いきなりロッカー番号がズバッと出る』仕組みです。だからデータが10件だろうが10億件だろうが【1発でロッカーに直行して取り出せる（計算量O(1)＝一定時間）】のです！",
-    tip: "『ハッシュ探索の探索時間 ＝ O(1)』は試験の絶対得点源です。"
+    "answer": 0,
+    "reasoning": "会社の組織図をイメージしてください！社長（根）が一番偉く、どの部署でも『上司 ≧ 部下』というルールだけが守られています（左の部下と右の部下のどちらが偉いかは気にしない）。このため、全社員の中で『一番偉い人（最大値）』を1秒で呼び出せます。優先度付きキューなどに使われます。",
+    "tip": "『根に最大値または最小値がある』＝ ヒープ。"
   },
   {
-    id: 702, category: "search", categoryName: "探索法", importance: "★★★",
-    summary: "ハッシュ値が被る事故 ＝ 衝突（シノニム）",
-    question: "ハッシュ法において、異なる2つのデータから偶然同じハッシュ値（格納アドレス）が算出されてしまう現象を何と呼ぶか？",
-    options: ["衝突（コリジョン / シノニムの発生）", "オーバーフロー", "デッドロック", "ページフォルト"],
-    answer: 0,
-    reasoning: "計算した結果、田中さんと佐藤さんが同じ『ロッカー番号42番』になってしまう事故です。この現象を『衝突（Collision）』、同じ値になってしまったデータのことを『シノニム（Synonym）』と呼びます。対策として隣の空きロッカーを探す（オープンアドレス法）や、ロッカー内で数珠繋ぎにする（チェイン法）があります。",
-    tip: "『同一ハッシュ値＝衝突（シノニム）』と結びつけて記憶しましょう。"
+    "id": 701,
+    "category": "search",
+    "categoryName": "探索法",
+    "importance": "★★★",
+    "summary": "ハッシュ法 ＝ 計算式でロッカー直行、探索時間は O(1)（一定時間）",
+    "question": "ハッシュ法（ハッシュ探索）において、理想的な状態でのデータ探索時間（計算量）を表すものはどれか？",
+    "options": [
+      "O(1) （データ数に関わらず一定時間）",
+      "O(n) （データ数に比例）",
+      "O(log n) （データ数の対数に比例）",
+      "O(n^2) （データ数の2乗に比例）"
+    ],
+    "answer": 0,
+    "reasoning": "普通は100万件のデータから人を探すとき、端から順に見たり（O(n)）、半分ずつ絞り込んだり（O(log n)）します。しかしハッシュ法は『名前を計算式に入れると、いきなりロッカー番号がズバッと出る』仕組みです。だからデータが10件だろうが10億件だろうが【1発でロッカーに直行して取り出せる（計算量O(1)＝一定時間）】のです！",
+    "tip": "『ハッシュ探索の探索時間 ＝ O(1)』は試験の絶対得点源です。"
   },
   {
-    id: 703, category: "search", categoryName: "探索法", importance: "★★☆",
-    summary: "2分探索法 ＝ 事前ソート必須、探索時間は O(log n)",
-    question: "2分探索法（バイナリサーチ）を行うための必須条件はどれか？",
-    options: [
+    "id": 702,
+    "category": "search",
+    "categoryName": "探索法",
+    "importance": "★★★",
+    "summary": "ハッシュ値が被る事故 ＝ 衝突（シノニム）",
+    "question": "ハッシュ法において、異なる2つのデータから偶然同じハッシュ値（格納アドレス）が算出されてしまう現象を何と呼ぶか？",
+    "options": [
+      "衝突（コリジョン / シノニムの発生）",
+      "オーバーフロー",
+      "デッドロック",
+      "ページフォルト"
+    ],
+    "answer": 0,
+    "reasoning": "計算した結果、田中さんと佐藤さんが同じ『ロッカー番号42番』になってしまう事故です。この現象を『衝突（Collision）』、同じ値になってしまったデータのことを『シノニム（Synonym）』と呼びます。対策として隣の空きロッカーを探す（オープンアドレス法）や、ロッカー内で数珠繋ぎにする（チェイン法）があります。",
+    "tip": "『同一ハッシュ値＝衝突（シノニム）』と結びつけて記憶しましょう。"
+  },
+  {
+    "id": 703,
+    "category": "search",
+    "categoryName": "探索法",
+    "importance": "★★☆",
+    "summary": "2分探索法 ＝ 事前ソート必須、探索時間は O(log n)",
+    "question": "2分探索法（バイナリサーチ）を行うための必須条件はどれか？",
+    "options": [
       "対象のデータがあらかじめ昇順または降順に整列（ソート）されていること",
       "データ数が2の階乗（2, 4, 8, 16...）であること",
       "データが連結リスト形式で保持されていること",
       "ハッシュ関数が定義されていること"
     ],
-    answer: 0,
-    reasoning: "国語辞書で単語を探すとき、真ん中をパカッと開いて『探したい言葉より前か後ろか』で半分ずつ絞り込みますよね。もし辞書の言葉がバラバラの順序で並んでいたら、真ん中を開いても意味がありません。だから『整列済みであること』が絶対条件です。探索時間は O(log n)。",
-    tip: "『2分探索 ＝ 事前にソート必須 ＝ O(log n)』。"
+    "answer": 0,
+    "reasoning": "国語辞書で単語を探すとき、真ん中をパカッと開いて『探したい言葉より前か後ろか』で半分ずつ絞り込みますよね。もし辞書の言葉がバラバラの順序で並んでいたら、真ん中を開いても意味がありません。だから『整列済みであること』が絶対条件です。探索時間は O(log n)。",
+    "tip": "『2分探索 ＝ 事前にソート必須 ＝ O(log n)』。"
   },
   {
-    id: 704, category: "search", categoryName: "探索法", importance: "★★★",
-    summary: "2分探索の最大探索回数 ＝ log2(データ数) の切り上げ",
-    question: "昇順に整列された1,024件のデータから、2分探索法を用いて目的のデータを探索するとき、最大何回の比較で見つかるか？",
-    options: ["10回", "512回", "1,024回", "20回"],
-    answer: 0,
-    reasoning: "2分探索は1回比較するごとに候補が半分（1/2）になります。\n1024件 $\\rightarrow$ 512 $\\rightarrow$ 256 $\\rightarrow$ 128 $\\rightarrow$ 64 $\\rightarrow$ 32 $\\rightarrow$ 16 $\\rightarrow$ 8 $\\rightarrow$ 4 $\\rightarrow$ 2 $\\rightarrow$ 1件。\n$2^{10} = 1024$ なので、たった10回真ん中を開くだけで、1000件の中から必ず目的のデータが見つかります！",
-    tip: "『2の何乗か』を考えるだけ！$2^{10}=1024$ なので10回。"
-  },
-
-  // 8. プログラムの種類
-  {
-    id: 801, category: "prog_type", categoryName: "言語・プログラム種類", importance: "★★☆",
-    summary: "クライアント(ブラウザ)＝アプレット、サーバー＝サーブレット",
-    question: "Webブラウザ（クライアント側）にダウンロードされ、ブラウザ上で動作するJavaプログラムをかつて何と呼んでいたか？",
-    options: ["Javaアプレット (Java Applet)", "Javaサーブレット (Java Servlet)", "JavaBeans", "Java仮想マシン (JVM)"],
-    answer: 0,
-    reasoning: "名前の対比で一発です！\n• アプレット（Applet = 小さなアプリ）：クライアント（ブラウザ）側で動くJava\n• サーブレット（Servlet = サーバーの小間使い）：サーバー側で動くJava\n現在アプレットはセキュリティ上の理由で廃止されていますが、試験では『クライアント＝アプレット、サーバー＝サーブレット』の知識が問われます。",
-    tip: "『クライアント側 ＝ アプレット』『サーバー側 ＝ サーブレット』で対比暗記！"
+    "id": 704,
+    "category": "search",
+    "categoryName": "探索法",
+    "importance": "★★★",
+    "summary": "2分探索の最大探索回数 ＝ log2(データ数) の切り上げ",
+    "question": "昇順に整列された1,024件のデータから、2分探索法を用いて目的のデータを探索するとき、最大何回の比較で見つかるか？",
+    "options": [
+      "10回",
+      "512回",
+      "1,024回",
+      "20回"
+    ],
+    "answer": 0,
+    "reasoning": "2分探索は1回比較するごとに候補が半分（1/2）になります。\n1024件 $\\rightarrow$ 512 $\\rightarrow$ 256 $\\rightarrow$ 128 $\\rightarrow$ 64 $\\rightarrow$ 32 $\\rightarrow$ 16 $\\rightarrow$ 8 $\\rightarrow$ 4 $\\rightarrow$ 2 $\\rightarrow$ 1件。\n$2^{10} = 1024$ なので、たった10回真ん中を開くだけで、1000件の中から必ず目的のデータが見つかります！",
+    "tip": "『2の何乗か』を考えるだけ！$2^{10}=1024$ なので10回。"
   },
   {
-    id: 802, category: "prog_type", categoryName: "言語・プログラム種類", importance: "★★★",
-    summary: "コンパイラ＝事前一括翻訳(実行が速い)、インタプリタ＝1行ずつ翻訳",
-    question: "ソースコードを実行時に1行ずつ機械語に翻訳しながら動かす「インタプリタ方式」と比較したときの、「コンパイラ方式」の特徴はどれか？",
-    options: [
+    "id": 801,
+    "category": "prog_type",
+    "categoryName": "言語・プログラム種類",
+    "importance": "★★☆",
+    "summary": "クライアント(ブラウザ)＝アプレット、サーバー＝サーブレット",
+    "question": "Webブラウザ（クライアント側）にダウンロードされ、ブラウザ上で動作するJavaプログラムをかつて何と呼んでいたか？",
+    "options": [
+      "Javaアプレット (Java Applet)",
+      "Javaサーブレット (Java Servlet)",
+      "JavaBeans",
+      "Java仮想マシン (JVM)"
+    ],
+    "answer": 0,
+    "reasoning": "名前の対比で一発です！\n• アプレット（Applet = 小さなアプリ）：クライアント（ブラウザ）側で動くJava\n• サーブレット（Servlet = サーバーの小間使い）：サーバー側で動くJava\n現在アプレットはセキュリティ上の理由で廃止されていますが、試験では『クライアント＝アプレット、サーバー＝サーブレット』の知識が問われます。",
+    "tip": "『クライアント側 ＝ アプレット』『サーバー側 ＝ サーブレット』で対比暗記！"
+  },
+  {
+    "id": 802,
+    "category": "prog_type",
+    "categoryName": "言語・プログラム種類",
+    "importance": "★★★",
+    "summary": "コンパイラ＝事前一括翻訳(実行が速い)、インタプリタ＝1行ずつ翻訳",
+    "question": "ソースコードを実行時に1行ずつ機械語に翻訳しながら動かす「インタプリタ方式」と比較したときの、「コンパイラ方式」の特徴はどれか？",
+    "options": [
       "事前にプログラム全体を一括で機械語に翻訳するため、実行速度が非常に高速である",
       "翻訳の手間が不要なため、プログラムの修正・テストが手軽である",
       "OSやCPUの種類に依存せず、どこでも同じ機械語ファイルがそのまま動く",
       "メモリ消費量が常にインタプリタよりも少ない"
     ],
-    answer: 0,
-    reasoning: "文系向けの例え：\n• コンパイラ方式（C言語など）：本を一冊丸ごと事前に『全ページ日本語に完全翻訳出版』してから読む。読むスピードは爆速！\n• インタプリタ方式（Pythonなど）：外国人が隣にいて『1文ずつ同時通訳』してくれる。すぐ試せるが、実行スピードは遅い。",
-    tip: "コンパイラ＝事前一括翻訳（実行が速い）、インタプリタ＝1行ずつ逐次翻訳（実行が遅い、開発手軽）。"
+    "answer": 0,
+    "reasoning": "文系向けの例え：\n• コンパイラ方式（C言語など）：本を一冊丸ごと事前に『全ページ日本語に完全翻訳出版』してから読む。読むスピードは爆速！\n• インタプリタ方式（Pythonなど）：外国人が隣にいて『1文ずつ同時通訳』してくれる。すぐ試せるが、実行スピードは遅い。",
+    "tip": "コンパイラ＝事前一括翻訳（実行が速い）、インタプリタ＝1行ずつ逐次翻訳（実行が遅い、開発手軽）。"
   },
   {
-    id: 803, category: "prog_type", categoryName: "言語・プログラム種類", importance: "★★☆",
-    summary: "JavaはJVM(仮想マシン)があるからどこでも動く",
-    question: "Javaプログラムが「Write Once, Run Anywhere（一度書けばどこでも動く）」を実現できる理由となっているソフトウェアはどれか？",
-    options: ["JVM（Java仮想マシン）", "Webブラウザ", "GCCコンパイラ", "テキストエディタ"],
-    answer: 0,
-    reasoning: "WindowsとMacでは話す言葉（機械語）が違います。Javaは直接WindowsやMac用の機械語にするのではなく、共通の『中間コード（バイトコード）』に変換します。そして各OSの上に置かれた『JVM（通訳マシン）』がその場で自分のOSの言葉に通訳して実行します。",
-    tip: "『Java ＝ 中間コードをJVM（Java仮想マシン）上で動かす』。"
-  },
-
-  // 9. CPUの構成要素
-  {
-    id: 901, category: "cpu", categoryName: "CPUの構成要素", importance: "★★★",
-    summary: "プログラムカウンタ(PC) ＝ 「次に実行する命令」のアドレスを保持",
-    question: "CPU内部のレジスタのうち、「次に実行すべき命令が格納されている主記憶のアドレス」を保持するものはどれか？",
-    options: ["プログラムカウンタ (PC)", "命令レジスタ", "アキュムレータ", "インデックスレジスタ"],
-    answer: 0,
-    reasoning: "文系向けの整理：\n• プログラムカウンタ：しおり・案内役。『次は主記憶の何番地の命令を読めばいいか』の番地メモ。\n• 命令レジスタ：作業机。『今まさに実行している命令そのもの』を広げておく場所。\n• アキュムレータ：計算用の手元メモ。『1+2=3』などの計算途中の数値を置いておく場所。",
-    tip: "『次に実行する命令のアドレス』という文言が出たら100%「プログラムカウンタ」です！"
+    "id": 803,
+    "category": "prog_type",
+    "categoryName": "言語・プログラム種類",
+    "importance": "★★☆",
+    "summary": "JavaはJVM(仮想マシン)があるからどこでも動く",
+    "question": "Javaプログラムが「Write Once, Run Anywhere（一度書けばどこでも動く）」を実現できる理由となっているソフトウェアはどれか？",
+    "options": [
+      "JVM（Java仮想マシン）",
+      "Webブラウザ",
+      "GCCコンパイラ",
+      "テキストエディタ"
+    ],
+    "answer": 0,
+    "reasoning": "WindowsとMacでは話す言葉（機械語）が違います。Javaは直接WindowsやMac用の機械語にするのではなく、共通の『中間コード（バイトコード）』に変換します。そして各OSの上に置かれた『JVM（通訳マシン）』がその場で自分のOSの言葉に通訳して実行します。",
+    "tip": "『Java ＝ 中間コードをJVM（Java仮想マシン）上で動かす』。"
   },
   {
-    id: 902, category: "cpu", categoryName: "CPUの構成要素", importance: "★★★",
-    summary: "キャッシュメモリ ＝ 主記憶より高速なSRAMでCPUを待たせない",
-    question: "CPUと主記憶（メインメモリ）の間に配置され、速度差を埋めるために使われる高速・小容量なメモリはどれか？",
-    options: ["キャッシュメモリ", "仮想メモリ", "フラッシュメモリ", "磁気ディスク"],
-    answer: 0,
-    reasoning: "CPUは頭の回転が爆速（秒速何十億回計算）ですが、主記憶（メインメモリ）は動作がゆっくりです。CPUが主記憶にいちいちデータを取りに行くと待ち時間でサボってしまいます。そこで、よく使うデータをCPUのすぐ隣の爆速メモリ（SRAM）にコピーしておきます。これがキャッシュメモリです。",
-    tip: "キャッシュメモリには高速な『SRAM』が使われます（主記憶はDRAM）。"
+    "id": 901,
+    "category": "cpu",
+    "categoryName": "CPUの構成要素",
+    "importance": "★★★",
+    "summary": "プログラムカウンタ(PC) ＝ 「次に実行する命令」のアドレスを保持",
+    "question": "CPU内部のレジスタのうち、「次に実行すべき命令が格納されている主記憶のアドレス」を保持するものはどれか？",
+    "options": [
+      "プログラムカウンタ (PC)",
+      "命令レジスタ",
+      "アキュムレータ",
+      "インデックスレジスタ"
+    ],
+    "answer": 0,
+    "reasoning": "文系向けの整理：\n• プログラムカウンタ：しおり・案内役。『次は主記憶の何番地の命令を読めばいいか』の番地メモ。\n• 命令レジスタ：作業机。『今まさに実行している命令そのもの』を広げておく場所。\n• アキュムレータ：計算用の手元メモ。『1+2=3』などの計算途中の数値を置いておく場所。",
+    "tip": "『次に実行する命令のアドレス』という文言が出たら100%「プログラムカウンタ」です！"
   },
   {
-    id: 903, category: "cpu", categoryName: "CPUの構成要素", importance: "★★☆",
-    summary: "パイプライン処理 ＝ 洗濯機と乾燥機のように工程をずらして並列実行",
-    question: "CPUの高速化技術である「命令パイプライン処理」の説明として、最も適切なものはどれか？",
-    options: [
+    "id": 902,
+    "category": "cpu",
+    "categoryName": "CPUの構成要素",
+    "importance": "★★★",
+    "summary": "キャッシュメモリ ＝ 主記憶より高速なSRAMでCPUを待たせない",
+    "question": "CPUと主記憶（メインメモリ）の間に配置され、速度差を埋めるために使われる高速・小容量なメモリはどれか？",
+    "options": [
+      "キャッシュメモリ",
+      "仮想メモリ",
+      "フラッシュメモリ",
+      "磁気ディスク"
+    ],
+    "answer": 0,
+    "reasoning": "CPUは頭の回転が爆速（秒速何十億回計算）ですが、主記憶（メインメモリ）は動作がゆっくりです。CPUが主記憶にいちいちデータを取りに行くと待ち時間でサボってしまいます。そこで、よく使うデータをCPUのすぐ隣の爆速メモリ（SRAM）にコピーしておきます。これがキャッシュメモリです。",
+    "tip": "キャッシュメモリには高速な『SRAM』が使われます（主記憶はDRAM）。"
+  },
+  {
+    "id": 903,
+    "category": "cpu",
+    "categoryName": "CPUの構成要素",
+    "importance": "★★☆",
+    "summary": "パイプライン処理 ＝ 洗濯機と乾燥機のように工程をずらして並列実行",
+    "question": "CPUの高速化技術である「命令パイプライン処理」の説明として、最も適切なものはどれか？",
+    "options": [
       "命令の実行プロセス（読出・解読・実行など）を複数段階に分け、複数の命令を少しずつずらして並行実行する",
       "複数のCPUコアを搭載して、まったく別のプログラムを同時に動かす",
       "よく使う命令をハードウェア回路に直接焼き付けて、1クロックで実行する",
       "クロック周波数を2倍に引き上げることで、すべての命令を2倍の速度で処理する"
     ],
-    answer: 0,
-    reasoning: "コインランドリーを想像してください！1人目が『洗濯』を終えて『乾燥機』に移ったら、2人目はもう空いた『洗濯機』を使っていいですよね。1人目の乾燥が終わるまで2人目が外で待つのは無駄です。命令も『取出し → 解読 → 実行』のステージをずらしながら同時進行するのがパイプラインです。",
-    tip: "『段階（ステージ）に分けてずらしながら並行処理』＝ パイプライン。"
+    "answer": 0,
+    "reasoning": "コインランドリーを想像してください！1人目が『洗濯』を終えて『乾燥機』に移ったら、2人目はもう空いた『洗濯機』を使っていいですよね。1人目の乾燥が終わるまで2人目が外で待つのは無駄です。命令も『取出し → 解読 → 実行』のステージをずらしながら同時進行するのがパイプラインです。",
+    "tip": "『段階（ステージ）に分けてずらしながら並行処理』＝ パイプライン。"
   },
   {
-    id: 904, category: "cpu", categoryName: "CPUの構成要素", importance: "★★★",
-    summary: "実効アクセス時間 ＝ ヒット率×キャッシュ時間 ＋ (1-ヒット率)×主記憶時間",
-    question: "キャッシュメモリのアクセス時間が10ナノ秒、主記憶のアクセス時間が60ナノ秒、キャッシュヒット率が80%のとき、実効アクセス時間は何ナノ秒か？",
-    options: ["20ナノ秒", "15ナノ秒", "50ナノ秒", "70ナノ秒"],
-    answer: 0,
-    reasoning: "期待値の計算です！\n• 80%（0.8）の確率で、爆速キャッシュ（10ns）で見つかる $\\rightarrow 10 \\times 0.8 = 8$ns\n• 残り20%（0.2）の確率で、低速な主記憶（60ns）まで取りに行く $\\rightarrow 60 \\times 0.2 = 12$ns\n足し合わせると：$8 + 12 = 20$ナノ秒になります！",
-    tip: "『(キャッシュ時間 × ヒット率) ＋ (主記憶時間 × 空振り率)』。公式丸暗記で点取り問題です。"
-  },
-
-  // 10. OS・記憶管理
-  {
-    id: 1001, category: "os_memory", categoryName: "OS・記憶管理", importance: "★★★",
-    summary: "ページフォルト ＝ 主記憶にないページをアクセスした時の割り込み",
-    question: "仮想記憶管理の「ページング方式」において、プログラムがアクセスしたページが主記憶上に存在しない場合に発生する事象はどれか？",
-    options: ["ページフォルト", "スラッシング", "セグメンテーション違反", "デッドロック"],
-    answer: 0,
-    reasoning: "仮想記憶では、プログラム全体ではなく『今必要な部分（ページ）』だけを主記憶に置いて動かします。本を読んでいて『あ、このページは本棚（HDD/SSD）に置いたままだ！』と気づいた瞬間が『ページフォルト』です。OSは一旦処理を止め、本棚から主記憶へページを読み込みます（ページイン）。",
-    tip: "『主記憶に目的のページがない！』＝ ページフォルト。"
+    "id": 904,
+    "category": "cpu",
+    "categoryName": "CPUの構成要素",
+    "importance": "★★★",
+    "summary": "実効アクセス時間 ＝ ヒット率×キャッシュ時間 ＋ (1-ヒット率)×主記憶時間",
+    "question": "キャッシュメモリのアクセス時間が10ナノ秒、主記憶のアクセス時間が60ナノ秒、キャッシュヒット率が80%のとき、実効アクセス時間は何ナノ秒か？",
+    "options": [
+      "20ナノ秒",
+      "15ナノ秒",
+      "50ナノ秒",
+      "70ナノ秒"
+    ],
+    "answer": 0,
+    "reasoning": "期待値の計算です！\n• 80%（0.8）の確率で、爆速キャッシュ（10ns）で見つかる $\\rightarrow 10 \\times 0.8 = 8$ns\n• 残り20%（0.2）の確率で、低速な主記憶（60ns）まで取りに行く $\\rightarrow 60 \\times 0.2 = 12$ns\n足し合わせると：$8 + 12 = 20$ナノ秒になります！",
+    "tip": "『(キャッシュ時間 × ヒット率) ＋ (主記憶時間 × 空振り率)』。公式丸暗記で点取り問題です。"
   },
   {
-    id: 1002, category: "os_memory", categoryName: "OS・記憶管理", importance: "★★★",
-    summary: "スラッシング ＝ メモリ不足でページ入替ばかりになりパソコンが激重に",
-    question: "仮想記憶システムにおいて、主記憶の容量不足が原因でページの入れ替え（ページイン・ページアウト）が頻発し、CPU利用率が極端に低下する現象を何と呼ぶか？",
-    options: ["スラッシング", "フラグメンテーション", "スワッピング", "オーバーフロー"],
-    answer: 0,
-    reasoning: "机（主記憶）が狭すぎるのに大量の教科書を広げようとして、『Aをしまう → Bを出す → すぐAが必要になってBをしまう → Aを出す』という本の出し入れだけで1日が終わってしまう状態です。CPUが計算する暇がなくなり、パソコンが固まります。",
-    tip: "『ページ置換が頻発して処理が進まない』＝ スラッシング。対策は主記憶（物理メモリ）の増設！"
+    "id": 1001,
+    "category": "os_memory",
+    "categoryName": "OS・記憶管理",
+    "importance": "★★★",
+    "summary": "ページフォルト ＝ 主記憶にないページをアクセスした時の割り込み",
+    "question": "仮想記憶管理の「ページング方式」において、プログラムがアクセスしたページが主記憶上に存在しない場合に発生する事象はどれか？",
+    "options": [
+      "ページフォルト",
+      "スラッシング",
+      "セグメンテーション違反",
+      "デッドロック"
+    ],
+    "answer": 0,
+    "reasoning": "仮想記憶では、プログラム全体ではなく『今必要な部分（ページ）』だけを主記憶に置いて動かします。本を読んでいて『あ、このページは本棚（HDD/SSD）に置いたままだ！』と気づいた瞬間が『ページフォルト』です。OSは一旦処理を止め、本棚から主記憶へページを読み込みます（ページイン）。",
+    "tip": "『主記憶に目的のページがない！』＝ ページフォルト。"
   },
   {
-    id: 1003, category: "os_memory", categoryName: "OS・記憶管理", importance: "★★☆",
-    summary: "フラグメンテーション ＝ メモリやディスクの「細切れ（断片化）」",
-    question: "メモリの獲得と解放を繰り返すことで、使用可能な空き領域が細切れになり、合計サイズは足りているのに連続したメモリが確保できなくなる現象はどれか？",
-    options: ["フラグメンテーション（断片化）", "ページフォールト", "スラッシング", "バンク切り替え"],
-    answer: 0,
-    reasoning: "駐車場で例えると、車が出入りした結果『1台分の空きスペースがあちこちにポツポツ散らばっている』状態です。全部合わせれば大型バス（大きなプログラム）を止められる広さがあるのに、連続していないのでバスが止められません。この細切れ状態を直すお掃除を『メモリコンパクション（デフラグ）』と呼びます。",
-    tip: "『空き領域の細切れ・断片化』＝ フラグメンテーション。"
+    "id": 1002,
+    "category": "os_memory",
+    "categoryName": "OS・記憶管理",
+    "importance": "★★★",
+    "summary": "スラッシング ＝ メモリ不足でページ入替ばかりになりパソコンが激重に",
+    "question": "仮想記憶システムにおいて、主記憶の容量不足が原因でページの入れ替え（ページイン・ページアウト）が頻発し、CPU利用率が極端に低下する現象を何と呼ぶか？",
+    "options": [
+      "スラッシング",
+      "フラグメンテーション",
+      "スワッピング",
+      "オーバーフロー"
+    ],
+    "answer": 0,
+    "reasoning": "机（主記憶）が狭すぎるのに大量の教科書を広げようとして、『Aをしまう → Bを出す → すぐAが必要になってBをしまう → Aを出す』という本の出し入れだけで1日が終わってしまう状態です。CPUが計算する暇がなくなり、パソコンが固まります。",
+    "tip": "『ページ置換が頻発して処理が進まない』＝ スラッシング。対策は主記憶（物理メモリ）の増設！"
   },
   {
-    id: 1004, category: "os_memory", categoryName: "OS・記憶管理", importance: "★★★",
-    summary: "LRU ＝ 「最も長い間使われていない」ページを追い出す方式",
-    question: "仮想記憶のページ置換アルゴリズムのうち、「最後に参照されてから最も長い時間が経過しているページを主記憶から追い出す」方式はどれか？",
-    options: ["LRU (Least Recently Used)", "FIFO (First-In First-Out)", "LFU (Least Frequently Used)", "ランダム方式"],
-    answer: 0,
-    reasoning: "クローゼットの断捨離です！『最後に着てから一番長いこと放置されている服（LRU）』を捨てるのが一番合理的ですよね。\n対比：\n• FIFO：一番最初に入れたページから順に捨てる（よく使う服でも古ければ捨ててしまう欠点あり）\n• LFU：参照回数が一番少ないページを捨てる",
-    tip: "『最後に参照されてから最も時間が経過』＝ LRU。"
-  },
-
-  // 11. ディレクトリ・パス
-  {
-    id: 1101, category: "directory", categoryName: "ディレクトリ・パス", importance: "★★★",
-    summary: "「.」＝今ここ、「..」＝1つ上。「/」から始まるのが絶対パス",
-    question: "カレントディレクトリが `/A/B` のとき、相対パス `../C/file.txt` が指すファイルの絶対パスはどれか？",
-    options: ["/A/C/file.txt", "/A/B/C/file.txt", "/C/file.txt", "/A/B/../file.txt"],
-    answer: 0,
-    reasoning: "文系が絶対に迷わないスゴロク解法：\n1. 今いる場所は `/A/B`（Aフォルダの中のB部屋）です。\n2. `..` は『1つ上の階層（親フォルダ）に戻る』合図です。`/A/B` から1つ上に戻ると `/A` に着きます。\n3. そこから `/C/file.txt` に進むので、最終的な場所は `/A/C/file.txt` です！",
-    tip: "『.. が出てきたら、今いるフォルダを後ろから1つ消す』！\n`/A/B` ＋ `..` ＝ `/A`。そこに `/C/file.txt` をくっつけるだけ！"
+    "id": 1003,
+    "category": "os_memory",
+    "categoryName": "OS・記憶管理",
+    "importance": "★★☆",
+    "summary": "フラグメンテーション ＝ メモリやディスクの「細切れ（断片化）」",
+    "question": "メモリの獲得と解放を繰り返すことで、使用可能な空き領域が細切れになり、合計サイズは足りているのに連続したメモリが確保できなくなる現象はどれか？",
+    "options": [
+      "フラグメンテーション（断片化）",
+      "ページフォールト",
+      "スラッシング",
+      "バンク切り替え"
+    ],
+    "answer": 0,
+    "reasoning": "駐車場で例えると、車が出入りした結果『1台分の空きスペースがあちこちにポツポツ散らばっている』状態です。全部合わせれば大型バス（大きなプログラム）を止められる広さがあるのに、連続していないのでバスが止められません。この細切れ状態を直すお掃除を『メモリコンパクション（デフラグ）』と呼びます。",
+    "tip": "『空き領域の細切れ・断片化』＝ フラグメンテーション。"
   },
   {
-    id: 1102, category: "directory", categoryName: "ディレクトリ・パス", importance: "★★☆",
-    summary: "絶対パス ＝ ルート(/)からの完全住所、相対パス ＝ 今の場所からの案内",
-    question: "ファイルシステムのパス指定において、「絶対パス（フルパス）」の説明として正しいものはどれか？",
-    options: [
+    "id": 1004,
+    "category": "os_memory",
+    "categoryName": "OS・記憶管理",
+    "importance": "★★★",
+    "summary": "LRU ＝ 「最も長い間使われていない」ページを追い出す方式",
+    "question": "仮想記憶のページ置換アルゴリズムのうち、「最後に参照されてから最も長い時間が経過しているページを主記憶から追い出す」方式はどれか？",
+    "options": [
+      "LRU (Least Recently Used)",
+      "FIFO (First-In First-Out)",
+      "LFU (Least Frequently Used)",
+      "ランダム方式"
+    ],
+    "answer": 0,
+    "reasoning": "クローゼットの断捨離です！『最後に着てから一番長いこと放置されている服（LRU）』を捨てるのが一番合理的ですよね。\n対比：\n• FIFO：一番最初に入れたページから順に捨てる（よく使う服でも古ければ捨ててしまう欠点あり）\n• LFU：参照回数が一番少ないページを捨てる",
+    "tip": "『最後に参照されてから最も時間が経過』＝ LRU。"
+  },
+  {
+    "id": 1101,
+    "category": "directory",
+    "categoryName": "ディレクトリ・パス",
+    "importance": "★★★",
+    "summary": "「.」＝今ここ、「..」＝1つ上。「/」から始まるのが絶対パス",
+    "question": "カレントディレクトリが `/A/B` のとき、相対パス `../C/file.txt` が指すファイルの絶対パスはどれか？",
+    "options": [
+      "/A/C/file.txt",
+      "/A/B/C/file.txt",
+      "/C/file.txt",
+      "/A/B/../file.txt"
+    ],
+    "answer": 0,
+    "reasoning": "文系が絶対に迷わないスゴロク解法：\n1. 今いる場所は `/A/B`（Aフォルダの中のB部屋）です。\n2. `..` は『1つ上の階層（親フォルダ）に戻る』合図です。`/A/B` から1つ上に戻ると `/A` に着きます。\n3. そこから `/C/file.txt` に進むので、最終的な場所は `/A/C/file.txt` です！",
+    "tip": "『.. が出てきたら、今いるフォルダを後ろから1つ消す』！\n`/A/B` ＋ `..` ＝ `/A`。そこに `/C/file.txt` をくっつけるだけ！"
+  },
+  {
+    "id": 1102,
+    "category": "directory",
+    "categoryName": "ディレクトリ・パス",
+    "importance": "★★☆",
+    "summary": "絶対パス ＝ ルート(/)からの完全住所、相対パス ＝ 今の場所からの案内",
+    "question": "ファイルシステムのパス指定において、「絶対パス（フルパス）」の説明として正しいものはどれか？",
+    "options": [
       "最上位の階層であるルートディレクトリを起点として、ファイルまでの経路を表記したもの",
       "現在作業しているカレントディレクトリを起点として、ファイルまでの経路を表記したもの",
       "ファイルが存在するディスクの物理的なセクタ番号を直接指定したもの",
       "インターネット上のURL形式（http://〜）で記述されたパスのこと"
     ],
-    answer: 0,
-    reasoning: "手紙の住所で例えられます：\n• 絶対パス：『日本国 東京都 千代田区 1丁目...』と地球上の誰が見ても一意にわかる書き方（ルート `/` から書く）。\n• 相対パス：『右に曲がって2軒目の家』と今自分がいる場所を知らないと辿り着けない書き方。",
-    tip: "先頭にスラッシュ（`/`）やドライブレター（`C:\\`）があるのが絶対パスです。"
+    "answer": 0,
+    "reasoning": "手紙の住所で例えられます：\n• 絶対パス：『日本国 東京都 千代田区 1丁目...』と地球上の誰が見ても一意にわかる書き方（ルート `/` から書く）。\n• 相対パス：『右に曲がって2軒目の家』と今自分がいる場所を知らないと辿り着けない書き方。",
+    "tip": "先頭にスラッシュ（`/`）やドライブレター（`C:\\`）があるのが絶対パスです。"
   },
   {
-    id: 1103, category: "directory", categoryName: "ディレクトリ・パス", importance: "★★★",
-    summary: "2階層戻るときは「../../」と書く",
-    question: "カレントディレクトリが `/A/B/C` のとき、`/A/D/file.txt` を指す相対パスはどれか？",
-    options: ["../../D/file.txt", "../D/file.txt", "../../../D/file.txt", "/D/file.txt"],
-    answer: 0,
-    reasoning: "逆引きパズルです！\n1. 今いる場所は `/A/B/C` です。\n2. 目指す場所は `/A/D/file.txt` です（共通している親は `/A`）。\n3. `/A/B/C` から `/A` に戻るには、`C` を抜けて（1回）、さらに `B` を抜ける（2回）必要があります。\n4. 2回戻るので `../../` となり、そこから `D/file.txt` へ向かうので `../../D/file.txt` です！",
-    tip: "戻りたいフォルダの階層数だけ `../` を重ねます。"
+    "id": 1103,
+    "category": "directory",
+    "categoryName": "ディレクトリ・パス",
+    "importance": "★★★",
+    "summary": "2階層戻るときは「../../」と書く",
+    "question": "カレントディレクトリが `/A/B/C` のとき、`/A/D/file.txt` を指す相対パスはどれか？",
+    "options": [
+      "../../D/file.txt",
+      "../D/file.txt",
+      "../../../D/file.txt",
+      "/D/file.txt"
+    ],
+    "answer": 0,
+    "reasoning": "逆引きパズルです！\n1. 今いる場所は `/A/B/C` です。\n2. 目指す場所は `/A/D/file.txt` です（共通している親は `/A`）。\n3. `/A/B/C` から `/A` に戻るには、`C` を抜けて（1回）、さらに `B` を抜ける（2回）必要があります。\n4. 2回戻るので `../../` となり、そこから `D/file.txt` へ向かうので `../../D/file.txt` です！",
+    "tip": "戻りたいフォルダの階層数だけ `../` を重ねます。"
   },
-
-  // 12. ハードウェア・メモリ
   {
-    id: 1201, category: "hardware", categoryName: "ハードウェア・メモリ", importance: "★★★",
-    summary: "SRAM＝高速・高価(キャッシュ)、DRAM＝安価・リフレッシュ要(主記憶)",
-    question: "主記憶（メインメモリ）に広く使われるDRAMの特徴として、最も適切なものはどれか？",
-    options: [
+    "id": 1201,
+    "category": "hardware",
+    "categoryName": "ハードウェア・メモリ",
+    "importance": "★★★",
+    "summary": "SRAM＝高速・高価(キャッシュ)、DRAM＝安価・リフレッシュ要(主記憶)",
+    "question": "主記憶（メインメモリ）に広く使われるDRAMの特徴として、最も適切なものはどれか？",
+    "options": [
       "コンデンサに電荷を蓄える構造で、時間が経つと放電するため定期的な再書き込み（リフレッシュ）が必要である",
       "フリップフロップ回路で構成され、リフレッシュ動作が不要で非常に高速である",
       "電源を切ってもデータが消えない不揮発性メモリである",
       "紫外線や強い電圧を当てることで、データを一括消去できるROMの一種である"
     ],
-    answer: 0,
-    reasoning: "メモリ対決（試験の超頻出）：\n• DRAM（主記憶）：コンデンサ（小さなバケツ）に電気を溜める。バケツに穴が空いていて漏れるので、定期的に水を汲み直す作業（リフレッシュ）が必要。構造がシンプルなので大容量で安い！\n• SRAM（キャッシュ）：スイッチ（フリップフロップ）で電気を保持。漏れないのでリフレッシュ不要で爆速。ただし部品が多くて高い！",
-    tip: "『DRAM ＝ リフレッシュ必要 ＝ 主記憶』『SRAM ＝ 高速・リフレッシュ不要 ＝ キャッシュ』。"
+    "answer": 0,
+    "reasoning": "メモリ対決（試験の超頻出）：\n• DRAM（主記憶）：コンデンサ（小さなバケツ）に電気を溜める。バケツに穴が空いていて漏れるので、定期的に水を汲み直す作業（リフレッシュ）が必要。構造がシンプルなので大容量で安い！\n• SRAM（キャッシュ）：スイッチ（フリップフロップ）で電気を保持。漏れないのでリフレッシュ不要で爆速。ただし部品が多くて高い！",
+    "tip": "『DRAM ＝ リフレッシュ必要 ＝ 主記憶』『SRAM ＝ 高速・リフレッシュ不要 ＝ キャッシュ』。"
   },
   {
-    id: 1202, category: "hardware", categoryName: "ハードウェア・メモリ", importance: "★★★",
-    summary: "RAID 0=ストライピング(分散書き込み高速化)、RAID 1=ミラーリング(二重化安全)",
-    question: "複数のハードディスクにデータを分散して並行して書き込むことで、読み書き速度を向上させるRAIDの構成方式はどれか？",
-    options: ["RAID 0（ストライピング）", "RAID 1（ミラーリング）", "RAID 5（パリティ分散）", "RAID 6"],
-    answer: 0,
-    reasoning: "RAIDの3大構成：\n• RAID 0（ストライピング）：1つのデータを細切れにして2台のHDDに同時に書き込む。速さは2倍！ただし片方壊れたら全滅（安全性ゼロなので数字もゼロ）。\n• RAID 1（ミラーリング）：2台に全く同じ内容をコピー（鏡）。1台壊れても無事。\n• RAID 5：データ＋誤り訂正パリティを3台以上に分散。1台壊れても復元可能で容量効率も良い一番人気！",
-    tip: "『RAID 0 ＝ 速さ優先（冗長性なし）』『RAID 1 ＝ 鏡（二重化）』『RAID 5 ＝ パリティ分散』。"
+    "id": 1202,
+    "category": "hardware",
+    "categoryName": "ハードウェア・メモリ",
+    "importance": "★★★",
+    "summary": "RAID 0=ストライピング(分散書き込み高速化)、RAID 1=ミラーリング(二重化安全)",
+    "question": "複数のハードディスクにデータを分散して並行して書き込むことで、読み書き速度を向上させるRAIDの構成方式はどれか？",
+    "options": [
+      "RAID 0（ストライピング）",
+      "RAID 1（ミラーリング）",
+      "RAID 5（パリティ分散）",
+      "RAID 6"
+    ],
+    "answer": 0,
+    "reasoning": "RAIDの3大構成：\n• RAID 0（ストライピング）：1つのデータを細切れにして2台のHDDに同時に書き込む。速さは2倍！ただし片方壊れたら全滅（安全性ゼロなので数字もゼロ）。\n• RAID 1（ミラーリング）：2台に全く同じ内容をコピー（鏡）。1台壊れても無事。\n• RAID 5：データ＋誤り訂正パリティを3台以上に分散。1台壊れても復元可能で容量効率も良い一番人気！",
+    "tip": "『RAID 0 ＝ 速さ優先（冗長性なし）』『RAID 1 ＝ 鏡（二重化）』『RAID 5 ＝ パリティ分散』。"
   },
   {
-    id: 1203, category: "hardware", categoryName: "ハードウェア・メモリ", importance: "★★☆",
-    summary: "フラッシュメモリ ＝ 電気が切れても消えない（SSD/USBメモリ）",
-    question: "USBメモリやSSDに採用されている、電気的に内容を書き換え可能で電源を切っても消えない半導体メモリはどれか？",
-    options: ["フラッシュメモリ (Flash EEPROM)", "DRAM", "SRAM", "マスクROM"],
-    answer: 0,
-    reasoning: "RAMは『電源を切ると消える（揮発性）』、ROMは『電源を切っても消えない（不揮発性）』です。フラッシュメモリはROMの進化版で、電気の力でブロック単位でサッと消去・書き換えができます。",
-    tip: "『SSD / USBメモリ ＝ 不揮発性フラッシュメモリ』。"
-  },
-
-  // 13. ユーザビリティ
-  {
-    id: 1301, category: "usability", categoryName: "ユーザビリティ", importance: "★★☆",
-    summary: "ヒューリスティック評価 ＝ 専門家が「経験則・ガイドライン」でチェック",
-    question: "ユーザビリティ評価手法のうち、「UIの専門家が、確立された設計原則（経験則・ガイドライン）に照らし合わせて画面の問題点をチェックする手法」はどれか？",
-    options: ["ヒューリスティック評価", "認知的ウォークスルー", "思考発話法（シンクアウド法）", "ABテスト"],
-    answer: 0,
-    reasoning: "カタカナ3大評価手法の覚え方：\n• ヒューリスティック評価：専門家がチェックリスト（経験則＝ヒューリスティックス）を持って『ここはボタンが見づらいな』と採点する。\n• 認知的ウォークスルー：専門家が『初めて使うお年寄りや初心者』になりきって操作手順を1歩ずつなぞり、迷わないか検証する。\n• 思考発話法：本物の被験者に操作してもらい、『頭に浮かんだ独り言』を声に出してもらう。",
-    tip: "『経験則・ガイドラインに基づいて専門家が評価』＝ ヒューリスティック評価。"
+    "id": 1203,
+    "category": "hardware",
+    "categoryName": "ハードウェア・メモリ",
+    "importance": "★★☆",
+    "summary": "フラッシュメモリ ＝ 電気が切れても消えない（SSD/USBメモリ）",
+    "question": "USBメモリやSSDに採用されている、電気的に内容を書き換え可能で電源を切っても消えない半導体メモリはどれか？",
+    "options": [
+      "フラッシュメモリ (Flash EEPROM)",
+      "DRAM",
+      "SRAM",
+      "マスクROM"
+    ],
+    "answer": 0,
+    "reasoning": "RAMは『電源を切ると消える（揮発性）』、ROMは『電源を切っても消えない（不揮発性）』です。フラッシュメモリはROMの進化版で、電気の力でブロック単位でサッと消去・書き換えができます。",
+    "tip": "『SSD / USBメモリ ＝ 不揮発性フラッシュメモリ』。"
   },
   {
-    id: 1302, category: "usability", categoryName: "ユーザビリティ", importance: "★★☆",
-    summary: "思考発話法 ＝ ユーザーに「思ったことを口に出しながら」操作してもらう",
-    question: "被験者にシステムを操作してもらいながら、考えたことや感じた疑問・戸惑いを声に出して言ってもらう評価手法はどれか？",
-    options: ["思考発話法", "認知的ウォークスルー", "ヒューリスティック評価", "デルファイ法"],
-    answer: 0,
-    reasoning: "ユーザーテストの王道です。『えーと、次どこ押せばいいの？ この赤いボタンかな…』と喋ってもらうことで、どこでつまずいたのか、作り手の意図とユーザーの認識のズレが丸見えになります。",
-    tip: "『頭の中の考えを声に出してもらう』＝ 思考発話法（シンクアウド）。"
+    "id": 1301,
+    "category": "usability",
+    "categoryName": "ユーザビリティ",
+    "importance": "★★☆",
+    "summary": "ヒューリスティック評価 ＝ 専門家が「経験則・ガイドライン」でチェック",
+    "question": "ユーザビリティ評価手法のうち、「UIの専門家が、確立された設計原則（経験則・ガイドライン）に照らし合わせて画面の問題点をチェックする手法」はどれか？",
+    "options": [
+      "ヒューリスティック評価",
+      "認知的ウォークスルー",
+      "思考発話法（シンクアウド法）",
+      "ABテスト"
+    ],
+    "answer": 0,
+    "reasoning": "カタカナ3大評価手法の覚え方：\n• ヒューリスティック評価：専門家がチェックリスト（経験則＝ヒューリスティックス）を持って『ここはボタンが見づらいな』と採点する。\n• 認知的ウォークスルー：専門家が『初めて使うお年寄りや初心者』になりきって操作手順を1歩ずつなぞり、迷わないか検証する。\n• 思考発話法：本物の被験者に操作してもらい、『頭に浮かんだ独り言』を声に出してもらう。",
+    "tip": "『経験則・ガイドラインに基づいて専門家が評価』＝ ヒューリスティック評価。"
   },
   {
-    id: 1303, category: "usability", categoryName: "ユーザビリティ", importance: "★★☆",
-    summary: "認知的ウォークスルー ＝ 専門家が初心者の気持ちになりきって手順を辿る",
-    question: "設計者や専門家が、ユーザーが目標を達成するまでの操作手順を1ステップずつトレースし、「ユーザーはこの操作に気づくか」「迷わず進めるか」を検証する評価手法はどれか？",
-    options: ["認知的ウォークスルー", "思考発話法", "アンケート調査法", "フォーカスグループインタビュー"],
-    answer: 0,
-    reasoning: "『ウォークスルー＝歩いて辿る』。専門家が初心者の視点に憑依して、『画面を開く $\\rightarrow$ ボタンを押す $\\rightarrow$ 入力する』の各ステップでユーザーが正しく理解できるかを机上でシミュレーションします。",
-    tip: "『専門家がユーザーの操作手順をステップごとに追跡・評価』＝ 認知的ウォークスルー。"
-  },
-
-  // 14. マルチメディア技術
-  {
-    id: 1401, category: "multimedia", categoryName: "マルチメディア技術", importance: "★★☆",
-    summary: "JPEG＝非可逆・写真向け、PNG＝可逆・イラスト・透過、SVG＝ベクター",
-    question: "画像ファイル形式のうち、「拡大・縮小しても輪郭がギザギザにならず、Webサイトのアイコンやロゴに適したベクター形式」はどれか？",
-    options: ["SVG", "JPEG", "PNG", "GIF"],
-    answer: 0,
-    reasoning: "画像の2大種類：\n• ラスター画像（JPEG, PNG, GIF）：小さな色のマス目（ドット）の集合。拡大するとモザイクのようにギザギザになる。\n• ベクター画像（SVG）：『ここからここへ線を引く』という計算式（数値データ）で記録。どれだけ巨大に引き伸ばしても絶対に線がぼやけず美しい！",
-    tip: "『ベクター形式・拡大しても劣化しない』＝ SVG。"
+    "id": 1302,
+    "category": "usability",
+    "categoryName": "ユーザビリティ",
+    "importance": "★★☆",
+    "summary": "思考発話法 ＝ ユーザーに「思ったことを口に出しながら」操作してもらう",
+    "question": "被験者にシステムを操作してもらいながら、考えたことや感じた疑問・戸惑いを声に出して言ってもらう評価手法はどれか？",
+    "options": [
+      "思考発話法",
+      "認知的ウォークスルー",
+      "ヒューリスティック評価",
+      "デルファイ法"
+    ],
+    "answer": 0,
+    "reasoning": "ユーザーテストの王道です。『えーと、次どこ押せばいいの？ この赤いボタンかな…』と喋ってもらうことで、どこでつまずいたのか、作り手の意図とユーザーの認識のズレが丸見えになります。",
+    "tip": "『頭の中の考えを声に出してもらう』＝ 思考発話法（シンクアウド）。"
   },
   {
-    id: 1402, category: "multimedia", categoryName: "マルチメディア技術", importance: "★★☆",
-    summary: "サンプリング定理 ＝ 元の音の最高周波数の「2倍以上」の周波数で測る",
-    question: "音などのアナログ信号をデジタル化する際、元の波形を忠実に再現するために必要なサンプリング周波数は、元信号の最大周波数の何倍以上か？（標本化定理）",
-    options: ["2倍以上", "4倍以上", "0.5倍以上", "10倍以上"],
-    answer: 0,
-    reasoning: "波は『上がって下がる』の山と谷のワンセットです。山で1回、谷で1回の最低2回測定ポイントを取らないと、波があったことすら分かりませんよね。だから元の周波数の『最低2倍』の細かさで記録する必要があります。人間の耳に聞こえる限界が20kHzなので、音楽CDは2倍以上の44.1kHzで録音されています。",
-    tip: "『標本化定理（サンプリング定理）＝ 2倍以上』。数字の「2」を暗記！"
+    "id": 1303,
+    "category": "usability",
+    "categoryName": "ユーザビリティ",
+    "importance": "★★☆",
+    "summary": "認知的ウォークスルー ＝ 専門家が初心者の気持ちになりきって手順を辿る",
+    "question": "設計者や専門家が、ユーザーが目標を達成するまでの操作手順を1ステップずつトレースし、「ユーザーはこの操作に気づくか」「迷わず進めるか」を検証する評価手法はどれか？",
+    "options": [
+      "認知的ウォークスルー",
+      "思考発話法",
+      "アンケート調査法",
+      "フォーカスグループインタビュー"
+    ],
+    "answer": 0,
+    "reasoning": "『ウォークスルー＝歩いて辿る』。専門家が初心者の視点に憑依して、『画面を開く $\\rightarrow$ ボタンを押す $\\rightarrow$ 入力する』の各ステップでユーザーが正しく理解できるかを机上でシミュレーションします。",
+    "tip": "『専門家がユーザーの操作手順をステップごとに追跡・評価』＝ 認知的ウォークスルー。"
   },
   {
-    id: 1403, category: "multimedia", categoryName: "マルチメディア技術", importance: "★★☆",
-    summary: "可逆圧縮(PNG)＝元に完全復元可、非可逆圧縮(JPEG)＝人の目に見えない部分を間引く",
-    question: "画像や音声データの圧縮方式における「非可逆圧縮（不可逆圧縮）」の説明として、適切なものはどれか？",
-    options: [
+    "id": 1401,
+    "category": "multimedia",
+    "categoryName": "マルチメディア技術",
+    "importance": "★★☆",
+    "summary": "JPEG＝非可逆・写真向け、PNG＝可逆・イラスト・透過、SVG＝ベクター",
+    "question": "画像ファイル形式のうち、「拡大・縮小しても輪郭がギザギザにならず、Webサイトのアイコンやロゴに適したベクター形式」はどれか？",
+    "options": [
+      "SVG",
+      "JPEG",
+      "PNG",
+      "GIF"
+    ],
+    "answer": 0,
+    "reasoning": "画像の2大種類：\n• ラスター画像（JPEG, PNG, GIF）：小さな色のマス目（ドット）の集合。拡大するとモザイクのようにギザギザになる。\n• ベクター画像（SVG）：『ここからここへ線を引く』という計算式（数値データ）で記録。どれだけ巨大に引き伸ばしても絶対に線がぼやけず美しい！",
+    "tip": "『ベクター形式・拡大しても劣化しない』＝ SVG。"
+  },
+  {
+    "id": 1402,
+    "category": "multimedia",
+    "categoryName": "マルチメディア技術",
+    "importance": "★★☆",
+    "summary": "サンプリング定理 ＝ 元の音の最高周波数の「2倍以上」の周波数で測る",
+    "question": "音などのアナログ信号をデジタル化する際、元の波形を忠実に再現するために必要なサンプリング周波数は、元信号の最大周波数の何倍以上か？（標本化定理）",
+    "options": [
+      "2倍以上",
+      "4倍以上",
+      "0.5倍以上",
+      "10倍以上"
+    ],
+    "answer": 0,
+    "reasoning": "波は『上がって下がる』の山と谷のワンセットです。山で1回、谷で1回の最低2回測定ポイントを取らないと、波があったことすら分かりませんよね。だから元の周波数の『最低2倍』の細かさで記録する必要があります。人間の耳に聞こえる限界が20kHzなので、音楽CDは2倍以上の44.1kHzで録音されています。",
+    "tip": "『標本化定理（サンプリング定理）＝ 2倍以上』。数字の「2」を暗記！"
+  },
+  {
+    "id": 1403,
+    "category": "multimedia",
+    "categoryName": "マルチメディア技術",
+    "importance": "★★☆",
+    "summary": "可逆圧縮(PNG)＝元に完全復元可、非可逆圧縮(JPEG)＝人の目に見えない部分を間引く",
+    "question": "画像や音声データの圧縮方式における「非可逆圧縮（不可逆圧縮）」の説明として、適切なものはどれか？",
+    "options": [
       "人間の知覚しにくい情報を間引いて劇的にデータ量を削減するが、展開しても元のデータとは完全には一致しない",
       "圧縮したデータを展開したときに、圧縮前と完全に同一のデータに復元できる",
       "プログラムや実行ファイルのサイズを小さくするために必須の圧縮方式である",
       "データの出現頻度に応じて異なる長さの符号を割り当てる方式（ハフマン符号化）のこと"
     ],
-    answer: 0,
-    reasoning: "エクセルやプログラム（テキスト）は1文字でも化けたら壊れて動かなくなるので『可逆圧縮（ZIPなど）』が必須です。しかし写真や音楽なら、人間の耳や目に気づかない細かな色・音を少しくらい間引いても人間にはバレません。この思い切った間引きでサイズを1/10にするのが『非可逆圧縮（JPEG, MP3）』です。",
-    tip: "『完全に元に戻せる＝可逆（PNG/ZIP）』『人間が気付かない部分を捨てる＝非可逆（JPEG/MP3）』。"
+    "answer": 0,
+    "reasoning": "エクセルやプログラム（テキスト）は1文字でも化けたら壊れて動かなくなるので『可逆圧縮（ZIPなど）』が必須です。しかし写真や音楽なら、人間の耳や目に気づかない細かな色・音を少しくらい間引いても人間にはバレません。この思い切った間引きでサイズを1/10にするのが『非可逆圧縮（JPEG, MP3）』です。",
+    "tip": "『完全に元に戻せる＝可逆（PNG/ZIP）』『人間が気付かない部分を捨てる＝非可逆（JPEG/MP3）』。"
   },
-
-  // 15. データベース
   {
-    id: 1501, category: "database", categoryName: "データベース", importance: "★★★",
-    summary: "第1正規化 ＝ 繰り返し項目を排除してフラットにする",
-    question: "リレーショナルデータベースの「第1正規化」で行う作業として、正しいものはどれか？",
-    options: [
+    "id": 1501,
+    "category": "database",
+    "categoryName": "データベース",
+    "importance": "★★★",
+    "summary": "第1正規化 ＝ 繰り返し項目を排除してフラットにする",
+    "question": "リレーショナルデータベースの「第1正規化」で行う作業として、正しいものはどれか？",
+    "options": [
       "繰り返し含まれる項目群を排除し、すべての属性値を単一値（スカラ値）にする",
       "主キーの一部に関数従属している項目を別テーブルに分離する",
       "主キー以外の項目に関数従属している項目（推移的関数従属）を分離する",
       "テーブルに主キーと外部キーのインデックスを作成する"
     ],
-    answer: 0,
-    reasoning: "正規化の3段階（文系納得ステップ）：\n• 第1正規化：1つのマス目に『りんご, みかん, バナナ』と複数入っていたりする繰り返しを解消し、1マスに1つの値だけにするフラット化。\n• 第2正規化：主キーが2つセットのとき、片方だけにぶら下がっている項目を別表へ追い出す（部分関数従属の排除）。\n• 第3正規化：主キー以外の他人の項目にぶら下がっている項目を別表へ追い出す（推移的関数従属の排除）。",
-    tip: "第1＝繰り返し排除、第2＝部分関数従属の排除、第3＝推移的関数従属の排除。"
+    "answer": 0,
+    "reasoning": "正規化の3段階（文系納得ステップ）：\n• 第1正規化：1つのマス目に『りんご, みかん, バナナ』と複数入っていたりする繰り返しを解消し、1マスに1つの値だけにするフラット化。\n• 第2正規化：主キーが2つセットのとき、片方だけにぶら下がっている項目を別表へ追い出す（部分関数従属の排除）。\n• 第3正規化：主キー以外の他人の項目にぶら下がっている項目を別表へ追い出す（推移的関数従属の排除）。",
+    "tip": "第1＝繰り返し排除、第2＝部分関数従属の排除、第3＝推移的関数従属の排除。"
   },
   {
-    id: 1502, category: "database", categoryName: "データベース", importance: "★★★",
-    summary: "第2正規化 ＝ 主キーの一部に依存する項目を別表へ（部分関数従属排除）",
-    question: "複合主キー（社員番号＋研修コード）を持つテーブルにおいて、研修コードだけで一意に決まる「研修名」を別テーブルに切り離す正規化はどれか？",
-    options: [
+    "id": 1502,
+    "category": "database",
+    "categoryName": "データベース",
+    "importance": "★★★",
+    "summary": "第2正規化 ＝ 主キーの一部に依存する項目を別表へ（部分関数従属排除）",
+    "question": "複合主キー（社員番号＋研修コード）を持つテーブルにおいて、研修コードだけで一意に決まる「研修名」を別テーブルに切り離す正規化はどれか？",
+    "options": [
       "第2正規化",
       "第1正規化",
       "第3正規化",
       "非正規化"
     ],
-    answer: 0,
-    reasoning: "主キーが『社員番号』と『研修コード』の2人コンビなのに、『研修名』は研修コードさえ分かれば決まりますよね（社員番号は関係ない）。このように主キーの片方にだけぶら下がっている不完全な依存（部分関数従属）を別テーブルに分けるのが『第2正規化』です。",
-    tip: "『主キーの一部に依存（部分関数従属）を分離』＝ 第2正規化。"
+    "answer": 0,
+    "reasoning": "主キーが『社員番号』と『研修コード』の2人コンビなのに、『研修名』は研修コードさえ分かれば決まりますよね（社員番号は関係ない）。このように主キーの片方にだけぶら下がっている不完全な依存（部分関数従属）を別テーブルに分けるのが『第2正規化』です。",
+    "tip": "『主キーの一部に依存（部分関数従属）を分離』＝ 第2正規化。"
   },
   {
-    id: 1503, category: "database", categoryName: "データベース", importance: "★★★",
-    summary: "第3正規化 ＝ 主キー以外の項目に依存する項目を別表へ（推移的関数従属排除）",
-    question: "主キーが「社員番号」のテーブルで、「部署コード」によって決まる「部署名」を別テーブルに切り離す正規化はどれか？",
-    options: [
+    "id": 1503,
+    "category": "database",
+    "categoryName": "データベース",
+    "importance": "★★★",
+    "summary": "第3正規化 ＝ 主キー以外の項目に依存する項目を別表へ（推移的関数従属排除）",
+    "question": "主キーが「社員番号」のテーブルで、「部署コード」によって決まる「部署名」を別テーブルに切り離す正規化はどれか？",
+    "options": [
       "第3正規化",
       "第1正規化",
       "第2正規化",
       "第4正規化"
     ],
-    answer: 0,
-    reasoning: "『社員番号 $\\rightarrow$ 部署コード $\\rightarrow$ 部署名』とドミノ倒しのように伝言ゲームで決まっています。主キーではない部署コードに部署名がぶら下がっている状態（推移的関数従属）を解消し、部署マスタとして別表にするのが『第3正規化』です。",
-    tip: "『主キー以外の項目に依存（推移的関数従属）を分離』＝ 第3正規化。"
+    "answer": 0,
+    "reasoning": "『社員番号 $\\rightarrow$ 部署コード $\\rightarrow$ 部署名』とドミノ倒しのように伝言ゲームで決まっています。主キーではない部署コードに部署名がぶら下がっている状態（推移的関数従属）を解消し、部署マスタとして別表にするのが『第3正規化』です。",
+    "tip": "『主キー以外の項目に依存（推移的関数従属）を分離』＝ 第3正規化。"
   },
   {
-    id: 1504, category: "database", categoryName: "データベース", importance: "★★★",
-    summary: "ACID特性 ＝ データベースの信頼性を保つ4原則（原子性・一貫性・独立性・耐久性）",
-    question: "データベースのトランザクション処理における「原子性（Atomicity）」の説明として、正しいものはどれか？",
-    options: [
+    "id": 1504,
+    "category": "database",
+    "categoryName": "データベース",
+    "importance": "★★★",
+    "summary": "ACID特性 ＝ データベースの信頼性を保つ4原則（原子性・一貫性・独立性・耐久性）",
+    "question": "データベースのトランザクション処理における「原子性（Atomicity）」の説明として、正しいものはどれか？",
+    "options": [
       "トランザクション内の処理は、すべて完全に実行されるか、すべて取り消されるかのどちらか一方のみとなる",
       "トランザクションの完了後、システム障害が発生しても更新結果は失われない",
       "複数のトランザクションを同時に実行しても、順番に実行したときと同じ結果になる",
       "データベースの内容が、あらかじめ定義された制約や整合性を常に満たしている"
     ],
-    answer: 0,
-    reasoning: "銀行の口座振り込み（Aさんから1万円引いて、Bさんに1万円足す）を想像してください。途中で停電が起きて『Aさんのお金だけ減ってBさんに届かない』なんてことが起きたら暴動になりますよね！『やるなら全部やる、ダメなら最初から無かったことにする（All or Nothing）』、これが原子性です。",
-    tip: "原子性(Atomicity)=All or Nothing、一貫性(Consistency)=矛盾なし、独立性(Isolation)=他人に邪魔されない、耐久性(Durability)=消えない。"
+    "answer": 0,
+    "reasoning": "銀行の口座振り込み（Aさんから1万円引いて、Bさんに1万円足す）を想像してください。途中で停電が起きて『Aさんのお金だけ減ってBさんに届かない』なんてことが起きたら暴動になりますよね！『やるなら全部やる、ダメなら最初から無かったことにする（All or Nothing）』、これが原子性です。",
+    "tip": "原子性(Atomicity)=All or Nothing、一貫性(Consistency)=矛盾なし、独立性(Isolation)=他人に邪魔されない、耐久性(Durability)=消えない。"
   },
   {
-    id: 1505, category: "database", categoryName: "データベース", importance: "★★☆",
-    summary: "デッドロック ＝ 互いに相手のロック解除を待ってお見合い停止状態",
-    question: "2つのトランザクションが、互いに相手がロック（専有）している資源の解放を待ち続けてしまい、処理が永久に停止する現象を何と呼ぶか？",
-    options: ["デッドロック", "スラッシング", "ライブロック", "ロールバック"],
-    answer: 0,
-    reasoning: "狭い路地で車同士が鉢合わせして、双方が『お前がバックしろ』と頑なに譲らず、永久に動けなくなってしまうお見合い状態です。OSやDBはこれを検知すると、片方の処理を強制キャンセル（ロールバック）して道を空けます。",
-    tip: "『互いに相手の資源を待って停止』＝ デッドロック。"
+    "id": 1505,
+    "category": "database",
+    "categoryName": "データベース",
+    "importance": "★★☆",
+    "summary": "デッドロック ＝ 互いに相手のロック解除を待ってお見合い停止状態",
+    "question": "2つのトランザクションが、互いに相手がロック（専有）している資源の解放を待ち続けてしまい、処理が永久に停止する現象を何と呼ぶか？",
+    "options": [
+      "デッドロック",
+      "スラッシング",
+      "ライブロック",
+      "ロールバック"
+    ],
+    "answer": 0,
+    "reasoning": "狭い路地で車同士が鉢合わせして、双方が『お前がバックしろ』と頑なに譲らず、永久に動けなくなってしまうお見合い状態です。OSやDBはこれを検知すると、片方の処理を強制キャンセル（ロールバック）して道を空けます。",
+    "tip": "『互いに相手の資源を待って停止』＝ デッドロック。"
   },
   {
-    id: 1506, category: "database", categoryName: "データベース", importance: "★★★",
-    summary: "SQLのWHERE＝グループ化前の絞り込み、HAVING＝GROUP BY集約後の絞り込み",
-    question: "SQLにおいて、「GROUP BY句によってグループ化した集約結果（合計や平均など）」に対して絞り込み条件を指定する句はどれか？",
-    options: ["HAVING", "WHERE", "ORDER BY", "DISTINCT"],
-    answer: 0,
-    reasoning: "文系向け整理：\n• WHERE：元の生データを絞り込む（例: 『東京支社の売上だけを集める』）\n• GROUP BY：支社ごとに集計する（例: 『支社ごとの売上合計を計算』）\n• HAVING：集計した後の結果を絞り込む（例: 『売上合計が1億円以上の支社だけを抽出』）",
-    tip: "『集約関数（SUM, AVG等）の結果に対する条件』＝ HAVING。"
-  },
-
-  // 16. データのチェック方式
-  {
-    id: 1601, category: "data_check", categoryName: "データチェック方式", importance: "★★★",
-    summary: "パリティビット ＝ 1ビットの誤りを「検出」できる（訂正は不可）",
-    question: "「偶数パリティ」を採用した通信において、受信データが `1101001` だった場合、付加されるパリティビットはどれか？",
-    options: ["0", "1", "偶数", "計算不能"],
-    answer: 0,
-    reasoning: "パリティビットは、データ全体の『1の個数』を数えるだけの超カンタンな誤り検出法です。\nデータ `1101001` の中の「1」の個数を数えると… 1が4個あります。4は最初から偶数なので、パリティビットには『0』を付ければ全体で偶数のまま保てます（もし奇数個なら1を付けて偶数にする）。",
-    tip: "偶数パリティ＝1の個数を偶数にする。1ビットの誤りを検出できるが、場所が分からないので『訂正』はできません。"
+    "id": 1506,
+    "category": "database",
+    "categoryName": "データベース",
+    "importance": "★★★",
+    "summary": "SQLのWHERE＝グループ化前の絞り込み、HAVING＝GROUP BY集約後の絞り込み",
+    "question": "SQLにおいて、「GROUP BY句によってグループ化した集約結果（合計や平均など）」に対して絞り込み条件を指定する句はどれか？",
+    "options": [
+      "HAVING",
+      "WHERE",
+      "ORDER BY",
+      "DISTINCT"
+    ],
+    "answer": 0,
+    "reasoning": "文系向け整理：\n• WHERE：元の生データを絞り込む（例: 『東京支社の売上だけを集める』）\n• GROUP BY：支社ごとに集計する（例: 『支社ごとの売上合計を計算』）\n• HAVING：集計した後の結果を絞り込む（例: 『売上合計が1億円以上の支社だけを抽出』）",
+    "tip": "『集約関数（SUM, AVG等）の結果に対する条件』＝ HAVING。"
   },
   {
-    id: 1602, category: "data_check", categoryName: "データチェック方式", importance: "★★★",
-    summary: "ハミング符号 ＝ 1ビットの誤りを「訂正」できる（2ビットは検出）",
-    question: "通信データに検査ビットを付加することで、「1ビットの誤りを自動的に訂正できる」方式はどれか？",
-    options: ["ハミング符号", "パリティ検査", "チェックサム", "CRC（巡回冗長検査）"],
-    answer: 0,
-    reasoning: "パリティビットは『どこかが壊れた』ことしか分かりませんが、ハミング符号は検査ビットを何箇所もクロスさせて埋め込むことで『何番目のビットが壊れたか』まで特定できます。0か1の2進数なので、場所さえ分かれば反転させるだけで自動的に『訂正』できるのです！",
-    tip: "『誤り訂正ができる』と来たら選択肢は「ハミング符号」一択です！"
+    "id": 1601,
+    "category": "data_check",
+    "categoryName": "データチェック方式",
+    "importance": "★★★",
+    "summary": "パリティビット ＝ 1ビットの誤りを「検出」できる（訂正は不可）",
+    "question": "「偶数パリティ」を採用した通信において、受信データが `1101001` だった場合、付加されるパリティビットはどれか？",
+    "options": [
+      "0",
+      "1",
+      "偶数",
+      "計算不能"
+    ],
+    "answer": 0,
+    "reasoning": "パリティビットは、データ全体の『1の個数』を数えるだけの超カンタンな誤り検出法です。\nデータ `1101001` の中の「1」の個数を数えると… 1が4個あります。4は最初から偶数なので、パリティビットには『0』を付ければ全体で偶数のまま保てます（もし奇数個なら1を付けて偶数にする）。",
+    "tip": "偶数パリティ＝1の個数を偶数にする。1ビットの誤りを検出できるが、場所が分からないので『訂正』はできません。"
   },
   {
-    id: 1603, category: "data_check", categoryName: "データチェック方式", importance: "★★☆",
-    summary: "CRC ＝ 生成多項式で割った余り。連続したノイズ（バースト誤り）検出に強い",
-    question: "ネットワーク通信（Ethernetなど）で広く使われ、生成多項式を用いた除算の余りを付加することで「バースト誤り」の検出に威力を発揮する方式はどれか？",
-    options: ["CRC（巡回冗長検査）", "奇数パリティ", "水平垂直パリティ", "ハミング符号"],
-    answer: 0,
-    reasoning: "LANケーブルに電気ノイズが走ると、1ビットだけでなく『1011000...』と連続してごっそりデータが化けます（これをバースト誤りと呼びます）。CRCはデータを長い多項式（数式）で割り算した『余り』をチェック用にくっつけるため、連続した破壊でも高精度で見つけ出せます。",
-    tip: "『生成多項式』『バースト誤り検出』＝ CRC（巡回冗長検査）。"
-  },
-
-  // 17. ネットワーク
-  {
-    id: 1701, category: "network", categoryName: "ネットワーク", importance: "★★★",
-    summary: "DNS ＝ ドメイン名（URL）と IPアドレスの電話帳（相互変換）",
-    question: "Webサイトを閲覧する際、`www.example.com` のようなドメイン名を `192.0.2.1` のようなIPアドレスに変換（名前解決）するプロトコルはどれか？",
-    options: ["DNS", "DHCP", "ARP", "HTTP"],
-    answer: 0,
-    reasoning: "コンピュータは数字のIPアドレスしか理解できませんが、人間は `142.250.196.100` なんて覚えられず `google.com` の方が分かりやすいですよね。DNSは『ドメイン名 → IPアドレス』を教えてくれるインターネットの電話帳サービスです。",
-    tip: "『ドメイン名 ⇔ IPアドレス変換（名前解決）』＝ DNS。"
+    "id": 1602,
+    "category": "data_check",
+    "categoryName": "データチェック方式",
+    "importance": "★★★",
+    "summary": "ハミング符号 ＝ 1ビットの誤りを「訂正」できる（2ビットは検出）",
+    "question": "通信データに検査ビットを付加することで、「1ビットの誤りを自動的に訂正できる」方式はどれか？",
+    "options": [
+      "ハミング符号",
+      "パリティ検査",
+      "チェックサム",
+      "CRC（巡回冗長検査）"
+    ],
+    "answer": 0,
+    "reasoning": "パリティビットは『どこかが壊れた』ことしか分かりませんが、ハミング符号は検査ビットを何箇所もクロスさせて埋め込むことで『何番目のビットが壊れたか』まで特定できます。0か1の2進数なので、場所さえ分かれば反転させるだけで自動的に『訂正』できるのです！",
+    "tip": "『誤り訂正ができる』と来たら選択肢は「ハミング符号」一択です！"
   },
   {
-    id: 1702, category: "network", categoryName: "ネットワーク", importance: "★★★",
-    summary: "DHCP ＝ パソコンやスマホにIPアドレスを自動で貸し出す",
-    question: "ネットワークに接続したPCやスマートフォンに対して、IPアドレスやサブネットマスクなどのネットワーク設定を自動的に割り当てるプロトコルはどれか？",
-    options: ["DHCP", "DNS", "NAT", "SNMP"],
-    answer: 0,
-    reasoning: "カフェのWi-Fiに繋いだ瞬間、面倒なIPアドレスの設定なんて手入力しないですよね！ルーターの中にいるDHCPサーバーが『君にはこの空いてるIPアドレスを貸してあげるね』と一瞬で自動設定を配ってくれているからです。",
-    tip: "『IPアドレスの自動割り当て』＝ DHCP。"
+    "id": 1603,
+    "category": "data_check",
+    "categoryName": "データチェック方式",
+    "importance": "★★☆",
+    "summary": "CRC ＝ 生成多項式で割った余り。連続したノイズ（バースト誤り）検出に強い",
+    "question": "ネットワーク通信（Ethernetなど）で広く使われ、生成多項式を用いた除算の余りを付加することで「バースト誤り」の検出に威力を発揮する方式はどれか？",
+    "options": [
+      "CRC（巡回冗長検査）",
+      "奇数パリティ",
+      "水平垂直パリティ",
+      "ハミング符号"
+    ],
+    "answer": 0,
+    "reasoning": "LANケーブルに電気ノイズが走ると、1ビットだけでなく『1011000...』と連続してごっそりデータが化けます（これをバースト誤りと呼びます）。CRCはデータを長い多項式（数式）で割り算した『余り』をチェック用にくっつけるため、連続した破壊でも高精度で見つけ出せます。",
+    "tip": "『生成多項式』『バースト誤り検出』＝ CRC（巡回冗長検査）。"
   },
   {
-    id: 1703, category: "network", categoryName: "ネットワーク", importance: "★★★",
-    summary: "TCP＝確実な電話（コネクション型）、UDP＝速さ重視の放送（リアルタイム配信）",
-    question: "トランスポート層のプロトコルであるTCPとUDPの比較として、最も適切なものはどれか？",
-    options: [
+    "id": 1701,
+    "category": "network",
+    "categoryName": "ネットワーク",
+    "importance": "★★★",
+    "summary": "DNS ＝ ドメイン名（URL）と IPアドレスの電話帳（相互変換）",
+    "question": "Webサイトを閲覧する際、`www.example.com` のようなドメイン名を `192.0.2.1` のようなIPアドレスに変換（名前解決）するプロトコルはどれか？",
+    "options": [
+      "DNS",
+      "DHCP",
+      "ARP",
+      "HTTP"
+    ],
+    "answer": 0,
+    "reasoning": "コンピュータは数字のIPアドレスしか理解できませんが、人間は `142.250.196.100` なんて覚えられず `google.com` の方が分かりやすいですよね。DNSは『ドメイン名 → IPアドレス』を教えてくれるインターネットの電話帳サービスです。",
+    "tip": "『ドメイン名 ⇔ IPアドレス変換（名前解決）』＝ DNS。"
+  },
+  {
+    "id": 1702,
+    "category": "network",
+    "categoryName": "ネットワーク",
+    "importance": "★★★",
+    "summary": "DHCP ＝ パソコンやスマホにIPアドレスを自動で貸し出す",
+    "question": "ネットワークに接続したPCやスマートフォンに対して、IPアドレスやサブネットマスクなどのネットワーク設定を自動的に割り当てるプロトコルはどれか？",
+    "options": [
+      "DHCP",
+      "DNS",
+      "NAT",
+      "SNMP"
+    ],
+    "answer": 0,
+    "reasoning": "カフェのWi-Fiに繋いだ瞬間、面倒なIPアドレスの設定なんて手入力しないですよね！ルーターの中にいるDHCPサーバーが『君にはこの空いてるIPアドレスを貸してあげるね』と一瞬で自動設定を配ってくれているからです。",
+    "tip": "『IPアドレスの自動割り当て』＝ DHCP。"
+  },
+  {
+    "id": 1703,
+    "category": "network",
+    "categoryName": "ネットワーク",
+    "importance": "★★★",
+    "summary": "TCP＝確実な電話（コネクション型）、UDP＝速さ重視の放送（リアルタイム配信）",
+    "question": "トランスポート層のプロトコルであるTCPとUDPの比較として、最も適切なものはどれか？",
+    "options": [
       "TCPは相手との接続確立（ハンドシェイク）や再送制御を行い信頼性が高いが、UDPは確認を行わず高速性を重視する",
       "TCPはリアルタイム動画配信に向いており、UDPはWeb閲覧やファイル転送に向いている",
       "TCPは暗号化通信を行い、UDPは平文通信を行うプロトコルである",
       "TCPはLAN内でのみ動作し、インターネットではすべてUDPが使われる"
     ],
-    answer: 0,
-    reasoning: "文系向けの例え：\n• TCP（電話）：『もしもし、聞こえますか？』と3回確認（3ウェイハンドシェイク）してから話し始め、聞き逃したら『もう1回言って』と再送を頼む。Webサイトやメールなど、1文字も欠けてはいけない用途。\n• UDP（手紙・テレビ放送）：届いたか確認せずどんどん送る。オンラインゲームやZoom通話など、多少ノイズが入っても一瞬の遅延も許されない用途。",
-    tip: "『信頼性・再送制御 ＝ TCP』『高速・リアルタイム配信 ＝ UDP』。"
+    "answer": 0,
+    "reasoning": "文系向けの例え：\n• TCP（電話）：『もしもし、聞こえますか？』と3回確認（3ウェイハンドシェイク）してから話し始め、聞き逃したら『もう1回言って』と再送を頼む。Webサイトやメールなど、1文字も欠けてはいけない用途。\n• UDP（手紙・テレビ放送）：届いたか確認せずどんどん送る。オンラインゲームやZoom通話など、多少ノイズが入っても一瞬の遅延も許されない用途。",
+    "tip": "『信頼性・再送制御 ＝ TCP』『高速・リアルタイム配信 ＝ UDP』。"
   },
   {
-    id: 1704, category: "network", categoryName: "ネットワーク", importance: "★★☆",
-    summary: "NAPT (IPマスカレード) ＝ 1個のグローバルIPで家庭内の複数台が通信できる",
-    question: "社内LANや家庭内のプライベートIPアドレスを持つ複数の端末が、1個のグローバルIPアドレスを共有してインターネットに同時接続できるように、ポート番号を使って変換する技術はどれか？",
-    options: ["NAPT (IPマスカレード)", "DNS", "DHCP", "VPN"],
-    answer: 0,
-    reasoning: "世界中でIPv4アドレスが足りなくなっています。そこで家庭のWi-Fiルーターは、家族みんなのスマホやPCに『プライベートIP』を配り、外と通信するときだけルーターの持つ『1個のグローバルIP』に化けさせます。誰からの返事かを区別するために『ポート番号（部屋番号）』を名札として使います。",
-    tip: "『IPアドレス ＋ ポート番号で複数台変換』＝ NAPT (IPマスカレード)。"
+    "id": 1704,
+    "category": "network",
+    "categoryName": "ネットワーク",
+    "importance": "★★☆",
+    "summary": "NAPT (IPマスカレード) ＝ 1個のグローバルIPで家庭内の複数台が通信できる",
+    "question": "社内LANや家庭内のプライベートIPアドレスを持つ複数の端末が、1個のグローバルIPアドレスを共有してインターネットに同時接続できるように、ポート番号を使って変換する技術はどれか？",
+    "options": [
+      "NAPT (IPマスカレード)",
+      "DNS",
+      "DHCP",
+      "VPN"
+    ],
+    "answer": 0,
+    "reasoning": "世界中でIPv4アドレスが足りなくなっています。そこで家庭のWi-Fiルーターは、家族みんなのスマホやPCに『プライベートIP』を配り、外と通信するときだけルーターの持つ『1個のグローバルIP』に化けさせます。誰からの返事かを区別するために『ポート番号（部屋番号）』を名札として使います。",
+    "tip": "『IPアドレス ＋ ポート番号で複数台変換』＝ NAPT (IPマスカレード)。"
   },
   {
-    id: 1705, category: "network", categoryName: "ネットワーク", importance: "★★★",
-    summary: "CIDR /26 の収容ホスト数 ＝ 2^(32-26) - 2 ＝ 62台",
-    question: "ネットワークアドレスが `192.168.1.0/26` のサブネットにおいて、端末（ホスト）に割り当てることができるIPアドレスの最大数はいくつか？",
-    options: ["62個", "64個", "126個", "30個"],
-    answer: 0,
-    reasoning: "IPv4アドレスは全部で32ビットです。\n• `/26` なので、先頭26ビットがネットワーク部。残りのホスト部は `32 - 26 = 6ビット` です。\n• 6ビットで表せる数は $2^6 = 64$個。\n• ただし、最初の1個（ネットワーク自身を表すアドレス）と、最後の1個（全員宛てのブロードキャストアドレス）は端末に配れません！\nしたがって：$64 - 2 = 62$個になります。",
-    tip: "『$2^{(\\text{残りビット})} - 2$』。マイナス2するのを絶対に忘れないこと！"
+    "id": 1705,
+    "category": "network",
+    "categoryName": "ネットワーク",
+    "importance": "★★★",
+    "summary": "CIDR /26 の収容ホスト数 ＝ 2^(32-26) - 2 ＝ 62台",
+    "question": "ネットワークアドレスが `192.168.1.0/26` のサブネットにおいて、端末（ホスト）に割り当てることができるIPアドレスの最大数はいくつか？",
+    "options": [
+      "62個",
+      "64個",
+      "126個",
+      "30個"
+    ],
+    "answer": 0,
+    "reasoning": "IPv4アドレスは全部で32ビットです。\n• `/26` なので、先頭26ビットがネットワーク部。残りのホスト部は `32 - 26 = 6ビット` です。\n• 6ビットで表せる数は $2^6 = 64$個。\n• ただし、最初の1個（ネットワーク自身を表すアドレス）と、最後の1個（全員宛てのブロードキャストアドレス）は端末に配れません！\nしたがって：$64 - 2 = 62$個になります。",
+    "tip": "『$2^{(\\text{残りビット})} - 2$』。マイナス2するのを絶対に忘れないこと！"
   },
   {
-    id: 1706, category: "network", categoryName: "ネットワーク", importance: "★★☆",
-    summary: "HTTP=80, HTTPS=443, DNS=53, SSH=22 (ウェルノウンポート)",
-    question: "Webブラウザが暗号化通信（HTTPS）を行う際に標準的に使用するポート番号はどれか？",
-    options: ["443", "80", "22", "53"],
-    answer: 0,
-    reasoning: "ポート番号は『サーバーの中の窓口番号』です。\n• 80番：通常のWeb（HTTP）\n• 443番：暗号化された安全なWeb（HTTPS）\n• 22番：遠隔操作（SSH）\n• 53番：電話帳（DNS）",
-    tip: "『HTTP=80』『HTTPS=443』は試験の超基本常識！"
+    "id": 1706,
+    "category": "network",
+    "categoryName": "ネットワーク",
+    "importance": "★★☆",
+    "summary": "HTTP=80, HTTPS=443, DNS=53, SSH=22 (ウェルノウンポート)",
+    "question": "Webブラウザが暗号化通信（HTTPS）を行う際に標準的に使用するポート番号はどれか？",
+    "options": [
+      "443",
+      "80",
+      "22",
+      "53"
+    ],
+    "answer": 0,
+    "reasoning": "ポート番号は『サーバーの中の窓口番号』です。\n• 80番：通常のWeb（HTTP）\n• 443番：暗号化された安全なWeb（HTTPS）\n• 22番：遠隔操作（SSH）\n• 53番：電話帳（DNS）",
+    "tip": "『HTTP=80』『HTTPS=443』は試験の超基本常識！"
   },
-
-  // 18. 情報技術・暗号技術 (新規)
   {
-    id: 1801, category: "crypto", categoryName: "暗号技術", importance: "★★★",
-    summary: "共通鍵＝同じ鍵で高速(鍵配送が難)、公開鍵＝鍵ペアで管理楽(低速)",
-    question: "共通鍵暗号方式と比較したときの、「公開鍵暗号方式」の長所として最も適切なものはどれか？",
-    options: [
+    "id": 1801,
+    "category": "crypto",
+    "categoryName": "暗号技術",
+    "importance": "★★★",
+    "summary": "共通鍵＝同じ鍵で高速(鍵配送が難)、公開鍵＝鍵ペアで管理楽(低速)",
+    "question": "共通鍵暗号方式と比較したときの、「公開鍵暗号方式」の長所として最も適切なものはどれか？",
+    "options": [
       "暗号化鍵を誰にでも公開できるため、事前に相手と秘密裏に鍵を共有（配送）する手間が不要である",
       "共通鍵暗号方式よりも暗号化・復号の処理速度が圧倒的に高速である",
       "鍵の長さが短くて済むため、低スペックなIoT機器でも負荷なく計算できる",
       "通信相手が増えても、管理すべき鍵の総数が共通鍵暗号方式よりも多くなる"
     ],
-    answer: 0,
-    reasoning: "暗号方式の対決：\n• 共通鍵暗号（AESなど）：南京錠と鍵。同じ鍵で施錠も解錠もする。計算は爆速だが、事前に相手に鍵を手渡し（配送）するのが超大変（泥棒に見られたら終わり）。\n• 公開鍵暗号（RSAなど）：開いた南京錠を世界中に配る（公開鍵）。誰でも箱をロックできるが、開けられるのは自分だけが持っている『秘密鍵』のみ。鍵をこっそり送る必要がない！ただし計算が重い。",
-    tip: "『共通鍵＝高速・鍵配送が課題』『公開鍵＝低速・鍵配送が安全』。"
+    "answer": 0,
+    "reasoning": "暗号方式の対決：\n• 共通鍵暗号（AESなど）：南京錠と鍵。同じ鍵で施錠も解錠もする。計算は爆速だが、事前に相手に鍵を手渡し（配送）するのが超大変（泥棒に見られたら終わり）。\n• 公開鍵暗号（RSAなど）：開いた南京錠を世界中に配る（公開鍵）。誰でも箱をロックできるが、開けられるのは自分だけが持っている『秘密鍵』のみ。鍵をこっそり送る必要がない！ただし計算が重い。",
+    "tip": "『共通鍵＝高速・鍵配送が課題』『公開鍵＝低速・鍵配送が安全』。"
   },
   {
-    id: 1802, category: "crypto", categoryName: "暗号技術", importance: "★★★",
-    summary: "データを送る時は「相手の公開鍵」で暗号化する（相手の秘密鍵でしか開かない）",
-    question: "AさんがBさんに公開鍵暗号方式を使って機密メールを送りたい。Aさんはどの鍵を使ってメールを暗号化すべきか？",
-    options: [
+    "id": 1802,
+    "category": "crypto",
+    "categoryName": "暗号技術",
+    "importance": "★★★",
+    "summary": "データを送る時は「相手の公開鍵」で暗号化する（相手の秘密鍵でしか開かない）",
+    "question": "AさんがBさんに公開鍵暗号方式を使って機密メールを送りたい。Aさんはどの鍵を使ってメールを暗号化すべきか？",
+    "options": [
       "Bさんの公開鍵",
       "Aさんの公開鍵",
       "Aさんの秘密鍵",
       "Bさんの秘密鍵"
     ],
-    answer: 0,
-    reasoning: "文系が一番混乱する鍵の使い分け！\n『相手（Bさん）しか開けられない箱』を作りたいのですから、Bさんが配っている『Bさんの公開南京錠』でカチャッと鍵をかけます。そうすれば、世界中でBさん本人しか持っていない『Bさんの秘密鍵』でしか開けられません。",
-    tip: "『相手に読ませたい秘密データ ＝ 相手の公開鍵で暗号化』！"
+    "answer": 0,
+    "reasoning": "文系が一番混乱する鍵の使い分け！\n『相手（Bさん）しか開けられない箱』を作りたいのですから、Bさんが配っている『Bさんの公開南京錠』でカチャッと鍵をかけます。そうすれば、世界中でBさん本人しか持っていない『Bさんの秘密鍵』でしか開けられません。",
+    "tip": "『相手に読ませたい秘密データ ＝ 相手の公開鍵で暗号化』！"
   },
   {
-    id: 1803, category: "crypto", categoryName: "暗号技術", importance: "★★★",
-    summary: "ディジタル署名 ＝ 送信者の秘密鍵で作成し、送信者の公開鍵で検証（改ざん検知＋本人証明）",
-    question: "ディジタル署名の仕組みにおいて、送信者が署名を作成する際に使用する鍵と、受信者が署名を検証する際に使用する鍵の正しい組み合わせはどれか？",
-    options: [
+    "id": 1803,
+    "category": "crypto",
+    "categoryName": "暗号技術",
+    "importance": "★★★",
+    "summary": "ディジタル署名 ＝ 送信者の秘密鍵で作成し、送信者の公開鍵で検証（改ざん検知＋本人証明）",
+    "question": "ディジタル署名の仕組みにおいて、送信者が署名を作成する際に使用する鍵と、受信者が署名を検証する際に使用する鍵の正しい組み合わせはどれか？",
+    "options": [
       "署名作成：送信者の秘密鍵 ／ 署名検証：送信者の公開鍵",
       "署名作成：送信者の公開鍵 ／ 署名検証：受信者の秘密鍵",
       "署名作成：受信者の公開鍵 ／ 署名検証：受信者の秘密鍵",
       "署名作成：受信者の秘密鍵 ／ 署名検証：送信者の公開鍵"
     ],
-    answer: 0,
-    reasoning: "ハンコ（実印）をイメージしてください！\n実印を押せるのは『本人だけ（送信者の秘密鍵）』ですよね。そしてその印影が本物かどうかは、役所に登録された印鑑証明書（送信者の公開鍵）を使えば『誰でも検証できる』はずです。これにより、『確かに本人が書いた（なりすまし防止・否認防止）』と『途中で改ざんされていない』ことが証明されます。",
-    tip: "『署名は自分の秘密鍵で押し、相手は自分の公開鍵で確認する』！"
+    "answer": 0,
+    "reasoning": "ハンコ（実印）をイメージしてください！\n実印を押せるのは『本人だけ（送信者の秘密鍵）』ですよね。そしてその印影が本物かどうかは、役所に登録された印鑑証明書（送信者の公開鍵）を使えば『誰でも検証できる』はずです。これにより、『確かに本人が書いた（なりすまし防止・否認防止）』と『途中で改ざんされていない』ことが証明されます。",
+    "tip": "『署名は自分の秘密鍵で押し、相手は自分の公開鍵で確認する』！"
   },
   {
-    id: 1804, category: "crypto", categoryName: "暗号技術", importance: "★★☆",
-    summary: "ハイブリッド暗号 ＝ データは爆速な共通鍵で暗号化し、その共通鍵を公開鍵で送る",
-    question: "SSL/TLSなどの通信で用いられる「ハイブリッド暗号方式」の説明として、正しいものはどれか？",
-    options: [
+    "id": 1804,
+    "category": "crypto",
+    "categoryName": "暗号技術",
+    "importance": "★★☆",
+    "summary": "ハイブリッド暗号 ＝ データは爆速な共通鍵で暗号化し、その共通鍵を公開鍵で送る",
+    "question": "SSL/TLSなどの通信で用いられる「ハイブリッド暗号方式」の説明として、正しいものはどれか？",
+    "options": [
       "データ本体は高速な共通鍵暗号で暗号化し、その共通鍵を相手の公開鍵暗号で暗号化して安全に配送する",
       "共通鍵暗号と公開鍵暗号を1文字ごとに交互に切り替えて暗号化する",
       "秘密鍵を2重に暗号化することで、量子コンピュータでも解読できないようにする方式",
       "ハッシュ関数と共通鍵暗号を組み合わせて電子署名を作成する方式"
     ],
-    answer: 0,
-    reasoning: "2つの良いとこ取りです！\n• 公開鍵暗号は安全だけど計算が超重い（巨大な動画ファイルなんて暗号化できない）。\n• 共通鍵暗号は爆速だけど鍵の受け渡しが危険。\n$\\rightarrow$ ならば、『動画本体は爆速な共通鍵で暗号化』し、『その小さな共通鍵だけを公開鍵暗号で包んで相手に送る』！これで安全かつ超高速になります。",
-    tip: "『データ本体＝共通鍵』『鍵の配送＝公開鍵』のいいとこ取りがハイブリッド暗号。"
+    "answer": 0,
+    "reasoning": "2つの良いとこ取りです！\n• 公開鍵暗号は安全だけど計算が超重い（巨大な動画ファイルなんて暗号化できない）。\n• 共通鍵暗号は爆速だけど鍵の受け渡しが危険。\n$\\rightarrow$ ならば、『動画本体は爆速な共通鍵で暗号化』し、『その小さな共通鍵だけを公開鍵暗号で包んで相手に送る』！これで安全かつ超高速になります。",
+    "tip": "『データ本体＝共通鍵』『鍵の配送＝公開鍵』のいいとこ取りがハイブリッド暗号。"
   },
   {
-    id: 1805, category: "crypto", categoryName: "暗号技術", importance: "★★☆",
-    summary: "認証局 (CA) ＝ 「この公開鍵は本物です」とお墨付き証明書を発行する第三者機関",
-    question: "公開鍵暗号基盤（PKI）において、公開鍵の持ち主が本人であることを証明する「ディジタル証明書」を発行する信頼できる第三者機関はどれか？",
-    options: ["認証局 (CA : Certificate Authority)", "登録局 (RA)", "DNSサーバー", "プロキシサーバー"],
-    answer: 0,
-    reasoning: "ネット上で悪人が『私はGoogleです！これが私の公開鍵です！』と偽物を配ったら騙されてしまいますよね。そこで、世界中から信頼されている第三者機関（認証局・CA）が厳重に本人確認を行い、『この公開鍵は間違いなく本物のGoogleのものです』という電子証明書を発行してくれます。",
-    tip: "『ディジタル証明書を発行する第三者機関』＝ 認証局 (CA)。"
+    "id": 1805,
+    "category": "crypto",
+    "categoryName": "暗号技術",
+    "importance": "★★☆",
+    "summary": "認証局 (CA) ＝ 「この公開鍵は本物です」とお墨付き証明書を発行する第三者機関",
+    "question": "公開鍵暗号基盤（PKI）において、公開鍵の持ち主が本人であることを証明する「ディジタル証明書」を発行する信頼できる第三者機関はどれか？",
+    "options": [
+      "認証局 (CA : Certificate Authority)",
+      "登録局 (RA)",
+      "DNSサーバー",
+      "プロキシサーバー"
+    ],
+    "answer": 0,
+    "reasoning": "ネット上で悪人が『私はGoogleです！これが私の公開鍵です！』と偽物を配ったら騙されてしまいますよね。そこで、世界中から信頼されている第三者機関（認証局・CA）が厳重に本人確認を行い、『この公開鍵は間違いなく本物のGoogleのものです』という電子証明書を発行してくれます。",
+    "tip": "『ディジタル証明書を発行する第三者機関』＝ 認証局 (CA)。"
   },
-
-  // 19. 情報セキュリティ・脅威対策用語 (新規)
   {
-    id: 1901, category: "security", categoryName: "情報セキュリティ", importance: "★★★",
-    summary: "WAF ＝ Webアプリへの攻撃（SQLインジェクション、XSS等）を防ぐ専用の壁",
-    question: "WebサイトへのSQLインジェクションやクロスサイトスクリプティング（XSS）といった「Webアプリケーション層への攻撃」を検知・遮断することに特化したセキュリティ製品はどれか？",
-    options: [
+    "id": 1901,
+    "category": "security",
+    "categoryName": "情報セキュリティ",
+    "importance": "★★★",
+    "summary": "WAF ＝ Webアプリへの攻撃（SQLインジェクション、XSS等）を防ぐ専用の壁",
+    "question": "WebサイトへのSQLインジェクションやクロスサイトスクリプティング（XSS）といった「Webアプリケーション層への攻撃」を検知・遮断することに特化したセキュリティ製品はどれか？",
+    "options": [
       "WAF (Web Application Firewall)",
       "パケットフィルタリング型ファイアウォール",
       "スパムメールフィルタ",
       "MACアドレスフィルタリング"
     ],
-    answer: 0,
-    reasoning: "普通のファイアウォール（FW）は『80番ポートや443番ポートを開ける/閉める』ことしか見ません。しかしSQLインジェクションは、正常なWeb通信（80番/443番）のふりをして入力欄に悪意あるSQL文を流し込んできます。通信の中身（Webアプリの内容）までしっかり読んで攻撃を弾くのが WAF です。",
-    tip: "『SQLインジェクションやXSSを防ぐ』と来たら WAF 一択！"
+    "answer": 0,
+    "reasoning": "普通のファイアウォール（FW）は『80番ポートや443番ポートを開ける/閉める』ことしか見ません。しかしSQLインジェクションは、正常なWeb通信（80番/443番）のふりをして入力欄に悪意あるSQL文を流し込んできます。通信の中身（Webアプリの内容）までしっかり読んで攻撃を弾くのが WAF です。",
+    "tip": "『SQLインジェクションやXSSを防ぐ』と来たら WAF 一択！"
   },
   {
-    id: 1902, category: "security", categoryName: "情報セキュリティ", importance: "★★★",
-    summary: "IDS＝侵入を「検知して通報」、IPS＝侵入を「検知して即座に遮断」",
-    question: "ネットワークへの不正侵入を防御するシステムのうち、「不正なトラフィックを検知した際に、自動的にその通信を遮断（防御）する機能まで持つもの」はどれか？",
-    options: [
+    "id": 1902,
+    "category": "security",
+    "categoryName": "情報セキュリティ",
+    "importance": "★★★",
+    "summary": "IDS＝侵入を「検知して通報」、IPS＝侵入を「検知して即座に遮断」",
+    "question": "ネットワークへの不正侵入を防御するシステムのうち、「不正なトラフィックを検知した際に、自動的にその通信を遮断（防御）する機能まで持つもの」はどれか？",
+    "options": [
       "IPS (Intrusion Prevention System : 不正侵入防止システム)",
       "IDS (Intrusion Detection System : 不正侵入検知システム)",
       "SIEM",
       "ハニーポット"
     ],
-    answer: 0,
-    reasoning: "英語の単語で一発です！\n• Detection（検知）：IDS ＝ 泥棒を見つけて『警報ベルを鳴らす（通知する）』だけ。自分では戦わない。\n• Prevention（防止/阻止）：IPS ＝ 泥棒を見つけたら『その場でシャッターを下ろして締め出す（通信を遮断する）』。",
-    tip: "『検知のみ＝IDS』『通信遮断・防御まで行う＝IPS』。"
+    "answer": 0,
+    "reasoning": "英語の単語で一発です！\n• Detection（検知）：IDS ＝ 泥棒を見つけて『警報ベルを鳴らす（通知する）』だけ。自分では戦わない。\n• Prevention（防止/阻止）：IPS ＝ 泥棒を見つけたら『その場でシャッターを下ろして締め出す（通信を遮断する）』。",
+    "tip": "『検知のみ＝IDS』『通信遮断・防御まで行う＝IPS』。"
   },
   {
-    id: 1903, category: "security", categoryName: "情報セキュリティ", importance: "★★★",
-    summary: "DMZ (非武装地帯) ＝ ネットと社内LANの間に置くWebサーバー等の隔離エリア",
-    question: "外部のインターネットと社内ネットワークの間に設置され、WebサーバーやDNSサーバーなど外部に公開するサーバーを配置する緩衝地帯（隔離ネットワーク）を何と呼ぶか？",
-    options: ["DMZ (Demilitarized Zone : 非武装地帯)", "VLAN", "VPN", "プロキシ領域"],
-    answer: 0,
-    reasoning: "朝鮮半島の『非武装地帯（DMZ）』と同じ言葉です。外部公開するWebサーバーは常にハッカーから攻撃される危険があります。もしWebサーバーを社内LANの中に置いていたら、乗っ取られた瞬間に社内の全機密データが盗まれます。そこで『外からの攻撃を受けても、社内LANには侵入させない防波堤エリア（DMZ）』にサーバーを隔離します。",
-    tip: "『インターネットと内部LANの間の公開用隔離エリア』＝ DMZ。"
+    "id": 1903,
+    "category": "security",
+    "categoryName": "情報セキュリティ",
+    "importance": "★★★",
+    "summary": "DMZ (非武装地帯) ＝ ネットと社内LANの間に置くWebサーバー等の隔離エリア",
+    "question": "外部のインターネットと社内ネットワークの間に設置され、WebサーバーやDNSサーバーなど外部に公開するサーバーを配置する緩衝地帯（隔離ネットワーク）を何と呼ぶか？",
+    "options": [
+      "DMZ (Demilitarized Zone : 非武装地帯)",
+      "VLAN",
+      "VPN",
+      "プロキシ領域"
+    ],
+    "answer": 0,
+    "reasoning": "朝鮮半島の『非武装地帯（DMZ）』と同じ言葉です。外部公開するWebサーバーは常にハッカーから攻撃される危険があります。もしWebサーバーを社内LANの中に置いていたら、乗っ取られた瞬間に社内の全機密データが盗まれます。そこで『外からの攻撃を受けても、社内LANには侵入させない防波堤エリア（DMZ）』にサーバーを隔離します。",
+    "tip": "『インターネットと内部LANの間の公開用隔離エリア』＝ DMZ。"
   },
   {
-    id: 1904, category: "security", categoryName: "情報セキュリティ", importance: "★★☆",
-    summary: "EDR ＝ パソコンやスマホ（端末＝エンドポイント）の中の挙動を監視・対処",
-    question: "従業員が利用するPCやスマートフォンなどの端末において、マルウェア感染などの不審な挙動を常時監視し、侵入後の迅速な検知と対応（遠隔隔離など）を行うセキュリティ製品はどれか？",
-    options: ["EDR (Endpoint Detection and Response)", "IDS", "WAF", "UTM"],
-    answer: 0,
-    reasoning: "従来のアンチウイルスソフトは『侵入を防ぐ（水際対策）』でした。しかし最近の標的型攻撃は巧妙で、100%防ぐのは不可能です。そこで『侵入される前提』に立ち、末端の端末（エンドポイント）でウイルスが怪しい動きを始めたら即座に通信を遮断し、被害の拡大を防ぐのが EDR です。",
-    tip: "『端末（エンドポイント）の監視・侵入後の迅速対処』＝ EDR。"
+    "id": 1904,
+    "category": "security",
+    "categoryName": "情報セキュリティ",
+    "importance": "★★☆",
+    "summary": "EDR ＝ パソコンやスマホ（端末＝エンドポイント）の中の挙動を監視・対処",
+    "question": "従業員が利用するPCやスマートフォンなどの端末において、マルウェア感染などの不審な挙動を常時監視し、侵入後の迅速な検知と対応（遠隔隔離など）を行うセキュリティ製品はどれか？",
+    "options": [
+      "EDR (Endpoint Detection and Response)",
+      "IDS",
+      "WAF",
+      "UTM"
+    ],
+    "answer": 0,
+    "reasoning": "従来のアンチウイルスソフトは『侵入を防ぐ（水際対策）』でした。しかし最近の標的型攻撃は巧妙で、100%防ぐのは不可能です。そこで『侵入される前提』に立ち、末端の端末（エンドポイント）でウイルスが怪しい動きを始めたら即座に通信を遮断し、被害の拡大を防ぐのが EDR です。",
+    "tip": "『端末（エンドポイント）の監視・侵入後の迅速対処』＝ EDR。"
   },
   {
-    id: 1905, category: "security", categoryName: "情報セキュリティ", importance: "★★☆",
-    summary: "ゼロトラスト ＝ 「社内だから安全」を捨て、すべてのアクセスを毎回検証する",
-    question: "従来の「社内ネットワークは安全、社外は危険」という境界型の考え方を捨て、「すべての通信や端末を信頼しない」前提で毎回アクセス認証・認可を行うセキュリティの考え方はどれか？",
-    options: ["ゼロトラスト (Zero Trust)", "サンドボックス", "多要素認証", "シャドーIT"],
-    answer: 0,
-    reasoning: "昔は『オフィスの城壁（社内LAN）の中に入れば仲間だから安心』でした。しかしテレワークが増え、クラウドサービスを使い、社員のPCがウイルス感染する現代では、城壁の内側にも敵がいるかもしれません。『社内・社外関係なく、1回1回のアクセスごとに厳重に身元確認する』、これがゼロトラスト（信頼ゼロ）です。",
-    tip: "『境界を信じず、常に検証・確認するセキュリティ概念』＝ ゼロトラスト。"
+    "id": 1905,
+    "category": "security",
+    "categoryName": "情報セキュリティ",
+    "importance": "★★☆",
+    "summary": "ゼロトラスト ＝ 「社内だから安全」を捨て、すべてのアクセスを毎回検証する",
+    "question": "従来の「社内ネットワークは安全、社外は危険」という境界型の考え方を捨て、「すべての通信や端末を信頼しない」前提で毎回アクセス認証・認可を行うセキュリティの考え方はどれか？",
+    "options": [
+      "ゼロトラスト (Zero Trust)",
+      "サンドボックス",
+      "多要素認証",
+      "シャドーIT"
+    ],
+    "answer": 0,
+    "reasoning": "昔は『オフィスの城壁（社内LAN）の中に入れば仲間だから安心』でした。しかしテレワークが増え、クラウドサービスを使い、社員のPCがウイルス感染する現代では、城壁の内側にも敵がいるかもしれません。『社内・社外関係なく、1回1回のアクセスごとに厳重に身元確認する』、これがゼロトラスト（信頼ゼロ）です。",
+    "tip": "『境界を信じず、常に検証・確認するセキュリティ概念』＝ ゼロトラスト。"
   },
-
-  // 20. システム開発・オブジェクト指向 (新規)
   {
-    id: 2001, category: "sys_dev", categoryName: "システム開発", importance: "★★★",
-    summary: "カプセル化 ＝ データとメソッドをまとめ、外部から勝手にいじらせない隠蔽",
-    question: "オブジェクト指向における「カプセル化」の説明として、最も適切なものはどれか？",
-    options: [
+    "id": 2001,
+    "category": "sys_dev",
+    "categoryName": "システム開発",
+    "importance": "★★★",
+    "summary": "カプセル化 ＝ データとメソッドをまとめ、外部から勝手にいじらせない隠蔽",
+    "question": "オブジェクト指向における「カプセル化」の説明として、最も適切なものはどれか？",
+    "options": [
       "オブジェクトの内部データとそれを操作する手続き（メソッド）を一体化し、外部から直接アクセスできないように隠蔽すること",
       "親クラスのデータや手続きを子クラスが自動的に引き継ぐこと",
       "同一のメッセージを送っても、受け取ったオブジェクトによって異なる動作をすること",
       "プログラムをクラス単位に分割してコンパイルすること"
     ],
-    answer: 0,
-    reasoning: "カプセル薬を思い出してください！中の苦い粉薬（データ）は直接触れないように殻で包まれており、水で飲む（メソッド）だけで効きますよね。テレビも内部の電子回路を勝手にドライバーでいじられたら壊れるので、外側の『電源ボタン』や『音量ボタン』だけを公開して内部を守っています。",
-    tip: "『データと操作を一体化して内部を隠蔽する』＝ カプセル化。"
+    "answer": 0,
+    "reasoning": "カプセル薬を思い出してください！中の苦い粉薬（データ）は直接触れないように殻で包まれており、水で飲む（メソッド）だけで効きますよね。テレビも内部の電子回路を勝手にドライバーでいじられたら壊れるので、外側の『電源ボタン』や『音量ボタン』だけを公開して内部を守っています。",
+    "tip": "『データと操作を一体化して内部を隠蔽する』＝ カプセル化。"
   },
   {
-    id: 2002, category: "sys_dev", categoryName: "システム開発", importance: "★★★",
-    summary: "継承 (インヘリタンス) ＝ 親クラスの性質を引き継いで差分だけ作る",
-    question: "オブジェクト指向において、既存のクラス（スーパークラス）の持つ属性や手続きを引き継ぎ、独自の機能を追加して新しいクラス（サブクラス）を定義することを何と呼ぶか？",
-    options: ["継承 (インヘリタンス)", "カプセル化", "多相性 (ポリモーフィズム)", "オーバーライド"],
-    answer: 0,
-    reasoning: "『車』という親クラス（タイヤが4つ、走る、止まる）があれば、新しく『パトカー』を作るときに最初から全部作らなくていいですよね。『車』を継承して、サイレンを鳴らすという『差分だけ追加』すれば一瞬で作れます。コードの再利用性を高める仕組みです。",
-    tip: "『親クラスの性質を引き継ぐ』＝ 継承（インヘリタンス）。"
+    "id": 2002,
+    "category": "sys_dev",
+    "categoryName": "システム開発",
+    "importance": "★★★",
+    "summary": "継承 (インヘリタンス) ＝ 親クラスの性質を引き継いで差分だけ作る",
+    "question": "オブジェクト指向において、既存のクラス（スーパークラス）の持つ属性や手続きを引き継ぎ、独自の機能を追加して新しいクラス（サブクラス）を定義することを何と呼ぶか？",
+    "options": [
+      "継承 (インヘリタンス)",
+      "カプセル化",
+      "多相性 (ポリモーフィズム)",
+      "オーバーライド"
+    ],
+    "answer": 0,
+    "reasoning": "『車』という親クラス（タイヤが4つ、走る、止まる）があれば、新しく『パトカー』を作るときに最初から全部作らなくていいですよね。『車』を継承して、サイレンを鳴らすという『差分だけ追加』すれば一瞬で作れます。コードの再利用性を高める仕組みです。",
+    "tip": "『親クラスの性質を引き継ぐ』＝ 継承（インヘリタンス）。"
   },
   {
-    id: 2003, category: "sys_dev", categoryName: "システム開発", importance: "★★★",
-    summary: "多相性 (ポリモーフィズム) ＝ 同じ命令（鳴け！）でも犬はワン、猫はニャーと鳴く",
-    question: "オブジェクト指向において、同一のメッセージ（メソッド呼び出し）を送った場合でも、受信したオブジェクトの種類によってそれぞれ異なる振る舞いをする性質を何と呼ぶか？",
-    options: ["多相性 (ポリモーフィズム / 多様性)", "カプセル化", "多重継承", "情報隠蔽"],
-    answer: 0,
-    reasoning: "動物たちに向かって『鳴け！（speak）』という同じ命令を送ったとします。犬オブジェクトは『ワン！』と鳴き、猫オブジェクトは『ニャー！』と鳴き、牛オブジェクトは『モー！』と鳴きます。呼び出し側は相手が誰か細かく意識せず『鳴け』と命令するだけで、各自が適切な処理をしてくれる性質です。",
-    tip: "『同じメッセージで異なる振る舞いをする』＝ 多相性（ポリモーフィズム）。"
+    "id": 2003,
+    "category": "sys_dev",
+    "categoryName": "システム開発",
+    "importance": "★★★",
+    "summary": "多相性 (ポリモーフィズム) ＝ 同じ命令（鳴け！）でも犬はワン、猫はニャーと鳴く",
+    "question": "オブジェクト指向において、同一のメッセージ（メソッド呼び出し）を送った場合でも、受信したオブジェクトの種類によってそれぞれ異なる振る舞いをする性質を何と呼ぶか？",
+    "options": [
+      "多相性 (ポリモーフィズム / 多様性)",
+      "カプセル化",
+      "多重継承",
+      "情報隠蔽"
+    ],
+    "answer": 0,
+    "reasoning": "動物たちに向かって『鳴け！（speak）』という同じ命令を送ったとします。犬オブジェクトは『ワン！』と鳴き、猫オブジェクトは『ニャー！』と鳴き、牛オブジェクトは『モー！』と鳴きます。呼び出し側は相手が誰か細かく意識せず『鳴け』と命令するだけで、各自が適切な処理をしてくれる性質です。",
+    "tip": "『同じメッセージで異なる振る舞いをする』＝ 多相性（ポリモーフィズム）。"
   },
   {
-    id: 2004, category: "sys_dev", categoryName: "システム開発", importance: "★★☆",
-    summary: "UMLシーケンス図 ＝ オブジェクト間のやり取りを「上から下への時系列」で表す",
-    question: "UML（統一モデリング言語）のダイアグラムのうち、「オブジェクト間で送受信されるメッセージのやり取りを、上から下へと流れる時間の経過に沿って視覚化した図」はどれか？",
-    options: ["シーケンス図", "クラス図", "ユースケース図", "状態遷移図"],
-    answer: 0,
-    reasoning: "劇の台本のような図です！上に登場人物（ユーザー、ブラウザ、サーバー、DB）が並び、上から下へ時間が流れます。『ログインボタンを押す $\\rightarrow$ パスワード確認 $\\rightarrow$ OKを返す』と矢印が左右に行き交う様子を描いた図がシーケンス図です。",
-    tip: "『時系列・メッセージのやり取り』＝ シーケンス図。"
+    "id": 2004,
+    "category": "sys_dev",
+    "categoryName": "システム開発",
+    "importance": "★★☆",
+    "summary": "UMLシーケンス図 ＝ オブジェクト間のやり取りを「上から下への時系列」で表す",
+    "question": "UML（統一モデリング言語）のダイアグラムのうち、「オブジェクト間で送受信されるメッセージのやり取りを、上から下へと流れる時間の経過に沿って視覚化した図」はどれか？",
+    "options": [
+      "シーケンス図",
+      "クラス図",
+      "ユースケース図",
+      "状態遷移図"
+    ],
+    "answer": 0,
+    "reasoning": "劇の台本のような図です！上に登場人物（ユーザー、ブラウザ、サーバー、DB）が並び、上から下へ時間が流れます。『ログインボタンを押す $\\rightarrow$ パスワード確認 $\\rightarrow$ OKを返す』と矢印が左右に行き交う様子を描いた図がシーケンス図です。",
+    "tip": "『時系列・メッセージのやり取り』＝ シーケンス図。"
   },
-
-  // 21. テスト手法・網羅性（5つ） (新規)
   {
-    id: 2101, category: "test", categoryName: "テスト手法", importance: "★★★",
-    summary: "ホワイトボックステストの網羅基準：命令 ＜ 分岐 ＜ 条件 ＜ 複数条件(最強)",
-    question: "ホワイトボックステストにおけるテスト網羅基準（テストカバレッジ）のうち、「すべての条件判定において、取り得るすべての真偽の組み合わせを網羅する最も厳格な基準」はどれか？",
-    options: [
+    "id": 2101,
+    "category": "test",
+    "categoryName": "テスト手法",
+    "importance": "★★★",
+    "summary": "ホワイトボックステストの網羅基準：命令 ＜ 分岐 ＜ 条件 ＜ 複数条件(最強)",
+    "question": "ホワイトボックステストにおけるテスト網羅基準（テストカバレッジ）のうち、「すべての条件判定において、取り得るすべての真偽の組み合わせを網羅する最も厳格な基準」はどれか？",
+    "options": [
       "複数条件網羅 (複合条件網羅)",
       "分岐網羅 (判定条件網羅)",
       "命令網羅",
       "条件網羅"
     ],
-    answer: 0,
-    reasoning: "カバレッジの強さピラミッド（超頻出）：\n1. 命令網羅（一番甘い）：すべての行を最低1回通ればOK。\n2. 分岐網羅（判定条件網羅）：各IF文の『真』と『偽』を最低1回通ればOK。\n3. 条件網羅：IF文の中の各パーツ（A>0 とか B<5）の真・偽をテスト。\n4. 判定条件/条件網羅：2と3の合体。\n5. 複数条件網羅（最強！）：『真・真』『真・偽』『偽・真』『偽・偽』の全パターンを力技で全部テストする最強基準！",
-    tip: "『最もテスト基準が厳しい・全真偽の組み合わせ』＝ 複数条件網羅。"
+    "answer": 0,
+    "reasoning": "カバレッジの強さピラミッド（超頻出）：\n1. 命令網羅（一番甘い）：すべての行を最低1回通ればOK。\n2. 分岐網羅（判定条件網羅）：各IF文の『真』と『偽』を最低1回通ればOK。\n3. 条件網羅：IF文の中の各パーツ（A>0 とか B<5）の真・偽をテスト。\n4. 判定条件/条件網羅：2と3の合体。\n5. 複数条件網羅（最強！）：『真・真』『真・偽』『偽・真』『偽・偽』の全パターンを力技で全部テストする最強基準！",
+    "tip": "『最もテスト基準が厳しい・全真偽の組み合わせ』＝ 複数条件網羅。"
   },
   {
-    id: 2102, category: "test", categoryName: "テスト手法", importance: "★★★",
-    summary: "命令網羅 ＝ 「すべての実行文（命令）」を少なくとも1回は通す",
-    question: "ホワイトボックステストの網羅基準のうち、「プログラム中のすべての実行可能な命令文を、少なくとも1回は実行するテスト基準」はどれか？",
-    options: ["命令網羅", "分岐網羅", "条件網羅", "パス網羅"],
-    answer: 0,
-    reasoning: "『プログラムに書いてあるすべての行を、最低1回は通過させました』という一番基本のレベルです。ただし、ELSE文（失敗ルート）の処理が抜けていても気づけない弱点があります。",
-    tip: "『すべての命令文を1回実行』＝ 命令網羅。"
+    "id": 2102,
+    "category": "test",
+    "categoryName": "テスト手法",
+    "importance": "★★★",
+    "summary": "命令網羅 ＝ 「すべての実行文（命令）」を少なくとも1回は通す",
+    "question": "ホワイトボックステストの網羅基準のうち、「プログラム中のすべての実行可能な命令文を、少なくとも1回は実行するテスト基準」はどれか？",
+    "options": [
+      "命令網羅",
+      "分岐網羅",
+      "条件網羅",
+      "パス網羅"
+    ],
+    "answer": 0,
+    "reasoning": "『プログラムに書いてあるすべての行を、最低1回は通過させました』という一番基本のレベルです。ただし、ELSE文（失敗ルート）の処理が抜けていても気づけない弱点があります。",
+    "tip": "『すべての命令文を1回実行』＝ 命令網羅。"
   },
   {
-    id: 2103, category: "test", categoryName: "テスト手法", importance: "★★★",
-    summary: "分岐網羅 (判定条件網羅) ＝ IF文の「真ルート」と「偽ルート」を両方通す",
-    question: "プログラム内のすべての条件判定（分岐点）において、「真（True）の分岐と偽（False）の分岐の両方を、少なくとも1回は実行する」テスト網羅基準はどれか？",
-    options: ["分岐網羅 (判定条件網羅)", "命令網羅", "限界値網羅", "複数条件網羅"],
-    answer: 0,
-    reasoning: "分かれ道に来たとき、『右（True）に行くテスト』と『左（False）に行くテスト』の両方を必ずやってみる基準です。これにより、分岐の処理漏れを防ぐことができます。",
-    tip: "『判定の真と偽の両方を少なくとも1回実行』＝ 分岐網羅（判定条件網羅）。"
+    "id": 2103,
+    "category": "test",
+    "categoryName": "テスト手法",
+    "importance": "★★★",
+    "summary": "分岐網羅 (判定条件網羅) ＝ IF文の「真ルート」と「偽ルート」を両方通す",
+    "question": "プログラム内のすべての条件判定（分岐点）において、「真（True）の分岐と偽（False）の分岐の両方を、少なくとも1回は実行する」テスト網羅基準はどれか？",
+    "options": [
+      "分岐網羅 (判定条件網羅)",
+      "命令網羅",
+      "限界値網羅",
+      "複数条件網羅"
+    ],
+    "answer": 0,
+    "reasoning": "分かれ道に来たとき、『右（True）に行くテスト』と『左（False）に行くテスト』の両方を必ずやってみる基準です。これにより、分岐の処理漏れを防ぐことができます。",
+    "tip": "『判定の真と偽の両方を少なくとも1回実行』＝ 分岐網羅（判定条件網羅）。"
   },
   {
-    id: 2104, category: "test", categoryName: "テスト手法", importance: "★★★",
-    summary: "限界値分析 (境界値分析) ＝ バグが出やすい「境界線のギリギリ前後」をテスト",
-    question: "「年齢が20歳以上なら成人、20歳未満なら未成年」という仕様のプログラムをブラックボックステストする際、限界値分析（境界値分析）として選ぶべき入力値の組み合わせはどれか？",
-    options: ["19歳 と 20歳", "0歳 と 100歳", "10歳 と 30歳", "20歳 と 21歳"],
-    answer: 0,
-    reasoning: "プログラマーが一番コードで間違えやすいのは『`>` なのか `>=` なのか』という境界線です！そのため、境界線の真上である『20歳』と、その境界の1つ手前である『19歳』をテストするのが最もバグを発見しやすい鉄則です。",
-    tip: "『境界線の値とその直前・直後の値』をテストするのが限界値分析。"
+    "id": 2104,
+    "category": "test",
+    "categoryName": "テスト手法",
+    "importance": "★★★",
+    "summary": "限界値分析 (境界値分析) ＝ バグが出やすい「境界線のギリギリ前後」をテスト",
+    "question": "「年齢が20歳以上なら成人、20歳未満なら未成年」という仕様のプログラムをブラックボックステストする際、限界値分析（境界値分析）として選ぶべき入力値の組み合わせはどれか？",
+    "options": [
+      "19歳 と 20歳",
+      "0歳 と 100歳",
+      "10歳 と 30歳",
+      "20歳 と 21歳"
+    ],
+    "answer": 0,
+    "reasoning": "プログラマーが一番コードで間違えやすいのは『`>` なのか `>=` なのか』という境界線です！そのため、境界線の真上である『20歳』と、その境界の1つ手前である『19歳』をテストするのが最もバグを発見しやすい鉄則です。",
+    "tip": "『境界線の値とその直前・直後の値』をテストするのが限界値分析。"
   },
   {
-    id: 2105, category: "test", categoryName: "テスト手法", importance: "★★☆",
-    summary: "リグレッションテスト (回帰テスト) ＝ プログラム修正で他の場所が壊れてないか確認",
-    question: "プログラムのバグ修正や機能追加を行った後に、「その修正によって、以前まで正常に動いていた他の部分に予期せぬ不具合（デグレード）が発生していないか」を確認するテストはどれか？",
-    options: ["リグレッションテスト (回帰テスト / 退行テスト)", "ストレステスト", "単体テスト", "受入テスト"],
-    answer: 0,
-    reasoning: "プログラムは複雑に絡み合っているため、A機能を直したせいで関係ないB機能が突然動かなくなる事故（デグレード）が日常茶飯事です。修正後に『過去にパスした全テストを一括で再実行して、他が壊れていないか確認する』のがリグレッションテストです。",
-    tip: "『修正による他機能への悪影響がないか確認』＝ リグレッションテスト（回帰テスト）。"
-  },
-
-  // 22. プロジェクトマネジメント (新規)
-  {
-    id: 2201, category: "project_mgmt", categoryName: "プロジェクト管理", importance: "★★★",
-    summary: "クリティカルパス ＝ 全工程の中で「最も日数がかかる最長ルート」（余裕日数ゼロ）",
-    question: "アローダイアグラム（PERT図）において、「プロジェクトの開始から終了までの全経路のうち、所要日数が最も長い経路」を何と呼ぶか？",
-    options: ["クリティカルパス", "最短経路", "ダミーアクティビティ", "フロートパス"],
-    answer: 0,
-    reasoning: "文系向け納得の理屈：\n料理で『お米を炊く（50分）』と『味噌汁を作る（15分）』を同時進行するとき、夕食が完成するまでには最低でも長い方の50分かかりますよね。この『一番時間がかかる最長ルート』が遅れると、プロジェクト全体が1日遅延します。この絶対遅れられない重要経路をクリティカルパス（致命的な道）と呼びます。",
-    tip: "『最長の日数がかかる経路』『余裕日数（フロート）がゼロ』＝ クリティカルパス。"
+    "id": 2105,
+    "category": "test",
+    "categoryName": "テスト手法",
+    "importance": "★★☆",
+    "summary": "リグレッションテスト (回帰テスト) ＝ プログラム修正で他の場所が壊れてないか確認",
+    "question": "プログラムのバグ修正や機能追加を行った後に、「その修正によって、以前まで正常に動いていた他の部分に予期せぬ不具合（デグレード）が発生していないか」を確認するテストはどれか？",
+    "options": [
+      "リグレッションテスト (回帰テスト / 退行テスト)",
+      "ストレステスト",
+      "単体テスト",
+      "受入テスト"
+    ],
+    "answer": 0,
+    "reasoning": "プログラムは複雑に絡み合っているため、A機能を直したせいで関係ないB機能が突然動かなくなる事故（デグレード）が日常茶飯事です。修正後に『過去にパスした全テストを一括で再実行して、他が壊れていないか確認する』のがリグレッションテストです。",
+    "tip": "『修正による他機能への悪影響がないか確認』＝ リグレッションテスト（回帰テスト）。"
   },
   {
-    id: 2202, category: "project_mgmt", categoryName: "プロジェクト管理", importance: "★★★",
-    summary: "EVM ＝ 進捗もコストもすべて「金額（価値）」に換算して管理する手法",
-    question: "プロジェクト管理において、進捗状況とコスト実績を「金額（アーンド・バリュー）」という共通の尺度に換算して統合管理する手法はどれか？",
-    options: ["EVM (Earned Value Management)", "WBS", "ファンクションポイント法", "ガントチャート"],
-    answer: 0,
-    reasoning: "『今、全体の何％終わった？』と聞かれても人によって感覚がバラバラです。そこで『100万円の予算のうち、今日までに完成した成果物の価値はいくら分か（EV: アーンドバリュー）』とすべて円（お金）に換算することで、『予算を使いすぎか』『スケジュールが遅れているか』を客観的な数字で管理します。",
-    tip: "『進捗と費用をお金に換算して管理』＝ EVM。"
+    "id": 2201,
+    "category": "project_mgmt",
+    "categoryName": "プロジェクト管理",
+    "importance": "★★★",
+    "summary": "クリティカルパス ＝ 全工程の中で「最も日数がかかる最長ルート」（余裕日数ゼロ）",
+    "question": "アローダイアグラム（PERT図）において、「プロジェクトの開始から終了までの全経路のうち、所要日数が最も長い経路」を何と呼ぶか？",
+    "options": [
+      "クリティカルパス",
+      "最短経路",
+      "ダミーアクティビティ",
+      "フロートパス"
+    ],
+    "answer": 0,
+    "reasoning": "文系向け納得の理屈：\n料理で『お米を炊く（50分）』と『味噌汁を作る（15分）』を同時進行するとき、夕食が完成するまでには最低でも長い方の50分かかりますよね。この『一番時間がかかる最長ルート』が遅れると、プロジェクト全体が1日遅延します。この絶対遅れられない重要経路をクリティカルパス（致命的な道）と呼びます。",
+    "tip": "『最長の日数がかかる経路』『余裕日数（フロート）がゼロ』＝ クリティカルパス。"
   },
   {
-    id: 2203, category: "project_mgmt", categoryName: "プロジェクト管理", importance: "★★★",
-    summary: "EVMの効率指数：CPI＝EV/AC、SPI＝EV/PV。どちらも「1以上なら優秀」！",
-    question: "EVM（アーンドバリューマネジメント）において、計画価値 PV=100万円、達成価値 EV=120万円、実コスト AC=100万円 であるプロジェクトの状況として、正しいものはどれか？",
-    options: [
+    "id": 2202,
+    "category": "project_mgmt",
+    "categoryName": "プロジェクト管理",
+    "importance": "★★★",
+    "summary": "EVM ＝ 進捗もコストもすべて「金額（価値）」に換算して管理する手法",
+    "question": "プロジェクト管理において、進捗状況とコスト実績を「金額（アーンド・バリュー）」という共通の尺度に換算して統合管理する手法はどれか？",
+    "options": [
+      "EVM (Earned Value Management)",
+      "WBS",
+      "ファンクションポイント法",
+      "ガントチャート"
+    ],
+    "answer": 0,
+    "reasoning": "『今、全体の何％終わった？』と聞かれても人によって感覚がバラバラです。そこで『100万円の予算のうち、今日までに完成した成果物の価値はいくら分か（EV: アーンドバリュー）』とすべて円（お金）に換算することで、『予算を使いすぎか』『スケジュールが遅れているか』を客観的な数字で管理します。",
+    "tip": "『進捗と費用をお金に換算して管理』＝ EVM。"
+  },
+  {
+    "id": 2203,
+    "category": "project_mgmt",
+    "categoryName": "プロジェクト管理",
+    "importance": "★★★",
+    "summary": "EVMの効率指数：CPI＝EV/AC、SPI＝EV/PV。どちらも「1以上なら優秀」！",
+    "question": "EVM（アーンドバリューマネジメント）において、計画価値 PV=100万円、達成価値 EV=120万円、実コスト AC=100万円 であるプロジェクトの状況として、正しいものはどれか？",
+    "options": [
       "コストは予算内に収まっており、スケジュールも前倒しで進んでいる（極めて順調）",
       "コストは超過しており、スケジュールも遅延している",
       "コストは予算内だが、スケジュールは大幅に遅延している",
       "スケジュールは前倒しだが、コストは大幅に予算を超過している"
     ],
-    answer: 0,
-    reasoning: "文系の超簡単判定法（EVが基準！）：\n• コスト判定：100万円（AC）使って、120万円分（EV）の仕事ができた $\\rightarrow 120/100 = 1.2$（CPI $\\ge 1$ なので予算節約・黒字！）\n• スケジュール判定：100万円分（PV）進む予定だったのに、120万円分（EV）進んだ $\\rightarrow 120/100 = 1.2$（SPI $\\ge 1$ なので前倒し進行！）\nどちらも1を超えているので絶好調です！",
-    tip: "『CPI = EV / AC』『SPI = EV / PV』。どちらも『1以上なら優秀・合格』と覚えましょう！"
+    "answer": 0,
+    "reasoning": "文系の超簡単判定法（EVが基準！）：\n• コスト判定：100万円（AC）使って、120万円分（EV）の仕事ができた $\\rightarrow 120/100 = 1.2$（CPI $\\ge 1$ なので予算節約・黒字！）\n• スケジュール判定：100万円分（PV）進む予定だったのに、120万円分（EV）進んだ $\\rightarrow 120/100 = 1.2$（SPI $\\ge 1$ なので前倒し進行！）\nどちらも1を超えているので絶好調です！",
+    "tip": "『CPI = EV / AC』『SPI = EV / PV』。どちらも『1以上なら優秀・合格』と覚えましょう！"
   },
   {
-    id: 2204, category: "project_mgmt", categoryName: "プロジェクト管理", importance: "★★☆",
-    summary: "WBS ＝ プロジェクトの全作業をツリー状に階層的に細分化した図",
-    question: "プロジェクトで実施すべき作業全体を、大分類・中分類・小分類へと階層構造で細分化し、担当者や工数を明確にするための手法はどれか？",
-    options: ["WBS (Work Breakdown Structure)", "アローダイアグラム", "ガントチャート", "マトリックス組織図"],
-    answer: 0,
-    reasoning: "英語のままです！『Work（仕事）を Breakdown（分解した）Structure（構造図）』。\n例えば『Webサイト制作』という大きな仕事を『デザイン $\\rightarrow$ トップページ作成、詳細ページ作成』『開発 $\\rightarrow$ DB設計、API作成』と細かく分解してモレ・ヌケをなくします。",
-    tip: "『作業を階層的に細分化・構造化した図』＝ WBS。"
-  },
-
-  // 23. サービスマネジメント (新規)
-  {
-    id: 2301, category: "service_mgmt", categoryName: "サービス管理", importance: "★★★",
-    summary: "ITIL ＝ ITサービスマネジメントの「成功事例・ベストプラクティス集」",
-    question: "ITサービスマネジメント（ITSM）を実践するために、英国政府主導で世界中の成功事例（ベストプラクティス）を体系的にまとめた書籍群はどれか？",
-    options: ["ITIL (Information Technology Infrastructure Library)", "CMMI", "PMBOK", "COBIT"],
-    answer: 0,
-    reasoning: "IT業界の『先輩たちの知恵袋・成功マニュアル集』です。ITシステムを運用・保守するときに『どういう体制にすれば事故が減るか』のノウハウがギッシリ詰まっています（※PMBOKはプロジェクト管理の本、ITILはサービス運用の本）。",
-    tip: "『ITサービスマネジメントのベストプラクティス集』＝ ITIL。"
+    "id": 2204,
+    "category": "project_mgmt",
+    "categoryName": "プロジェクト管理",
+    "importance": "★★☆",
+    "summary": "WBS ＝ プロジェクトの全作業をツリー状に階層的に細分化した図",
+    "question": "プロジェクトで実施すべき作業全体を、大分類・中分類・小分類へと階層構造で細分化し、担当者や工数を明確にするための手法はどれか？",
+    "options": [
+      "WBS (Work Breakdown Structure)",
+      "アローダイアグラム",
+      "ガントチャート",
+      "マトリックス組織図"
+    ],
+    "answer": 0,
+    "reasoning": "英語のままです！『Work（仕事）を Breakdown（分解した）Structure（構造図）』。\n例えば『Webサイト制作』という大きな仕事を『デザイン $\\rightarrow$ トップページ作成、詳細ページ作成』『開発 $\\rightarrow$ DB設計、API作成』と細かく分解してモレ・ヌケをなくします。",
+    "tip": "『作業を階層的に細分化・構造化した図』＝ WBS。"
   },
   {
-    id: 2302, category: "service_mgmt", categoryName: "サービス管理", importance: "★★★",
-    summary: "SLA ＝ サービスの品質・稼働率について結ぶ「合意文書（契約約束事）」",
-    question: "ITサービスの提供者と利用者の間で、「稼働率99.9%以上」や「問い合わせ対応時間」など、提供するサービスの品質水準をあらかじめ明文化して合意した契約文書はどれか？",
-    options: ["SLA (Service Level Agreement : サービスレベル合意書)", "NDA (秘密保持契約書)", "RFP (提案依頼書)", "BCP (事業継続計画)"],
-    answer: 0,
-    reasoning: "『サーバーが止まったら損害賠償だ！』『いや、そんな約束はしていない！』というモメ事を防ぐため、事前に『年間の稼働率は99.9%を保証します。障害が起きたら1時間以内に駆けつけます』とサービス品質（レベル）を約束・合意（アグリーメント）しておく契約書です。",
-    tip: "『サービス品質・水準の合意文書』＝ SLA。"
+    "id": 2301,
+    "category": "service_mgmt",
+    "categoryName": "サービス管理",
+    "importance": "★★★",
+    "summary": "ITIL ＝ ITサービスマネジメントの「成功事例・ベストプラクティス集」",
+    "question": "ITサービスマネジメント（ITSM）を実践するために、英国政府主導で世界中の成功事例（ベストプラクティス）を体系的にまとめた書籍群はどれか？",
+    "options": [
+      "ITIL (Information Technology Infrastructure Library)",
+      "CMMI",
+      "PMBOK",
+      "COBIT"
+    ],
+    "answer": 0,
+    "reasoning": "IT業界の『先輩たちの知恵袋・成功マニュアル集』です。ITシステムを運用・保守するときに『どういう体制にすれば事故が減るか』のノウハウがギッシリ詰まっています（※PMBOKはプロジェクト管理の本、ITILはサービス運用の本）。",
+    "tip": "『ITサービスマネジメントのベストプラクティス集』＝ ITIL。"
   },
   {
-    id: 2303, category: "service_mgmt", categoryName: "サービス管理", importance: "★★★",
-    summary: "インシデント管理＝「とにかく早く暫定復旧」、問題管理＝「根本原因の究明と再発防止」",
-    question: "ITILのサービス運用における「インシデント管理」の主たる目的として、最も適切なものはどれか？",
-    options: [
+    "id": 2302,
+    "category": "service_mgmt",
+    "categoryName": "サービス管理",
+    "importance": "★★★",
+    "summary": "SLA ＝ サービスの品質・稼働率について結ぶ「合意文書（契約約束事）」",
+    "question": "ITサービスの提供者と利用者の間で、「稼働率99.9%以上」や「問い合わせ対応時間」など、提供するサービスの品質水準をあらかじめ明文化して合意した契約文書はどれか？",
+    "options": [
+      "SLA (Service Level Agreement : サービスレベル合意書)",
+      "NDA (秘密保持契約書)",
+      "RFP (提案依頼書)",
+      "BCP (事業継続計画)"
+    ],
+    "answer": 0,
+    "reasoning": "『サーバーが止まったら損害賠償だ！』『いや、そんな約束はしていない！』というモメ事を防ぐため、事前に『年間の稼働率は99.9%を保証します。障害が起きたら1時間以内に駆けつけます』とサービス品質（レベル）を約束・合意（アグリーメント）しておく契約書です。",
+    "tip": "『サービス品質・水準の合意文書』＝ SLA。"
+  },
+  {
+    "id": 2303,
+    "category": "service_mgmt",
+    "categoryName": "サービス管理",
+    "importance": "★★★",
+    "summary": "インシデント管理＝「とにかく早く暫定復旧」、問題管理＝「根本原因の究明と再発防止」",
+    "question": "ITILのサービス運用における「インシデント管理」の主たる目的として、最も適切なものはどれか？",
+    "options": [
       "サービスの停止や品質低下が発生した際、可能な限り迅速にサービスを暫定復旧させること",
       "障害の根本的な原因を突き止め、恒久的な再発防止策を策定すること",
       "変更作業に伴うリスクを評価し、関係者の承認を得ること",
       "将来のシステム利用量の増加を予測し、サーバースペックを増強すること"
     ],
-    answer: 0,
-    reasoning: "超重要対比（試験で超問われます！）：\n• インシデント管理（救急救命医）：『とにかく患者を生かす（早くシステムを再起動して暫定復旧させる）』のが仕事。原因究明は後回し。\n• 問題管理（病理医・研究者）：『なぜ病気になったのか根本原因を突き止め、二度と同じ障害が起きないように恒久対策する』のが仕事。",
-    tip: "『迅速な暫定復旧＝インシデント管理』『根本原因の究明・再発防止＝問題管理』。"
+    "answer": 0,
+    "reasoning": "超重要対比（試験で超問われます！）：\n• インシデント管理（救急救命医）：『とにかく患者を生かす（早くシステムを再起動して暫定復旧させる）』のが仕事。原因究明は後回し。\n• 問題管理（病理医・研究者）：『なぜ病気になったのか根本原因を突き止め、二度と同じ障害が起きないように恒久対策する』のが仕事。",
+    "tip": "『迅速な暫定復旧＝インシデント管理』『根本原因の究明・再発防止＝問題管理』。"
   },
   {
-    id: 2304, category: "service_mgmt", categoryName: "サービス管理", importance: "★★☆",
-    summary: "サービスデスク ＝ ユーザーからのあらゆる問い合わせを受け付ける「単一窓口 (SPOC)」",
-    question: "ユーザーからの障害報告、操作の質問、サービス利用申請など、あらゆる問い合わせを一元的に受け付ける「単一窓口（SPOC）」の役割を担う組織はどれか？",
-    options: ["サービスデスク", "開発チーム", "サーバー管理者", "情報セキュリティ委員会"],
-    answer: 0,
-    reasoning: "『PCが動かない時は総務？情シス？サーバー担当？どこに電話すればいいの？』とユーザーが迷わないよう、すべての問い合わせを受け止める総合窓口（コンシェルジュ）です。ここで一次切り分けをして担当へ引き継ぎます。",
-    tip: "『問い合わせの単一窓口（SPOC : Single Point of Contact）』＝ サービスデスク。"
+    "id": 2304,
+    "category": "service_mgmt",
+    "categoryName": "サービス管理",
+    "importance": "★★☆",
+    "summary": "サービスデスク ＝ ユーザーからのあらゆる問い合わせを受け付ける「単一窓口 (SPOC)」",
+    "question": "ユーザーからの障害報告、操作の質問、サービス利用申請など、あらゆる問い合わせを一元的に受け付ける「単一窓口（SPOC）」の役割を担う組織はどれか？",
+    "options": [
+      "サービスデスク",
+      "開発チーム",
+      "サーバー管理者",
+      "情報セキュリティ委員会"
+    ],
+    "answer": 0,
+    "reasoning": "『PCが動かない時は総務？情シス？サーバー担当？どこに電話すればいいの？』とユーザーが迷わないよう、すべての問い合わせを受け止める総合窓口（コンシェルジュ）です。ここで一次切り分けをして担当へ引き継ぎます。",
+    "tip": "『問い合わせの単一窓口（SPOC : Single Point of Contact）』＝ サービスデスク。"
   },
-
-  // 24. 情報システム戦略・EA (新規)
   {
-    id: 2401, category: "system_strategy", categoryName: "システム戦略", importance: "★★★",
-    summary: "EA (エンタープライズアーキテクチャ) ＝ 4つの階層（BA → DA → AA → TA）",
-    question: "大企業や政府機関の業務とITシステムを全体最適化する手法「エンタープライズアーキテクチャ（EA）」を構成する4つの体系の正しい組み合わせはどれか？",
-    options: [
+    "id": 2401,
+    "category": "system_strategy",
+    "categoryName": "システム戦略",
+    "importance": "★★★",
+    "summary": "EA (エンタープライズアーキテクチャ) ＝ 4つの階層（BA → DA → AA → TA）",
+    "question": "大企業や政府機関の業務とITシステムを全体最適化する手法「エンタープライズアーキテクチャ（EA）」を構成する4つの体系の正しい組み合わせはどれか？",
+    "options": [
       "ビジネス (BA)、データ (DA)、アプリケーション (AA)、テクノロジー (TA)",
       "戦略 (SA)、開発 (DA)、運用 (OA)、保守 (MA)",
       "顧客 (CA)、財務 (FA)、業務 (BA)、学習 (LA)",
       "クラウド (CA)、ネットワーク (NA)、サーバー (SA)、クライアント (CA)"
     ],
-    answer: 0,
-    reasoning: "上から下への4段ピラミッド：\n1. ビジネス（BA）：そもそもどんな業務プロセスや組織構造なのか？\n2. データ（DA）：その業務でどんなデータをやり取りするのか？\n3. アプリケーション（AA）：そのデータを処理するアプリはどう連携するのか？\n4. テクノロジー（TA）：それらを動かすサーバーやネットワーク（ハード）はどうするのか？",
-    tip: "『B・D・A・T（ビジネス・データ・アプリ・テクノロジー）』で暗記！"
+    "answer": 0,
+    "reasoning": "上から下への4段ピラミッド：\n1. ビジネス（BA）：そもそもどんな業務プロセスや組織構造なのか？\n2. データ（DA）：その業務でどんなデータをやり取りするのか？\n3. アプリケーション（AA）：そのデータを処理するアプリはどう連携するのか？\n4. テクノロジー（TA）：それらを動かすサーバーやネットワーク（ハード）はどうするのか？",
+    "tip": "『B・D・A・T（ビジネス・データ・アプリ・テクノロジー）』で暗記！"
   },
   {
-    id: 2402, category: "system_strategy", categoryName: "システム戦略", importance: "★★☆",
-    summary: "SoR＝正確な記録のための基幹系、SoE＝顧客とのつながりを強化するWeb系",
-    question: "情報システムを目的別に分類した概念のうち、「顧客とのエンゲージメント（関係性・つながり）を高め、顧客体験を向上させることを主目的とするシステム」はどれか？",
-    options: ["SoE (Systems of Engagement)", "SoR (Systems of Record)", "SoI (Systems of Insight)", "ERP"],
-    answer: 0,
-    reasoning: "英語の対比：\n• SoR（Record = 記録）：会計システムや人事給与など、1円のズレも許されない『正確な記録』が命の重厚な基幹システム。\n• SoE（Engagement = つながり・絆）：スマホアプリやSNS連携、ECサイトなど、『顧客とつながりファンになってもらう』ためのスピード重視のシステム。",
-    tip: "『記録＝SoR』『顧客とのつながり＝SoE』。"
+    "id": 2402,
+    "category": "system_strategy",
+    "categoryName": "システム戦略",
+    "importance": "★★☆",
+    "summary": "SoR＝正確な記録のための基幹系、SoE＝顧客とのつながりを強化するWeb系",
+    "question": "情報システムを目的別に分類した概念のうち、「顧客とのエンゲージメント（関係性・つながり）を高め、顧客体験を向上させることを主目的とするシステム」はどれか？",
+    "options": [
+      "SoE (Systems of Engagement)",
+      "SoR (Systems of Record)",
+      "SoI (Systems of Insight)",
+      "ERP"
+    ],
+    "answer": 0,
+    "reasoning": "英語の対比：\n• SoR（Record = 記録）：会計システムや人事給与など、1円のズレも許されない『正確な記録』が命の重厚な基幹システム。\n• SoE（Engagement = つながり・絆）：スマホアプリやSNS連携、ECサイトなど、『顧客とつながりファンになってもらう』ためのスピード重視のシステム。",
+    "tip": "『記録＝SoR』『顧客とのつながり＝SoE』。"
   },
-
-  // 25. 事業戦略・BSC (新規)
   {
-    id: 2501, category: "business_strategy", categoryName: "事業戦略", importance: "★★★",
-    summary: "BSC (バランススコアカード) ＝ 財務・顧客・内部業務・学習と成長の4つの視点",
-    question: "企業の戦略目標を達成するために、従来の財務指標だけでなく「4つの視点」からバランスよく業績を評価・管理する手法「バランススコアカード（BSC）」の4つの視点はどれか？",
-    options: [
+    "id": 2501,
+    "category": "business_strategy",
+    "categoryName": "事業戦略",
+    "importance": "★★★",
+    "summary": "BSC (バランススコアカード) ＝ 財務・顧客・内部業務・学習と成長の4つの視点",
+    "question": "企業の戦略目標を達成するために、従来の財務指標だけでなく「4つの視点」からバランスよく業績を評価・管理する手法「バランススコアカード（BSC）」の4つの視点はどれか？",
+    "options": [
       "財務の視点、顧客の視点、内部ビジネスプロセスの視点、学習と成長の視点",
       "強みの視点、弱みの視点、機会の視点、脅威の視点",
       "株主の視点、従業員の視点、取引先の視点、社会の視点",
       "製品の視点、価格の視点、流通の視点、プロモーションの視点"
     ],
-    answer: 0,
-    reasoning: "文系向けストーリー理解：\n目先の『売上や利益（財務）』ばかり追うと会社は潰れます。良い会社を作る因果関係ストーリー：\n① 社員が勉強して成長する（学習と成長）\n$\\rightarrow$ ② 業務効率や製品品質が良くなる（内部ビジネスプロセス）\n$\\rightarrow$ ③ お客さんが喜んでファンになる（顧客）\n$\\rightarrow$ ④ その結果として売上と利益が爆増する！（財務）",
-    tip: "『財務・顧客・内部プロセス・学習と成長』の4つ。この名称がそのまま試験に出ます！"
+    "answer": 0,
+    "reasoning": "文系向けストーリー理解：\n目先の『売上や利益（財務）』ばかり追うと会社は潰れます。良い会社を作る因果関係ストーリー：\n① 社員が勉強して成長する（学習と成長）\n$\\rightarrow$ ② 業務効率や製品品質が良くなる（内部ビジネスプロセス）\n$\\rightarrow$ ③ お客さんが喜んでファンになる（顧客）\n$\\rightarrow$ ④ その結果として売上と利益が爆増する！（財務）",
+    "tip": "『財務・顧客・内部プロセス・学習と成長』の4つ。この名称がそのまま試験に出ます！"
   },
   {
-    id: 2502, category: "business_strategy", categoryName: "事業戦略", importance: "★★☆",
-    summary: "KGI ＝ 最終ゴール目標、KPI ＝ ゴールに至る中間プロセスの達成指標",
-    question: "目標管理における指標のうち、「売上高10億円達成」のような最終的な成果目標を示す「KGI」に対して、その達成に向けた日々の活動進捗を測る「中間目標指標」を何と呼ぶか？",
-    options: ["KPI (重要業績評価指標)", "CSF (重要成功要因)", "ROI (投資利益率)", "ROA (総資産利益率)"],
-    answer: 0,
-    reasoning: "ダイエットで例えられます：\n• KGI（Goal = 最終ゴール）：『3ヶ月で体重を5kg減らす！』\n• CSF（Success Factor = 成功のツボ）：『毎日の摂取カロリーを抑えること』\n• KPI（Performance Indicator = 日々の測定メーター）：『毎日ウォーキングを1万歩歩く』『間食をゼロにする』",
-    tip: "『最終目標＝KGI』『中間の行動・進捗指標＝KPI』。"
+    "id": 2502,
+    "category": "business_strategy",
+    "categoryName": "事業戦略",
+    "importance": "★★☆",
+    "summary": "KGI ＝ 最終ゴール目標、KPI ＝ ゴールに至る中間プロセスの達成指標",
+    "question": "目標管理における指標のうち、「売上高10億円達成」のような最終的な成果目標を示す「KGI」に対して、その達成に向けた日々の活動進捗を測る「中間目標指標」を何と呼ぶか？",
+    "options": [
+      "KPI (重要業績評価指標)",
+      "CSF (重要成功要因)",
+      "ROI (投資利益率)",
+      "ROA (総資産利益率)"
+    ],
+    "answer": 0,
+    "reasoning": "ダイエットで例えられます：\n• KGI（Goal = 最終ゴール）：『3ヶ月で体重を5kg減らす！』\n• CSF（Success Factor = 成功のツボ）：『毎日の摂取カロリーを抑えること』\n• KPI（Performance Indicator = 日々の測定メーター）：『毎日ウォーキングを1万歩歩く』『間食をゼロにする』",
+    "tip": "『最終目標＝KGI』『中間の行動・進捗指標＝KPI』。"
   },
   {
-    id: 2503, category: "business_strategy", categoryName: "事業戦略", importance: "★★☆",
-    summary: "PPM ＝ 花形(高成長高占有)、金のなる木(低成長高占有で稼ぎ頭)、問題児、負け犬",
-    question: "プロダクトポートフォリオマネジメント（PPM）において、「市場成長率は低いが、自社の市場占有率は高く、多くの利益（現金）を生み出してくれる事業」を何と呼ぶか？",
-    options: ["金のなる木 (Cash Cow)", "花形 (Star)", "問題児 (Question Mark)", "負け犬 (Dog)"],
-    answer: 0,
-    reasoning: "4つの部屋のキャラクター：\n• 花形（Star）：市場も伸びててシェアも1位！花形だけど、投資もたくさん必要。\n• 金のなる木（Cash Cow）：市場の成長は止まったがシェア1位なので、追加投資しなくても毎日お金がジャブジャブ入ってくる稼ぎ頭！\n• 問題児（Question Mark）：市場は伸びてるのに自社シェアが低い。お金を注ぎ込んで花形に育てるか迷う。\n• 負け犬（Dog）：市場も死んでてシェアも低い。撤退すべき。",
-    tip: "『低成長 × 高シェア ＝ 金のなる木』。"
-  },
-
-  // 26. OR / IE・分析手法 (新規)
-  {
-    id: 2601, category: "or_ie", categoryName: "OR・IE分析手法", importance: "★★★",
-    summary: "パレート図 ＝ 棒グラフ＋累積折れ線グラフ（ABC分析・重点管理）",
-    question: "不具合の原因や売上データなどを件数の多い順に棒グラフで並べ、その累積比率を折れ線グラフで重ねて描くことで、重点的に対処すべき項目を特定する図はどれか？",
-    options: ["パレート図", "散布図", "特性要因図", "ヒストグラム"],
-    answer: 0,
-    reasoning: "『パレートの法則（20対80の法則）』を使った図です。『売上の8割は、上位2割の人気商品が生み出している』『不具合の8割は、上位2割の原因から起きている』。棒グラフで大きい順に並べ、累積が80%に達するまでの上位項目にリソースを集中投下（ABC分析）するために使います。",
-    tip: "『棒グラフ ＋ 累積比率の折れ線グラフ』＝ パレート図。"
+    "id": 2503,
+    "category": "business_strategy",
+    "categoryName": "事業戦略",
+    "importance": "★★☆",
+    "summary": "PPM ＝ 花形(高成長高占有)、金のなる木(低成長高占有で稼ぎ頭)、問題児、負け犬",
+    "question": "プロダクトポートフォリオマネジメント（PPM）において、「市場成長率は低いが、自社の市場占有率は高く、多くの利益（現金）を生み出してくれる事業」を何と呼ぶか？",
+    "options": [
+      "金のなる木 (Cash Cow)",
+      "花形 (Star)",
+      "問題児 (Question Mark)",
+      "負け犬 (Dog)"
+    ],
+    "answer": 0,
+    "reasoning": "4つの部屋のキャラクター：\n• 花形（Star）：市場も伸びててシェアも1位！花形だけど、投資もたくさん必要。\n• 金のなる木（Cash Cow）：市場の成長は止まったがシェア1位なので、追加投資しなくても毎日お金がジャブジャブ入ってくる稼ぎ頭！\n• 問題児（Question Mark）：市場は伸びてるのに自社シェアが低い。お金を注ぎ込んで花形に育てるか迷う。\n• 負け犬（Dog）：市場も死んでてシェアも低い。撤退すべき。",
+    "tip": "『低成長 × 高シェア ＝ 金のなる木』。"
   },
   {
-    id: 2602, category: "or_ie", categoryName: "OR・IE分析手法", importance: "★★★",
-    summary: "特性要因図 ＝ 魚の骨（フィッシュボーン）。原因と結果の関係を体系化",
-    question: "問題となっている結果（特性）に対して、影響を与えている様々な原因（要因）を大骨・中骨・小骨のツリー状に整理した、魚の骨のような形の図はどれか？",
-    options: ["特性要因図 (フィッシュボーンダイアグラム)", "パレート図", "管理図", "散布図"],
-    answer: 0,
-    reasoning: "魚の頭に『不良品が多い（結果）』を書き、背骨から『人（Man）』『機械（Machine）』『材料（Material）』『方法（Method）』の4大原因の大骨を生やし、さらに細かい原因を小骨として書き足してブレインストーミングする図です。",
-    tip: "『魚の骨のような図・原因と結果の因果関係』＝ 特性要因図。"
+    "id": 2601,
+    "category": "or_ie",
+    "categoryName": "OR・IE分析手法",
+    "importance": "★★★",
+    "summary": "パレート図 ＝ 棒グラフ＋累積折れ線グラフ（ABC分析・重点管理）",
+    "question": "不具合の原因や売上データなどを件数の多い順に棒グラフで並べ、その累積比率を折れ線グラフで重ねて描くことで、重点的に対処すべき項目を特定する図はどれか？",
+    "options": [
+      "パレート図",
+      "散布図",
+      "特性要因図",
+      "ヒストグラム"
+    ],
+    "answer": 0,
+    "reasoning": "『パレートの法則（20対80の法則）』を使った図です。『売上の8割は、上位2割の人気商品が生み出している』『不具合の8割は、上位2割の原因から起きている』。棒グラフで大きい順に並べ、累積が80%に達するまでの上位項目にリソースを集中投下（ABC分析）するために使います。",
+    "tip": "『棒グラフ ＋ 累積比率の折れ線グラフ』＝ パレート図。"
   },
   {
-    id: 2603, category: "or_ie", categoryName: "OR・IE分析手法", importance: "★★☆",
-    summary: "散布図 ＝ 2つのデータの相関関係（正の相関、負の相関）を見る",
-    question: "「気温」と「アイスの売上」のように、2つの変数のデータを縦軸と横軸に点（ドット）としてプロットし、両者の間に相関関係があるかを視覚的に確認する図はどれか？",
-    options: ["散布図", "ヒストグラム", "パレート図", "レーダーチャート"],
-    answer: 0,
-    reasoning: "右肩上がりに点が集まっていれば『正の相関（気温が上がるとアイスが売れる）』、右肩下がりなら『負の相関（気温が上がるとおでんが売れなくなる）』、バラバラなら『無相関』と一目で分かります。",
-    tip: "『2つの変数の相関関係をプロット』＝ 散布図。"
+    "id": 2602,
+    "category": "or_ie",
+    "categoryName": "OR・IE分析手法",
+    "importance": "★★★",
+    "summary": "特性要因図 ＝ 魚の骨（フィッシュボーン）。原因と結果の関係を体系化",
+    "question": "問題となっている結果（特性）に対して、影響を与えている様々な原因（要因）を大骨・中骨・小骨のツリー状に整理した、魚の骨のような形の図はどれか？",
+    "options": [
+      "特性要因図 (フィッシュボーンダイアグラム)",
+      "パレート図",
+      "管理図",
+      "散布図"
+    ],
+    "answer": 0,
+    "reasoning": "魚の頭に『不良品が多い（結果）』を書き、背骨から『人（Man）』『機械（Machine）』『材料（Material）』『方法（Method）』の4大原因の大骨を生やし、さらに細かい原因を小骨として書き足してブレインストーミングする図です。",
+    "tip": "『魚の骨のような図・原因と結果の因果関係』＝ 特性要因図。"
   },
   {
-    id: 2604, category: "or_ie", categoryName: "OR・IE分析手法", importance: "★★☆",
-    summary: "管理図 ＝ 中心線と上方・下方限界線で「異常」を監視する折れ線グラフ",
-    question: "製造工程などの品質管理において、時系列の折れ線グラフに中心線（CL）と上方管理限界線（UCL）、下方管理限界線（LCL）を引き、工程が安定した状態にあるかを判定する図はどれか？",
-    options: ["管理図", "パレート図", "特性要因図", "チェックシート"],
-    answer: 0,
-    reasoning: "心電図のモニターのようなものです！正常な範囲を示す『上下のガードレール（管理限界線）』が引いてあり、日々の品質データがその線の内側に収まっていれば安全。もし線からはみ出したら『機械が故障したか、何らかの異常が発生した！』と即座にラインを止めて調査します。",
-    tip: "『中心線と管理限界線（UCL/LCL）で工程の異常を検知』＝ 管理図。"
+    "id": 2603,
+    "category": "or_ie",
+    "categoryName": "OR・IE分析手法",
+    "importance": "★★☆",
+    "summary": "散布図 ＝ 2つのデータの相関関係（正の相関、負の相関）を見る",
+    "question": "「気温」と「アイスの売上」のように、2つの変数のデータを縦軸と横軸に点（ドット）としてプロットし、両者の間に相関関係があるかを視覚的に確認する図はどれか？",
+    "options": [
+      "散布図",
+      "ヒストグラム",
+      "パレート図",
+      "レーダーチャート"
+    ],
+    "answer": 0,
+    "reasoning": "右肩上がりに点が集まっていれば『正の相関（気温が上がるとアイスが売れる）』、右肩下がりなら『負の相関（気温が上がるとおでんが売れなくなる）』、バラバラなら『無相関』と一目で分かります。",
+    "tip": "『2つの変数の相関関係をプロット』＝ 散布図。"
   },
   {
-    id: 2605, category: "or_ie", categoryName: "OR・IE分析手法", importance: "★★☆",
-    summary: "線形計画法 ＝ 一次不等式の制約の中で利益を最大化する数学的手法",
-    question: "限られた原材料や労働時間といった複数の制約条件（一次不等式）のもとで、得られる利益（一次目的関数）を最大化するための生産計画を数学的に求める手法はどれか？",
-    options: ["線形計画法 (Linear Programming)", "ゲーム理論", "マルコフ連鎖", "モンテカルロ法"],
-    answer: 0,
-    reasoning: "高校数学の『領域と最大・最小』です！\n『パンAを作るのに小麦粉100g・砂糖20g必要』『パンBを作るのに小麦粉50g・砂糖50g必要』『小麦粉は10kg、砂糖は3kgしかない』という不等式の枠の中で、『利益＝300A ＋ 200B』が最大になる交点を求める手法です。",
-    tip: "『制約条件（一次不等式）のもとで利益を最大化』＝ 線形計画法。"
+    "id": 2604,
+    "category": "or_ie",
+    "categoryName": "OR・IE分析手法",
+    "importance": "★★☆",
+    "summary": "管理図 ＝ 中心線と上方・下方限界線で「異常」を監視する折れ線グラフ",
+    "question": "製造工程などの品質管理において、時系列の折れ線グラフに中心線（CL）と上方管理限界線（UCL）、下方管理限界線（LCL）を引き、工程が安定した状態にあるかを判定する図はどれか？",
+    "options": [
+      "管理図",
+      "パレート図",
+      "特性要因図",
+      "チェックシート"
+    ],
+    "answer": 0,
+    "reasoning": "心電図のモニターのようなものです！正常な範囲を示す『上下のガードレール（管理限界線）』が引いてあり、日々の品質データがその線の内側に収まっていれば安全。もし線からはみ出したら『機械が故障したか、何らかの異常が発生した！』と即座にラインを止めて調査します。",
+    "tip": "『中心線と管理限界線（UCL/LCL）で工程の異常を検知』＝ 管理図。"
+  },
+  {
+    "id": 2605,
+    "category": "or_ie",
+    "categoryName": "OR・IE分析手法",
+    "importance": "★★☆",
+    "summary": "線形計画法 ＝ 一次不等式の制約の中で利益を最大化する数学的手法",
+    "question": "限られた原材料や労働時間といった複数の制約条件（一次不等式）のもとで、得られる利益（一次目的関数）を最大化するための生産計画を数学的に求める手法はどれか？",
+    "options": [
+      "線形計画法 (Linear Programming)",
+      "ゲーム理論",
+      "マルコフ連鎖",
+      "モンテカルロ法"
+    ],
+    "answer": 0,
+    "reasoning": "高校数学の『領域と最大・最小』です！\n『パンAを作るのに小麦粉100g・砂糖20g必要』『パンBを作るのに小麦粉50g・砂糖50g必要』『小麦粉は10kg、砂糖は3kgしかない』という不等式の枠の中で、『利益＝300A ＋ 200B』が最大になる交点を求める手法です。",
+    "tip": "『制約条件（一次不等式）のもとで利益を最大化』＝ 線形計画法。"
+  },
+  {
+    "id": 2701,
+    "category": "sys_reliability",
+    "categoryName": "システム構成・信頼性",
+    "importance": "★★★",
+    "summary": "直列システムの稼働率 ＝ R1 × R2（両方動いて初めて動く）",
+    "question": "稼働率がともに0.9である2台のサーバーを「直列」に接続したシステムの全体の稼働率はいくつか？",
+    "options": [
+      "0.81",
+      "0.99",
+      "0.90",
+      "0.18"
+    ],
+    "answer": 0,
+    "reasoning": "文系向け掛け算ルール：\n直列は『一本道』です。1台目が動いて（0.9）、かつ2台目も動く（0.9）ときだけシステムが動くので、確率の掛け算になります。\n$0.9 \\times 0.9 = 0.81$\n直列につなぐと、部品が増えるほど全体の稼働率は下がります！",
+    "tip": "『直列は掛け算（R1 × R2）』。絶対に1台の稼働率より小さくなります。"
+  },
+  {
+    "id": 2702,
+    "category": "sys_reliability",
+    "categoryName": "システム構成・信頼性",
+    "importance": "★★★",
+    "summary": "並列システムの稼働率 ＝ 1 - (1 - R1)(1 - R2)（片方でも動けばOK）",
+    "question": "稼働率がともに0.9である2台のサーバーを「並列」に接続し、どちらか片方でも動いていれば稼働できるシステムの全体稼働率はいくつか？",
+    "options": [
+      "0.99",
+      "0.81",
+      "0.90",
+      "0.95"
+    ],
+    "answer": 0,
+    "reasoning": "余事象（全体から引く）で一発です！\n並列システムが止まるのは『2台とも同時にぶっ壊れたとき』だけです。\n• 1台目が壊れる確率：$1 - 0.9 = 0.1$\n• 2台目も同時に壊れる確率：$0.1 \\times 0.1 = 0.01$\nしたがって動いている確率は：$1 - 0.01 = 0.99$（99%）となります！",
+    "tip": "『並列は 1 - (故障率の掛け算)』。部品を増やすほど99.9%に近づきます。"
+  },
+  {
+    "id": 2703,
+    "category": "sys_reliability",
+    "categoryName": "システム構成・信頼性",
+    "importance": "★★★",
+    "summary": "稼働率 ＝ MTBF / (MTBF + MTTR)。MTBF＝元気に動く時間、MTTR＝修理時間",
+    "question": "システムの信頼性指標において、稼働率を求める正しい計算式はどれか？（※MTBF：平均故障間隔、MTTR：平均修理時間）",
+    "options": [
+      "MTBF / (MTBF + MTTR)",
+      "MTTR / (MTBF + MTTR)",
+      "MTBF / MTTR",
+      "(MTBF + MTTR) / MTBF"
+    ],
+    "answer": 0,
+    "reasoning": "言葉の意味を考えれば暗記不要です！\n• MTBF（Mean Time Between Failures）：故障と故障の間の『元気に動いていた時間』\n• MTTR（Mean Time To Repair）：ぶっ壊れてから『修理していた時間』\n全体の時間（動いてた時間＋修理時間）のうち、『元気に動いていた時間の割合』が稼働率ですから、$\\frac{\\text{MTBF}}{\\text{MTBF} + \\text{MTTR}}$ になります！",
+    "tip": "『稼働率 ＝ 元気な時間 / 全体の時間』。MTBFが分子に来ます！"
+  },
+  {
+    "id": 2704,
+    "category": "sys_reliability",
+    "categoryName": "システム構成・信頼性",
+    "importance": "★★★",
+    "summary": "フェールセーフ＝安全優先で止める、フールプルーフ＝おバカな誤操作を防ぐ",
+    "question": "電子レンジで「ドアが開いている間は、スタートボタンを押しても絶対に加熱が始まらない」ようにする安全設計思想はどれか？",
+    "options": [
+      "フールプルーフ (Fool Proof)",
+      "フェールセーフ (Fail Safe)",
+      "フォールトトレラント (Fault Tolerant)",
+      "フェールソフト (Fail Soft)"
+    ],
+    "answer": 0,
+    "reasoning": "カタカナ4大設計思想（超頻出）：\n• フールプルーフ（Fool=おバカ Proof=防止）：人間がうっかり間違った操作（ドア開けっ放し、クラッチ踏まずにセル回す等）をしても事故が起きない設計。\n• フェールセーフ（Fail=故障 Safe=安全）：壊れたときは『とにかく安全第一で止める』（踏切の遮断機が停電時に自重で降りる）。\n• フォールトトレラント（Tolerant=耐える）：一部が壊れても予備に切り替えて『止めずに動き続ける』。",
+    "tip": "『人間の誤操作・勘違いを防ぐ設計』＝ フールプルーフ。"
+  },
+  {
+    "id": 2705,
+    "category": "sys_reliability",
+    "categoryName": "システム構成・信頼性",
+    "importance": "★★☆",
+    "summary": "デュアルシステム＝2台で同じ計算して照合、デュプレックス＝主系と待機系",
+    "question": "2台のコンピュータで常に全く同じ処理を並行して実行し、処理結果を相互に照合することで極めて高い信頼性を確保するシステム構成はどれか？",
+    "options": [
+      "デュアルシステム (Dual System)",
+      "デュプレックスシステム (Duplex System)",
+      "マルチプロセッサシステム",
+      "クラスタシステム"
+    ],
+    "answer": 0,
+    "reasoning": "英語の対比：\n• デュアル（Dual＝双子）：2台が全く同じ仕事を同時にして、答えが一致するか常にチェック（新幹線の運行管理など）。片方壊れても即座に切り離して運転継続！\n• デュプレックス（Duplex）：1台はメインのオンライン業務、もう1台は別室で待機（またはバッチ処理）。メインが壊れたら待機系が代打出場する。",
+    "tip": "『2台で同一処理を行い照合』＝ デュアルシステム。"
+  },
+  {
+    "id": 2801,
+    "category": "agile_dev",
+    "categoryName": "アジャイル開発",
+    "importance": "★★★",
+    "summary": "ウォーターフォール＝後戻りなし一括、アジャイル＝短いスプリントで小刻み反復",
+    "question": "アジャイル開発の特徴として、最も適切なものはどれか？",
+    "options": [
+      "開発期間を1〜4週間程度の短い期間（イテレーション / スプリント）に区切り、動くソフトウェアを反復的にリリースする",
+      "開発の初期段階で要件定義を完全に確定させ、原則として後戻りや仕様変更を行わない",
+      "詳細なドキュメント（設計書）の作成をソフトウェアの動作確認よりも最優先する",
+      "プロジェクト全体の工程管理にアローダイアグラムを用いて厳密にスケジュールを管理する"
+    ],
+    "answer": 0,
+    "reasoning": "従来のウォーターフォールは『滝のように上流から下流へ1年かけて一括納品』でした。しかしネットの時代は変化が速いため、『1〜2週間ごとに動くアプリを作って顧客に見せ、要望を聞きながら小刻みに進化させる』アジャイル（俊敏）開発が主流になりました。",
+    "tip": "『短い期間（イテレーション）の反復・仕様変更に柔軟』＝ アジャイル開発。"
+  },
+  {
+    "id": 2802,
+    "category": "agile_dev",
+    "categoryName": "アジャイル開発",
+    "importance": "★★★",
+    "summary": "スクラムの役割：PO＝要求・優先順位決定、SM＝チームの支援・障害排除",
+    "question": "アジャイル開発のフレームワーク「スクラム」において、プロダクトの機能や優先順位を決定し、製品の価値を最大化する責任を持つ役割はどれか？",
+    "options": [
+      "プロダクトオーナー (Product Owner)",
+      "スクラムマスター (Scrum Master)",
+      "プロジェクトマネージャー",
+      "デベロッパー"
+    ],
+    "answer": 0,
+    "reasoning": "スクラムの2大重要人物：\n• プロダクトオーナー（PO）：『顧客・ビジネスの代表』。何を作るべきか（プロダクトバックログ）の優先順位を決め、完成の合否を判定するボス。\n• スクラムマスター（SM）：『執事・コーチ』。開発者が作業に集中できるよう、社内政治や障害を取り除いてチームをサポートする支援者（指示命令はしない）。",
+    "tip": "『製品の機能・優先順位を決める』＝ プロダクトオーナー。"
+  },
+  {
+    "id": 2803,
+    "category": "agile_dev",
+    "categoryName": "アジャイル開発",
+    "importance": "★★☆",
+    "summary": "リファクタリング ＝ 動き（仕様）を変えずに、中のソースコードを綺麗に整理する",
+    "question": "ソフトウェア開発において、「外部から見たプログラムの振る舞い（機能・仕様）を変えずに、保守性を高めるために内部のソースコードを綺麗に整理・改善すること」を何と呼ぶか？",
+    "options": [
+      "リファクタリング",
+      "リバースエンジニアリング",
+      "デバッグ",
+      "ポーティング"
+    ],
+    "answer": 0,
+    "reasoning": "部屋の模様替え・お掃除と同じです！部屋の機能（寝る・勉強する）は変わりませんが、散らかった服を畳んでクローゼットにしまうことで、将来物が探しやすくなり使いやすくなりますよね。プログラムも同じ動きのまま、重複したコードを関数にまとめて読みやすくする作業です。",
+    "tip": "『外部の振る舞いを変えずに内部構造を改善』＝ リファクタリング。"
+  },
+  {
+    "id": 2901,
+    "category": "audit",
+    "categoryName": "システム監査",
+    "importance": "★★★",
+    "summary": "システム監査人 ＝ 被監査部門から「独立」した立場で客観的に評価する",
+    "question": "システム監査を実施する際、監査人に求められる「独立性」に関する記述として、最も適切なものはどれか？",
+    "options": [
+      "監査対象となる情報システムの開発・運用・管理に直接関与していない第三者の立場でなければならない",
+      "システム監査人は必ず社外の公認会計士でなければならない",
+      "監査人は最高情報責任者（CIO）の指揮命令下で監査計画を立てなければならない",
+      "監査結果に責任を持つため、発見した問題点を自らの手で直接修正しなければならない"
+    ],
+    "answer": 0,
+    "reasoning": "自分で作った料理を自分で『星3つ！完璧！』と採点しても誰も信用しないですよね。システム監査は『開発した人や運用している人とは利害関係のない、独立した第三者』が客観的な目でチェックしなければ意味がありません。",
+    "tip": "『監査対象の業務・部門から独立した立場』＝ 監査人の独立性。"
+  },
+  {
+    "id": 2902,
+    "category": "audit",
+    "categoryName": "システム監査",
+    "importance": "★★★",
+    "summary": "監査人は「改善勧告・報告」をするだけ。直接命令や作業はしない！",
+    "question": "システム監査人の権限と役割に関する記述として、正しいものはどれか？",
+    "options": [
+      "監査結果に基づき、経営者や被監査部門に対して問題点の指摘や改善の「助言・勧告」を行うが、自ら改善作業を実行する権限は持たない",
+      "発見したセキュリティ脆弱性を直ちに修正する命令を現場に直接下す権限を持つ",
+      "監査報告書を所管官庁に直接提出し、システムの運用停止命令を発行する",
+      "システムの設計書やプログラムを自らの判断で書き換える権限を持つ"
+    ],
+    "answer": 0,
+    "reasoning": "文系向け重要ポイント：\n監査人は『お医者さんの診断』と同じです。『ここが病気（問題）ですよ、お薬を飲んで生活改善した方がいいですよ』と【診断・助言・勧告】はしますが、患者の代わりに運動したり、会社で命令を下す権限はありません。命令を下して改善させるのは『経営者』の仕事です。",
+    "tip": "『監査人は命令や作業をしない。報告・助言・勧告を行うだけ』！"
+  },
+  {
+    "id": 2903,
+    "category": "audit",
+    "categoryName": "システム監査",
+    "importance": "★★☆",
+    "summary": "IT全般統制＝全社共通の基盤管理、IT業務処理統制＝個別の伝票処理等の正確性",
+    "question": "内部統制におけるIT統制のうち、「売上伝票入力時の自動チェック（未入力チェックや重複チェック）」のように、個々の業務アプリケーション内でデータの正確性を確保する統制はどれか？",
+    "options": [
+      "IT業務処理統制",
+      "IT全般統制",
+      "ITガバナンス",
+      "職務分掌"
+    ],
+    "answer": 0,
+    "reasoning": "言葉の通りです！\n• IT業務処理統制：『個別の業務アプリの中身』。伝票の入力エラーを防ぐ桁数チェックや承認ボタンなど、業務処理ごとのチェック機能。\n• IT全般統制：『全社共通の土台』。サーバー室の入退室管理や、バックアップの運用ルールなど、社内全体を支える共通基盤の統制。",
+    "tip": "『個別の伝票・入力データの自動チェック』＝ IT業務処理統制。"
+  },
+  {
+    "id": 3001,
+    "category": "finance",
+    "categoryName": "財務・会計",
+    "importance": "★★★",
+    "summary": "損益計算書 (P/L) ＝ 一定期間の儲け成績表、貸借対照表 (B/S) ＝ ある時点の財産残高",
+    "question": "企業の財務諸表に関する記述のうち、最も適切なものはどれか？",
+    "options": [
+      "損益計算書（P/L）は企業の一定期間における経営成績（収益と費用）を表し、貸借対照表（B/S）は決算日時点での財政状態（資産・負債・純資産）を表す",
+      "貸借対照表（B/S）は1年間の売上高と当期純利益を表し、損益計算書（P/L）は借金の内訳を表す",
+      "損益計算書の資産の部と負債の部の合計は常に一致する",
+      "キャッシュフロー計算書は企業のブランド価値や特許などの無形資産を評価する表である"
+    ],
+    "answer": 0,
+    "reasoning": "家計簿で例えられます：\n• 損益計算書（P/L : Profit and Loss）：『給料明細とレシート』。1年間でいくら稼いで、生活費にいくら使って、いくら手元に残ったか（儲けのビデオ映像）。\n• 貸借対照表（B/S : Balance Sheet）：『通帳残高と借金メモ』。決算日という特定の一瞬で、貯金（資産）がいくらあって、住宅ローン（負債）がいくらあるか（財産の写真）。",
+    "tip": "『一定期間の成績＝P/L』『一時点の財政状態（資産・負債）＝B/S』。"
+  },
+  {
+    "id": 3002,
+    "category": "finance",
+    "categoryName": "財務・会計",
+    "importance": "★★★",
+    "summary": "損益分岐点 ＝ 「売上高 ＝ 固定費 ＋ 変動費」で利益がちょうどゼロの点",
+    "question": "固定費が400万円、売上高に対する変動費の割合（変動費率）が60%であるとき、損益分岐点売上高はいくらか？",
+    "options": [
+      "1,000万円",
+      "667万円",
+      "800万円",
+      "2,000万円"
+    ],
+    "answer": 0,
+    "reasoning": "文系向け公式：\n$\\text{損益分岐点売上高} = \\frac{\\text{固定費}}{1 - \\text{変動費率}}$\n\n• 変動費率が60%（0.6）なので、売上の40%（$1 - 0.6 = 0.4$）が粗利（限界利益）として手元に残ります。\n• この粗利で、家賃などの固定費400万円をちょうどピッタリ回収できればトントン（利益ゼロ）です！\n$\\frac{400\\text{万円}}{0.4} = 1,000\\text{万円}$ となります！",
+    "tip": "『固定費 ÷ (1 - 変動費率)』。超頻出計算問題です！"
+  },
+  {
+    "id": 3003,
+    "category": "finance",
+    "categoryName": "財務・会計",
+    "importance": "★★☆",
+    "summary": "ROE (自己資本利益率) ＝ 株主のお金を使ってどれだけ効率よく稼いだか",
+    "question": "企業の収益性指標である「ROE（自己資本利益率）」の計算式として、正しいものはどれか？",
+    "options": [
+      "当期純利益 / 自己資本 × 100",
+      "売上総利益 / 総資産 × 100",
+      "営業利益 / 売上高 × 100",
+      "自己資本 / 総資産 × 100"
+    ],
+    "answer": 0,
+    "reasoning": "英語のままです！『Return（リターン：利益）On Equity（株主資本：自己資本）』。\n株主から預かった元手（自己資本）をどれだけ上手に運用して、最終的な儲け（当期純利益）を生み出したかを示す、投資家が一番気にする成績表です。",
+    "tip": "『ROE ＝ 当期純利益 ÷ 自己資本』。"
+  },
+  {
+    "id": 3101,
+    "category": "legal",
+    "categoryName": "法務・知財",
+    "importance": "★★★",
+    "summary": "著作権法：プログラム言語、規約、アルゴリズムは保護されない！（ソースコード表現は保護）",
+    "question": "著作権法によって保護の「対象となるもの」はどれか？",
+    "options": [
+      "プログラマーが記述したプログラムのソースコード（表現）",
+      "プログラミング言語の構文や文法規則（PythonやC言語のルール）",
+      "データを整列させるためのアルゴリズム（クイックソートなどの解法・手順）",
+      "通信を行うためのプロトコルやデータ通信規約"
+    ],
+    "answer": 0,
+    "reasoning": "文系が絶対に引っかかる超重要過去問！\n著作権法は『表現（具体的な文章やコード）』を守る法律であって、『アイデア・言語・ルール』は守りません。\nもし『アルゴリズム』に著作権を認めたら、『2分探索法』を使った人全員が訴えられてしまい人類のITがストップします。だから言語・規約・アルゴリズムは保護対象外と法律にハッキリ書かれています！",
+    "tip": "『言語・規約・アルゴリズムは著作権の保護対象外！』は絶対暗記。"
+  },
+  {
+    "id": 3102,
+    "category": "legal",
+    "categoryName": "法務・知財",
+    "importance": "★★★",
+    "summary": "派遣＝発注元が指示、請負＝受託会社が指示。偽装請負は法律違反！",
+    "question": "労働者派遣契約と請負契約の違いにおいて、労働者に対する「指揮命令権」を持つ者の正しい組み合わせはどれか？",
+    "options": [
+      "労働者派遣：派遣先（注文者） ／ 請負：請負元（受託企業）",
+      "労働者派遣：派遣元（雇用主） ／ 請負：注文者（発注企業）",
+      "労働者派遣：派遣先（注文者） ／ 請負：注文者（発注企業）",
+      "労働者派遣：派遣元（雇用主） ／ 請負：請負元（受託企業）"
+    ],
+    "answer": 0,
+    "reasoning": "日常の例え：\n• 労働者派遣（助っ人）：発注先の会社に来て、発注先の上司から『これやって』と直接命令されます（派遣先が指揮命令）。\n• 請負（外注・仕立て屋）：『Webサイトを1個作って納品してね』と成果物を頼む契約。発注元が外注先の作業員に直接『あれしろこれしろ』と指示するのは法律違反（偽装請負）です！",
+    "tip": "『派遣は発注先が命令』『請負は自社のボスが命令』。"
+  },
+  {
+    "id": 3103,
+    "category": "legal",
+    "categoryName": "法務・知財",
+    "importance": "★★☆",
+    "summary": "OSSライセンス：GPL＝改変したらソース公開義務あり、MIT＝著作権表示だけで自由",
+    "question": "オープンソースソフトウェア（OSS）のライセンスに関する記述のうち、GPL（General Public License）の特徴として適切なものはどれか？",
+    "options": [
+      "GPLのコードを利用・改変して作成した派生ソフトウェアを頒布する場合、そのソフトウェアのソースコードもGPLとして無償公開しなければならない（コピーレフト）",
+      "商用利用が一切禁止されており、教育・研究機関でのみ利用が認められている",
+      "著作権表示を記載すれば、改変したソースコードを非公開のプロプライエタリ製品として販売できる",
+      "特許侵害の疑いがある場合でも、開発者が一切の法的責任と損害賠償を補償する"
+    ],
+    "answer": 0,
+    "reasoning": "GPLは『人類の知恵を独占させないライセンス（コピーレフト）』です。みんなの知恵（GPLコード）を使って便利な新ソフトを作ったなら、『お前もソースコードを世界に公開して還元しろ！』という義務（感染性）が発生します。\n一方、MITライセンスは『著作権者の名前さえ残せば、中身を隠して有料販売してもOK』という寛大なライセンスです。",
+    "tip": "『派生著作物のソースコード公開義務（コピーレフト）』＝ GPL。"
+  },
+  {
+    "id": 3104,
+    "category": "legal",
+    "categoryName": "法務・知財",
+    "importance": "★★☆",
+    "summary": "不正アクセス禁止法 ＝ 他人のパスワード無断入力、他人にパスワード教える行為",
+    "question": "不正アクセス禁止法において処罰の対象となる行為はどれか？",
+    "options": [
+      "他人のIDとパスワードを本人の承諾なく無断でWebサイトに入力してログインする行為",
+      "自社のセキュリティ診断のために、自社のWebサーバーに疑似攻撃パケットを送信する行為",
+      "暗号化されていないフリーWi-Fiの通信内容を偶然受信してしまう行為",
+      "パスワードの入力ミスを3回連続で行ってアカウントがロックされる行為"
+    ],
+    "answer": 0,
+    "reasoning": "不正アクセス禁止法は『勝手に他人の鍵を使って部屋に入る行為』を罰します。他人のID/パスワードを盗み入力する行為はもちろん、『他人のパスワードを第三者に勝手に教える行為（パスワードの不正提供）』も罰せられます。",
+    "tip": "『他人の認証情報を無断入力してアクセス制御をすり抜ける行為』＝ 不正アクセス罪。"
+  },
+  {
+    "id": 3201,
+    "category": "marketing",
+    "categoryName": "マーケティング・MOT",
+    "importance": "★★★",
+    "summary": "マーケティングの4P ＝ Product(製品), Price(価格), Place(流通), Promotion(販促)",
+    "question": "企業がマーケティング戦略を立案する際のフレームワーク「マーケティングの4P」の組み合わせとして、正しいものはどれか？",
+    "options": [
+      "製品 (Product)、価格 (Price)、流通 (Place)、プロモーション (Promotion)",
+      "人 (People)、プロセス (Process)、物的証拠 (Physical Evidence)、パートナー (Partner)",
+      "計画 (Plan)、生産 (Produce)、利益 (Profit)、ポジション (Position)",
+      "顧客価値 (Customer Value)、費用 (Cost)、利便性 (Convenience)、コミュニケーション (Communication)"
+    ],
+    "answer": 0,
+    "reasoning": "売り手（企業）目線の4要素（超頻出）：\n1. Product：どんな『商品・製品』を作るか？\n2. Price：いくらの『価格』で売るか？\n3. Place：コンビニかネットか、どこで『流通・販売』させるか？\n4. Promotion：テレビCMかSNS広告か、どうやって『宣伝・販促』するか？\n（※選択肢4は買い手目線の『4C』です）",
+    "tip": "『製品・価格・流通・販促（Product, Price, Place, Promotion）』の4P！"
+  },
+  {
+    "id": 3202,
+    "category": "marketing",
+    "categoryName": "マーケティング・MOT",
+    "importance": "★★☆",
+    "summary": "プロダクトライフサイクル ＝ 導入期 → 成長期 → 成熟期 → 衰退期",
+    "question": "製品のライフサイクルにおいて、「需要が急激に拡大し、競合他社が次々と市場に参入して激しい競争が始まる段階」はどれか？",
+    "options": [
+      "成長期",
+      "導入期",
+      "成熟期",
+      "衰退期"
+    ],
+    "answer": 0,
+    "reasoning": "製品の一生（ライフサイクル）：\n• 導入期：新発売！まだ知名度が低く赤字。\n• 成長期：ブーム到来！売上が急増し、ライバル会社が続々参入して激しい争いに。\n• 成熟期：普及しきってシェアが固定化。差別化やコスト削減の勝負。\n• 衰退期：新しい新技術（代替品）が出てきて市場ごと消滅に向かう。",
+    "tip": "『売上が急激に拡大し競合が多数参入』＝ 成長期。"
+  },
+  {
+    "id": 3203,
+    "category": "marketing",
+    "categoryName": "マーケティング・MOT",
+    "importance": "★★☆",
+    "summary": "技術経営 (MOT) の難所：魔の川(研究→開発)、死の谷(開発→事業化)、ダーウィンの海(事業化→市場競争)",
+    "question": "技術経営（MOT）において、「優れた研究開発に成功して製品の試作が完了したものの、資金不足や量産体制の未整備などにより事業化・商品化に至らない障壁」を何と呼ぶか？",
+    "options": [
+      "死の谷 (Valley of Death)",
+      "魔の川 (Devil River)",
+      "ダーウィンの海 (Darwinian Sea)",
+      "イノベーションのジレンマ"
+    ],
+    "answer": 0,
+    "reasoning": "新商品が世に出るまでの3大関門ストーリー：\n1. 魔の川（研究 $\\rightarrow$ 開発）：基礎研究を実用技術にできるかの川。\n2. 死の谷（開発 $\\rightarrow$ 事業化）：ラボで試作品ができたが、工場での量産や資金が続かず倒産する谷（ここが一番死にやすい！）。\n3. ダーウィンの海（事業化 $\\rightarrow$ 産業化・生存競争）：市場に出た後、競合他社との弱肉強食のサバイバルを生き残れるかの海。",
+    "tip": "『開発から事業化への関門』＝ 死の谷。"
   }
 ];
 
@@ -1624,6 +2599,8 @@
     let currentFilter = 'all';
     let currentIndex = 0;
     let isFlashcardMode = false;
+    let isOrderShuffled = false;
+    let searchQuery = '';
     let filteredQuestions = [];
     let currentShuffledOptions = [];
     let userStats = {
@@ -1631,7 +2608,6 @@
       learning: new Set()
     };
 
-    
     // Security Sanitization Helper (XSS Prevention)
     function escapeHTML(str) {
       if (typeof str !== 'string') return String(str || '');
@@ -1646,7 +2622,7 @@
     function initData() {
       try {
         const storedVersion = localStorage.getItem('fe_data_version');
-        const storedQuestions = localStorage.getItem('fe_custom_questions_v4');
+        const storedQuestions = localStorage.getItem('fe_custom_questions_v5');
 
         // If version is older or not set, overwrite with full latest official set
         if (!storedVersion || parseInt(storedVersion) < CURRENT_DATA_VERSION) {
@@ -1672,7 +2648,7 @@
 
     function saveAllQuestions() {
       try {
-        localStorage.setItem('fe_custom_questions_v4', JSON.stringify(allQuestions));
+        localStorage.setItem('fe_custom_questions_v5', JSON.stringify(allQuestions));
       } catch (e) {}
     }
 
@@ -1682,18 +2658,36 @@
         localStorage.setItem('fe_learning', JSON.stringify([...userStats.learning]));
       } catch (e) {}
       updateStatsUI();
+      buildCategoryFilters();
     }
 
     function updateStatsUI() {
-      document.getElementById('stat-mastered').textContent = userStats.mastered.size;
-      document.getElementById('stat-learning').textContent = userStats.learning.size;
-      document.getElementById('stat-total').textContent = allQuestions.length;
+      const masteredCount = userStats.mastered.size;
+      const learningCount = userStats.learning.size;
+      const totalCount = allQuestions.length;
+
+      document.getElementById('stat-mastered').textContent = masteredCount;
+      document.getElementById('stat-learning').textContent = learningCount;
+      document.getElementById('stat-total').textContent = totalCount;
+
+      // Feature ③: Calculate and update progress percentage
+      const percent = totalCount > 0 ? Math.round((masteredCount / totalCount) * 100) : 0;
+      const learningPercent = totalCount > 0 ? Math.round((learningCount / totalCount) * 100) : 0;
+      
+      document.getElementById('progress-percentage-label').textContent = percent + '% (' + masteredCount + '/' + totalCount + '問習得)';
+      document.getElementById('progress-bar-fill').style.width = percent + '%';
+      document.getElementById('progress-bar-learning').style.width = learningPercent + '%';
     }
 
+    // Feature ①: Category filters including "⚠️ 要復習のみ" button
     function buildCategoryFilters() {
       const container = document.getElementById('category-filters');
       const cats = new Map();
+      
       cats.set('all', 'すべて (' + allQuestions.length + ')');
+      
+      const learningCount = userStats.learning.size;
+      cats.set('needs_review', '⚠️ 要復習のみ (' + learningCount + ')');
 
       allQuestions.forEach(q => {
         if (!cats.has(q.category)) {
@@ -1706,9 +2700,16 @@
         const btn = document.createElement('button');
         btn.dataset.cat = key;
         btn.textContent = label;
-        btn.className = (key === currentFilter)
-          ? "filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] whitespace-nowrap"
-          : "filter-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--background)] hover:bg-[var(--border)] text-[var(--foreground)] border border-[var(--border)] whitespace-nowrap";
+        
+        let activeClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] whitespace-nowrap";
+        let inactiveClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--background)] hover:bg-[var(--border)] text-[var(--foreground)] border border-[var(--border)] whitespace-nowrap";
+        
+        if (key === 'needs_review') {
+          inactiveClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 whitespace-nowrap";
+          activeClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-white whitespace-nowrap";
+        }
+
+        btn.className = (key === currentFilter) ? activeClass : inactiveClass;
         btn.onclick = () => applyFilter(key);
         container.appendChild(btn);
       });
@@ -1717,21 +2718,70 @@
     function applyFilter(cat) {
       currentFilter = cat;
       document.querySelectorAll('.filter-btn').forEach(b => {
-        if (b.dataset.cat === cat) {
-          b.className = "filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] whitespace-nowrap";
-        } else {
-          b.className = "filter-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--background)] hover:bg-[var(--border)] text-[var(--foreground)] border border-[var(--border)] whitespace-nowrap";
+        const key = b.dataset.cat;
+        let activeClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] whitespace-nowrap";
+        let inactiveClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--background)] hover:bg-[var(--border)] text-[var(--foreground)] border border-[var(--border)] whitespace-nowrap";
+        
+        if (key === 'needs_review') {
+          inactiveClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 whitespace-nowrap";
+          activeClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-white whitespace-nowrap";
         }
+
+        b.className = (key === currentFilter) ? activeClass : inactiveClass;
       });
 
-      if (cat === 'all') {
-        filteredQuestions = [...allQuestions];
+      refreshQuestionList();
+    }
+
+    // Feature ④: Quick Search filter
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      refreshQuestionList();
+    }
+
+    function refreshQuestionList() {
+      let list = [];
+
+      if (currentFilter === 'all') {
+        list = [...allQuestions];
+      } else if (currentFilter === 'needs_review') {
+        list = allQuestions.filter(q => userStats.learning.has(q.id));
       } else {
-        filteredQuestions = allQuestions.filter(q => q.category === cat);
+        list = allQuestions.filter(q => q.category === currentFilter);
       }
+
+      // Apply Search Filter if any query
+      if (searchQuery) {
+        list = list.filter(q => {
+          return (q.question && q.question.toLowerCase().includes(searchQuery)) ||
+                 (q.summary && q.summary.toLowerCase().includes(searchQuery)) ||
+                 (q.reasoning && q.reasoning.toLowerCase().includes(searchQuery)) ||
+                 (q.categoryName && q.categoryName.toLowerCase().includes(searchQuery)) ||
+                 (q.options && q.options.some(opt => opt.toLowerCase().includes(searchQuery)));
+        });
+      }
+
+      // Feature ②: Apply Random Order Shuffle if enabled
+      if (isOrderShuffled) {
+        for (let i = list.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [list[i], list[j]] = [list[j], list[i]];
+        }
+      }
+
+      filteredQuestions = list;
       currentIndex = 0;
       updateStatsUI();
       renderQuestion();
+    }
+
+    // Feature ②: Toggle order shuffle
+    function toggleOrderShuffle() {
+      isOrderShuffled = !isOrderShuffled;
+      document.getElementById('shuffle-mode-label').innerHTML = isOrderShuffled 
+        ? '<span class="text-emerald-500 font-bold">順序: 🔀ランダム</span>' 
+        : '順序: <b>通常</b>';
+      refreshQuestionList();
     }
 
     function toggleMode() {
@@ -1749,10 +2799,19 @@
       document.getElementById('quick-hint-box').classList.add('hidden');
 
       if (filteredQuestions.length === 0) {
-        document.getElementById('q-question-text').textContent = "問題がありません。「➕ 追加」ボタンから追加してください。";
+        if (currentFilter === 'needs_review') {
+          document.getElementById('q-question-text').textContent = "現在「要復習」に指定された問題はありません！\n問題を解きながら「⚠️ まだあやふや」ボタンを押すと、ここに苦手問題だけが集まります。";
+        } else if (searchQuery) {
+          document.getElementById('q-question-text').textContent = "「" + escapeHTML(searchQuery) + "」に一致する問題は見つかりませんでした。別のキーワードでお試しください。";
+        } else {
+          document.getElementById('q-question-text').textContent = "問題がありません。「➕ 追加」ボタンから追加してください。";
+        }
         document.getElementById('options-container').innerHTML = '';
         document.getElementById('total-filtered-count').textContent = '0';
         document.getElementById('current-q-index').textContent = '0';
+        document.getElementById('q-category-badge').textContent = '検索結果';
+        document.getElementById('q-importance-badge').textContent = '-';
+        document.getElementById('q-status-badge').textContent = '';
         return;
       }
 
@@ -1986,7 +3045,7 @@
     }
 
     function restoreDefaults() {
-      if (confirm('初期問題セット（最新全104問）に更新しますか？')) {
+      if (confirm('初期問題セット（最新全125問）に更新しますか？')) {
         allQuestions = [...defaultQuestions];
         userStats.mastered.clear();
         userStats.learning.clear();
